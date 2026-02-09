@@ -356,6 +356,8 @@ export type Database = {
         session_paused: boolean | null
         intake_open: boolean | null
         message: string | null
+        expected_window_start: string | null
+        expected_window_end: string | null
       }
     }
   }
