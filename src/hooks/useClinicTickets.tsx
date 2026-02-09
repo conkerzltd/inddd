@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -74,6 +74,9 @@ export function useClinicTickets(clinicId: string | null, clinicTimezone: string
   }, [clinicId, clinicTimezone, refresh]);
 
   // Realtime subscriptions
+  const refreshRef = useRef(refresh);
+  refreshRef.current = refresh;
+
   useEffect(() => {
     if (!clinicId) return;
 
@@ -82,19 +85,19 @@ export function useClinicTickets(clinicId: string | null, clinicTimezone: string
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'tickets', filter: `clinic_id=eq.${clinicId}` },
-        () => refresh()
+        () => refreshRef.current()
       )
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'clinics', filter: `id=eq.${clinicId}` },
-        () => refresh()
+        () => refreshRef.current()
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [clinicId, refresh]);
+  }, [clinicId]);
 
   // Grouped tickets
   const preArrival = tickets
