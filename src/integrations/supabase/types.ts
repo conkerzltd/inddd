@@ -329,8 +329,34 @@ export type Database = {
       }
       mark_missed: { Args: { p_ticket_id: string }; Returns: Json }
       mark_returned: { Args: { p_ticket_id: string }; Returns: Json }
+      reinsert_returned: {
+        Args: {
+          p_insert_n?: number
+          p_insert_position: Database["public"]["Enums"]["insert_position"]
+          p_note?: string
+          p_ticket_id: string
+        }
+        Returns: Json
+      }
       seed_demo_day: { Args: { p_clinic_id: string }; Returns: number }
       send_patient_link: { Args: { p_ticket_id: string }; Returns: Json }
+      set_intake_open: {
+        Args: { p_clinic_id: string; p_open: boolean }
+        Returns: Json
+      }
+      set_session_paused: {
+        Args: { p_clinic_id: string; p_paused: boolean }
+        Returns: Json
+      }
+      set_urgent_and_insert: {
+        Args: {
+          p_insert_n?: number
+          p_insert_position: Database["public"]["Enums"]["insert_position"]
+          p_note?: string
+          p_ticket_id: string
+        }
+        Returns: Json
+      }
       start_service: { Args: { p_ticket_id: string }; Returns: Json }
       urlencode: { Args: { "": string }; Returns: string }
     }

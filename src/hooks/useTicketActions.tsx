@@ -42,5 +42,37 @@ export function useTicketActions(clinicId: string | null, onDone: () => void) {
   const markReturned = (ticketId: string) =>
     rpc("mark_returned", { p_ticket_id: ticketId }, "Marked returned.");
 
-  return { sendLink, confirmArrival, callNext, startService, completeTicket, markMissed, markReturned };
+  const setSessionPaused = (paused: boolean) => {
+    if (!clinicId) return;
+    return rpc("set_session_paused", { p_clinic_id: clinicId, p_paused: paused },
+      paused ? "Session paused" : "Session resumed");
+  };
+
+  const setIntakeOpen = (open: boolean) => {
+    if (!clinicId) return;
+    return rpc("set_intake_open", { p_clinic_id: clinicId, p_open: open },
+      open ? "Intake opened" : "Intake closed");
+  };
+
+  const reinsertReturned = (ticketId: string, position: string, n: number | null, note: string | null) =>
+    rpc("reinsert_returned", {
+      p_ticket_id: ticketId,
+      p_insert_position: position,
+      p_insert_n: n,
+      p_note: note,
+    }, "Patient reinserted!");
+
+  const setUrgentAndInsert = (ticketId: string, position: string, n: number | null, note: string | null) =>
+    rpc("set_urgent_and_insert", {
+      p_ticket_id: ticketId,
+      p_insert_position: position,
+      p_insert_n: n,
+      p_note: note,
+    }, "Urgent insert done!");
+
+  return {
+    sendLink, confirmArrival, callNext, startService, completeTicket,
+    markMissed, markReturned, setSessionPaused, setIntakeOpen,
+    reinsertReturned, setUrgentAndInsert,
+  };
 }
