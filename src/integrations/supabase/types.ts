@@ -284,6 +284,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_patient_queue_view: {
+        Args: { p_token: string }
+        Returns: Database["public"]["CompositeTypes"]["patient_queue_view"]
+        SetofOptions: {
+          from: "*"
+          to: "patient_queue_view"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_user_clinic_ids: { Args: { _user_id: string }; Returns: string[] }
       has_role: {
         Args: {
@@ -337,7 +347,16 @@ export type Database = {
       visit_type: "NEW" | "CONSULTATION"
     }
     CompositeTypes: {
-      [_ in never]: never
+      patient_queue_view: {
+        status_badge: string | null
+        appointment_time: string | null
+        eligible_position: number | null
+        eta_min_minutes: number | null
+        eta_max_minutes: number | null
+        session_paused: boolean | null
+        intake_open: boolean | null
+        message: string | null
+      }
     }
   }
 }
