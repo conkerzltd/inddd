@@ -48,47 +48,17 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
 
     setSubmitting(true);
     try {
-      const status = type === "SCHEDULED" ? "REMOTE_BOOKED" : "REMOTE_BOOKED";
-      const today = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "UTC",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }).format(new Date());
-
-      // Build appointment_time as timestamptz if scheduled
-      let appointmentTimestamp: string | null = null;
-      if (type === "SCHEDULED" && apptTime) {
-        // apptTime is HH:MM, combine with today
-        appointmentTimestamp = `${today}T${apptTime}:00`;
-      }
-
-      const { data: ticket, error } = await supabase
-        .from("tickets")
-        .insert({
-          clinic_id: clinicId,
-          source: source as any,
-          type: type as any,
-          visit_type: visitType as any,
-          patient_phone: phone.trim(),
-          patient_name: name.trim() || null,
-          status: status as any,
-          appointment_time: appointmentTimestamp,
-        })
-        .select("id")
-        .single();
+      const { data, error } = await supabase.rpc("create_ticket", {
+        p_clinic_id: clinicId,
+        p_source: source as any,
+        p_type: type as any,
+        p_visit_type: visitType as any,
+        p_patient_phone: phone.trim(),
+        p_patient_name: name.trim() || null,
+        p_appt_hhmm: type === "SCHEDULED" ? apptTime : null,
+      });
 
       if (error) throw error;
-
-      // Write audit log
-      const { data: { user } } = await supabase.auth.getUser();
-      await supabase.from("audit_log").insert({
-        clinic_id: clinicId,
-        ticket_id: ticket.id,
-        action: "TICKET_CREATED" as any,
-        actor_id: user?.id || null,
-        new_status: status as any,
-      });
 
       toast.success("Ticket created!");
       reset();
