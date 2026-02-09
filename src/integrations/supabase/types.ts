@@ -286,6 +286,8 @@ export type Database = {
     Functions: {
       bootstrap_demo_clinic: { Args: never; Returns: string }
       call_next: { Args: { p_clinic_id: string }; Returns: Json }
+      cancel_ticket: { Args: { p_ticket_id: string }; Returns: Json }
+      close_out_day: { Args: { p_clinic_id: string }; Returns: Json }
       complete_ticket: { Args: { p_ticket_id: string }; Returns: Json }
       confirm_arrival: { Args: { p_ticket_id: string }; Returns: Json }
       create_ticket: {
