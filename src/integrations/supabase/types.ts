@@ -285,6 +285,9 @@ export type Database = {
     }
     Functions: {
       bootstrap_demo_clinic: { Args: never; Returns: string }
+      call_next: { Args: { p_clinic_id: string }; Returns: Json }
+      complete_ticket: { Args: { p_ticket_id: string }; Returns: Json }
+      confirm_arrival: { Args: { p_ticket_id: string }; Returns: Json }
       get_patient_queue_view: {
         Args: { p_token: string }
         Returns: Database["public"]["CompositeTypes"]["patient_queue_view"]
@@ -312,7 +315,12 @@ export type Database = {
         Args: { _clinic_id: string; _user_id: string }
         Returns: boolean
       }
+      mark_missed: { Args: { p_ticket_id: string }; Returns: Json }
+      mark_returned: { Args: { p_ticket_id: string }; Returns: Json }
       seed_demo_day: { Args: { p_clinic_id: string }; Returns: number }
+      send_patient_link: { Args: { p_ticket_id: string }; Returns: Json }
+      start_service: { Args: { p_ticket_id: string }; Returns: Json }
+      urlencode: { Args: { "": string }; Returns: string }
     }
     Enums: {
       app_role: "owner" | "admin" | "secretary" | "doctor"
