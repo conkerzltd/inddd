@@ -70,9 +70,17 @@ export function useTicketActions(clinicId: string | null, onDone: () => void) {
       p_note: note,
     }, "Urgent insert done!");
 
+  const cancelTicket = (ticketId: string) =>
+    rpc("cancel_ticket", { p_ticket_id: ticketId }, "Ticket cancelled.");
+
+  const closeOutDay = () => {
+    if (!clinicId) return;
+    return rpc("close_out_day", { p_clinic_id: clinicId }, "Day closed out!");
+  };
+
   return {
     sendLink, confirmArrival, callNext, startService, completeTicket,
     markMissed, markReturned, setSessionPaused, setIntakeOpen,
-    reinsertReturned, setUrgentAndInsert,
+    reinsertReturned, setUrgentAndInsert, cancelTicket, closeOutDay,
   };
 }
