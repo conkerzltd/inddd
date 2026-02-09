@@ -29,17 +29,49 @@ const Console = () => {
   const [seeding, setSeeding] = useState(false);
   const [seedTickets, setSeedTickets] = useState<SeedTicket[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
+  const [clinicTimezone, setClinicTimezone] = useState<string>("UTC");
 
   const isOwnerOrAdmin = userRoles.some(
     (r) => r.role === "owner" || r.role === "admin"
   );
 
-  // Load tickets + their active patient_link tokens
+  // Compute today in clinic timezone
+  const getClinicToday = (tz: string) =>
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: tz,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+
+  // Format time in clinic timezone
+  const formatClinicTime = (iso: string, tz: string) =>
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(new Date(iso));
+
+  // Fetch clinic timezone
+  useEffect(() => {
+    if (!clinicId) return;
+    supabase
+      .from("clinics")
+      .select("timezone")
+      .eq("id", clinicId)
+      .single()
+      .then(({ data }) => {
+        if (data?.timezone) setClinicTimezone(data.timezone);
+      });
+  }, [clinicId]);
+
+  // Load tickets using clinic-timezone today
   const loadTickets = async () => {
     if (!clinicId) return;
     setLoadingTickets(true);
     try {
-      const today = new Date().toISOString().split("T")[0];
+      const today = getClinicToday(clinicTimezone);
       const { data: tickets, error } = await supabase
         .from("tickets")
         .select("id, status, type, patient_name, appointment_time, rank_key")
@@ -53,7 +85,6 @@ const Console = () => {
         return;
       }
 
-      // Fetch active tokens for these tickets
       const ticketIds = tickets.map((t) => t.id);
       const { data: links } = await supabase
         .from("patient_links")
@@ -79,15 +110,15 @@ const Console = () => {
   };
 
   useEffect(() => {
-    if (clinicId) loadTickets();
-  }, [clinicId]);
+    if (clinicId && clinicTimezone) loadTickets();
+  }, [clinicId, clinicTimezone]);
 
   const handleBootstrap = async () => {
     setBootstrapping(true);
     try {
       const { data, error } = await supabase.rpc("bootstrap_demo_clinic");
       if (error) throw error;
-      toast.success(`Demo clinic created!`);
+      toast.success("Demo clinic created!");
       window.location.reload();
     } catch (e: any) {
       toast.error(e.message || "Failed to create demo clinic");
@@ -164,7 +195,8 @@ const Console = () => {
                   Today's Dashboard
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Dashboard will be built in Step 3.
+                  {getClinicToday(clinicTimezone)} ({clinicTimezone}) · Dashboard
+                  will be built in Step 3.
                 </p>
               </div>
               {isOwnerOrAdmin && (
@@ -207,9 +239,9 @@ const Console = () => {
                         <TableCell>{t.type}</TableCell>
                         <TableCell>
                           {t.appointment_time
-                            ? new Date(t.appointment_time).toLocaleTimeString(
-                                [],
-                                { hour: "2-digit", minute: "2-digit" }
+                            ? formatClinicTime(
+                                t.appointment_time,
+                                clinicTimezone
                               )
                             : "—"}
                         </TableCell>
