@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { LogOut, Plus, Database } from "lucide-react";
 import { toast } from "sonner";
 import { useClinicTickets } from "@/hooks/useClinicTickets";
@@ -20,6 +22,8 @@ const Console = () => {
   const [bootstrapping, setBootstrapping] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [clinicTimezone, setClinicTimezone] = useState<string>("UTC");
+  const [sessionPaused, setSessionPaused] = useState(false);
+  const [intakeOpen, setIntakeOpen] = useState(true);
 
   const isOwnerOrAdmin = userRoles.some(
     (r) => r.role === "owner" || r.role === "admin"
@@ -30,16 +34,20 @@ const Console = () => {
       timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
     }).format(new Date());
 
-  // Fetch clinic timezone
+  // Fetch clinic timezone and flags
   useEffect(() => {
     if (!clinicId) return;
     supabase
       .from("clinics")
-      .select("timezone")
+      .select("timezone, session_paused, intake_open")
       .eq("id", clinicId)
       .single()
       .then(({ data }) => {
         if (data?.timezone) setClinicTimezone(data.timezone);
+        if (data) {
+          setSessionPaused(data.session_paused);
+          setIntakeOpen(data.intake_open);
+        }
       });
   }, [clinicId]);
 
@@ -107,21 +115,51 @@ const Console = () => {
         ) : (
           <>
             {/* Header bar */}
-            <div className="rounded-lg border border-border bg-card p-4 flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-foreground">Today's Dashboard</h2>
-                <p className="text-sm text-muted-foreground">
-                  {getClinicToday(clinicTimezone)} ({clinicTimezone})
-                </p>
+            <div className="rounded-lg border border-border bg-card p-4 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground">Today's Dashboard</h2>
+                  <p className="text-sm text-muted-foreground">
+                    {getClinicToday(clinicTimezone)} ({clinicTimezone})
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {clinicId && <CreateTicketDialog clinicId={clinicId} onCreated={refresh} />}
+                  {isOwnerOrAdmin && (
+                    <Button variant="outline" size="sm" onClick={handleSeed} disabled={seeding}>
+                      <Database className="mr-2 h-4 w-4" />
+                      {seeding ? "Seeding…" : "Seed Demo Day"}
+                    </Button>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                {clinicId && <CreateTicketDialog clinicId={clinicId} onCreated={refresh} />}
-                {isOwnerOrAdmin && (
-                  <Button variant="outline" size="sm" onClick={handleSeed} disabled={seeding}>
-                    <Database className="mr-2 h-4 w-4" />
-                    {seeding ? "Seeding…" : "Seed Demo Day"}
-                  </Button>
-                )}
+              <div className="flex items-center gap-6 border-t border-border pt-3">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="pause-toggle"
+                    checked={sessionPaused}
+                    onCheckedChange={async (checked) => {
+                      setSessionPaused(checked);
+                      await actions.setSessionPaused(checked);
+                    }}
+                  />
+                  <Label htmlFor="pause-toggle" className="text-sm">
+                    {sessionPaused ? "Session Paused" : "Session Active"}
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="intake-toggle"
+                    checked={intakeOpen}
+                    onCheckedChange={async (checked) => {
+                      setIntakeOpen(checked);
+                      await actions.setIntakeOpen(checked);
+                    }}
+                  />
+                  <Label htmlFor="intake-toggle" className="text-sm">
+                    {intakeOpen ? "Intake Open" : "Intake Closed"}
+                  </Label>
+                </div>
               </div>
             </div>
 
@@ -131,11 +169,13 @@ const Console = () => {
               clinicTimezone={clinicTimezone}
               onSendLink={actions.sendLink}
               onConfirmArrival={actions.confirmArrival}
+              onSetUrgent={actions.setUrgentAndInsert}
             />
             <WaitingList
               tickets={waiting}
               clinicTimezone={clinicTimezone}
               onCallNext={actions.callNext}
+              onSetUrgent={actions.setUrgentAndInsert}
             />
             <CalledList
               tickets={called}
@@ -149,7 +189,11 @@ const Console = () => {
               onComplete={actions.completeTicket}
             />
             <MissedList tickets={missed} onMarkReturned={actions.markReturned} />
-            <ReturnedList tickets={returned} />
+            <ReturnedList
+              tickets={returned}
+              onReinsert={actions.reinsertReturned}
+              onSetUrgent={actions.setUrgentAndInsert}
+            />
             <DoneList tickets={done} />
           </>
         )}
