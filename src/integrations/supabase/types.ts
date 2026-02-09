@@ -284,6 +284,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bootstrap_demo_clinic: { Args: never; Returns: string }
       get_patient_queue_view: {
         Args: { p_token: string }
         Returns: Database["public"]["CompositeTypes"]["patient_queue_view"]
@@ -311,6 +312,7 @@ export type Database = {
         Args: { _clinic_id: string; _user_id: string }
         Returns: boolean
       }
+      seed_demo_day: { Args: { p_clinic_id: string }; Returns: number }
     }
     Enums: {
       app_role: "owner" | "admin" | "secretary" | "doctor"
