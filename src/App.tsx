@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Console from "./pages/Console";
+import PatientQueue from "./pages/PatientQueue";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,7 +32,7 @@ const App = () => (
               }
             />
             {/* Patient queue page - no auth required */}
-            <Route path="/q/:token" element={<div>Patient page (Step 4)</div>} />
+            <Route path="/q/:token" element={<PatientQueue />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
