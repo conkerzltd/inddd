@@ -288,6 +288,18 @@ export type Database = {
       call_next: { Args: { p_clinic_id: string }; Returns: Json }
       complete_ticket: { Args: { p_ticket_id: string }; Returns: Json }
       confirm_arrival: { Args: { p_ticket_id: string }; Returns: Json }
+      create_ticket: {
+        Args: {
+          p_appt_hhmm?: string
+          p_clinic_id: string
+          p_patient_name?: string
+          p_patient_phone: string
+          p_source: Database["public"]["Enums"]["ticket_source"]
+          p_type: Database["public"]["Enums"]["ticket_type"]
+          p_visit_type: Database["public"]["Enums"]["visit_type"]
+        }
+        Returns: Json
+      }
       get_patient_queue_view: {
         Args: { p_token: string }
         Returns: Database["public"]["CompositeTypes"]["patient_queue_view"]
