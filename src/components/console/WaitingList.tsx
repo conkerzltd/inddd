@@ -6,13 +6,14 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Phone, Zap } from "lucide-react";
+import { Phone, Zap, Ban } from "lucide-react";
 
 interface Props {
   tickets: TicketRow[];
   clinicTimezone: string;
   onCallNext: () => void;
   onSetUrgent: (id: string, pos: string, n: number | null, note: string | null) => Promise<any>;
+  onCancel: (id: string) => void;
 }
 
 const fmtTime = (iso: string, tz: string) =>
@@ -28,7 +29,7 @@ const laneLabel = (rk: number | null) => {
   return "—";
 };
 
-export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent }: Props) {
+export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, onCancel }: Props) {
   const [urgentTicketId, setUrgentTicketId] = useState<string | null>(null);
 
   return (
@@ -66,6 +67,9 @@ export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent }
                 <TableCell className="text-right">
                   <Button size="sm" variant="outline" onClick={() => setUrgentTicketId(t.id)}>
                     <Zap className="h-3 w-3 mr-1" />Set Urgent
+                  </Button>
+                  <Button size="sm" variant="destructive" onClick={() => onCancel(t.id)}>
+                    <Ban className="h-3 w-3 mr-1" />Cancel
                   </Button>
                 </TableCell>
               </TableRow>

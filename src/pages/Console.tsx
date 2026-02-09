@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { LogOut, Plus, Database } from "lucide-react";
+import { LogOut, Plus, Database, Power } from "lucide-react";
 import { toast } from "sonner";
 import { useClinicTickets } from "@/hooks/useClinicTickets";
 import { useTicketActions } from "@/hooks/useTicketActions";
@@ -131,6 +131,15 @@ const Console = () => {
                       {seeding ? "Seeding…" : "Seed Demo Day"}
                     </Button>
                   )}
+                  {isOwnerOrAdmin && (
+                    <Button variant="destructive" size="sm" onClick={() => {
+                      if (window.confirm("Close out all remaining tickets for today? This cannot be undone.")) {
+                        actions.closeOutDay();
+                      }
+                    }}>
+                      <Power className="mr-2 h-4 w-4" />Close Out Day
+                    </Button>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-6 border-t border-border pt-3">
@@ -170,18 +179,21 @@ const Console = () => {
               onSendLink={actions.sendLink}
               onConfirmArrival={actions.confirmArrival}
               onSetUrgent={actions.setUrgentAndInsert}
+              onCancel={actions.cancelTicket}
             />
             <WaitingList
               tickets={waiting}
               clinicTimezone={clinicTimezone}
               onCallNext={actions.callNext}
               onSetUrgent={actions.setUrgentAndInsert}
+              onCancel={actions.cancelTicket}
             />
             <CalledList
               tickets={called}
               clinicTimezone={clinicTimezone}
               onStartService={actions.startService}
               onMarkMissed={actions.markMissed}
+              onCancel={actions.cancelTicket}
             />
             <InServiceList
               tickets={inService}

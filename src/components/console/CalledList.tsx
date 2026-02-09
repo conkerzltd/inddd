@@ -4,13 +4,14 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Play, XCircle } from "lucide-react";
+import { Play, XCircle, Ban } from "lucide-react";
 
 interface Props {
   tickets: TicketRow[];
   clinicTimezone: string;
   onStartService: (id: string) => void;
   onMarkMissed: (id: string) => void;
+  onCancel: (id: string) => void;
 }
 
 const fmtTime = (iso: string, tz: string) =>
@@ -18,7 +19,7 @@ const fmtTime = (iso: string, tz: string) =>
     timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
   }).format(new Date(iso));
 
-export function CalledList({ tickets, clinicTimezone, onStartService, onMarkMissed }: Props) {
+export function CalledList({ tickets, clinicTimezone, onStartService, onMarkMissed, onCancel }: Props) {
   return (
     <TicketSection title="Called" count={tickets.length}>
       <Table>
@@ -40,6 +41,9 @@ export function CalledList({ tickets, clinicTimezone, onStartService, onMarkMiss
                 </Button>
                 <Button size="sm" variant="destructive" onClick={() => onMarkMissed(t.id)}>
                   <XCircle className="h-3 w-3 mr-1" />Missed
+                </Button>
+                <Button size="sm" variant="destructive" onClick={() => onCancel(t.id)}>
+                  <Ban className="h-3 w-3 mr-1" />Cancel
                 </Button>
               </TableCell>
             </TableRow>

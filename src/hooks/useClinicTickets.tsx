@@ -73,6 +73,29 @@ export function useClinicTickets(clinicId: string | null, clinicTimezone: string
     if (clinicId && clinicTimezone) refresh();
   }, [clinicId, clinicTimezone, refresh]);
 
+  // Realtime subscriptions
+  useEffect(() => {
+    if (!clinicId) return;
+
+    const channel = supabase
+      .channel(`console-${clinicId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tickets', filter: `clinic_id=eq.${clinicId}` },
+        () => refresh()
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'clinics', filter: `id=eq.${clinicId}` },
+        () => refresh()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [clinicId, refresh]);
+
   // Grouped tickets
   const preArrival = tickets
     .filter((t) => t.status === "REMOTE_BOOKED" || t.status === "LINK_SENT")

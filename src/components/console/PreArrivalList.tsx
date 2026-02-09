@@ -6,7 +6,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Send, ExternalLink, UserCheck, Zap } from "lucide-react";
+import { Send, ExternalLink, UserCheck, Zap, Ban } from "lucide-react";
 
 interface Props {
   tickets: TicketRow[];
@@ -14,6 +14,7 @@ interface Props {
   onSendLink: (id: string) => void;
   onConfirmArrival: (id: string) => void;
   onSetUrgent: (id: string, pos: string, n: number | null, note: string | null) => Promise<any>;
+  onCancel: (id: string) => void;
 }
 
 const fmtTime = (iso: string, tz: string) =>
@@ -21,7 +22,7 @@ const fmtTime = (iso: string, tz: string) =>
     timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
   }).format(new Date(iso));
 
-export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmArrival, onSetUrgent }: Props) {
+export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmArrival, onSetUrgent, onCancel }: Props) {
   const [urgentTicketId, setUrgentTicketId] = useState<string | null>(null);
 
   return (
@@ -57,6 +58,9 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => setUrgentTicketId(t.id)}>
                     <Zap className="h-3 w-3 mr-1" />Set Urgent
+                  </Button>
+                  <Button size="sm" variant="destructive" onClick={() => onCancel(t.id)}>
+                    <Ban className="h-3 w-3 mr-1" />Cancel
                   </Button>
                   {t.token && (
                     <a href={`/q/${t.token}`} target="_blank" rel="noopener noreferrer">
