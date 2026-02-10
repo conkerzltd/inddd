@@ -24,6 +24,7 @@ const Console = () => {
   const [bootstrapping, setBootstrapping] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [clinicTimezone, setClinicTimezone] = useState<string>("UTC");
+  const navigate = useNavigate();
   const [sessionPaused, setSessionPaused] = useState(false);
   const [intakeOpen, setIntakeOpen] = useState(true);
 
