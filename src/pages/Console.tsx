@@ -91,9 +91,11 @@ const Console = () => {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card px-4 py-3">
         <div className="container mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-bold text-foreground">QueueLine Console</h1>
-            <p className="text-sm text-muted-foreground">
+          <div className="flex items-center gap-3">
+            <img src={logoSymbol} alt="inddd" className="h-8 w-8" />
+            <div>
+              <h1 className="text-lg font-bold text-foreground">inddd Console</h1>
+              <p className="text-sm text-muted-foreground">
               {user?.email} · {userRoles.map((r) => r.role).join(", ") || "No role"}
             </p>
           </div>
