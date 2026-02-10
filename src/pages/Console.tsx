@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { LogOut, Plus, Database, Power } from "lucide-react";
+import logoSymbol from "@/assets/logo-symbol.png";
 import { toast } from "sonner";
 import { useClinicTickets } from "@/hooks/useClinicTickets";
 import { useTicketActions } from "@/hooks/useTicketActions";
