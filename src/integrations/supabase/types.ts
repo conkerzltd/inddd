@@ -70,49 +70,108 @@ export type Database = {
       }
       clinics: {
         Row: {
+          address_text: string | null
           avg_service_minutes: number
+          clinic_whatsapp_phone: string | null
           close_time: string
           created_at: string
+          governorate_ar: string | null
           grace_minutes: number
           id: string
           intake_open: boolean
           late_threshold_minutes: number
+          locality_level2_ar: string | null
+          locality_level2_type: string | null
+          locality_level3_ar: string | null
+          maps_url: string | null
           name: string
           open_time: string
           phone: string | null
+          primary_specialty_id: string | null
           session_paused: boolean
           timezone: string
           wa_message_template: string
+          working_hours_json: Json | null
         }
         Insert: {
+          address_text?: string | null
           avg_service_minutes?: number
+          clinic_whatsapp_phone?: string | null
           close_time?: string
           created_at?: string
+          governorate_ar?: string | null
           grace_minutes?: number
           id?: string
           intake_open?: boolean
           late_threshold_minutes?: number
+          locality_level2_ar?: string | null
+          locality_level2_type?: string | null
+          locality_level3_ar?: string | null
+          maps_url?: string | null
           name: string
           open_time?: string
           phone?: string | null
+          primary_specialty_id?: string | null
           session_paused?: boolean
           timezone?: string
           wa_message_template?: string
+          working_hours_json?: Json | null
         }
         Update: {
+          address_text?: string | null
           avg_service_minutes?: number
+          clinic_whatsapp_phone?: string | null
           close_time?: string
           created_at?: string
+          governorate_ar?: string | null
           grace_minutes?: number
           id?: string
           intake_open?: boolean
           late_threshold_minutes?: number
+          locality_level2_ar?: string | null
+          locality_level2_type?: string | null
+          locality_level3_ar?: string | null
+          maps_url?: string | null
           name?: string
           open_time?: string
           phone?: string | null
+          primary_specialty_id?: string | null
           session_paused?: boolean
           timezone?: string
           wa_message_template?: string
+          working_hours_json?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinics_primary_specialty_id_fkey"
+            columns: ["primary_specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geo_localities: {
+        Row: {
+          governorate_ar: string
+          id: string
+          level2_ar: string
+          level2_type: string
+          level3_ar: string | null
+        }
+        Insert: {
+          governorate_ar: string
+          id?: string
+          level2_ar: string
+          level2_type: string
+          level3_ar?: string | null
+        }
+        Update: {
+          governorate_ar?: string
+          id?: string
+          level2_ar?: string
+          level2_type?: string
+          level3_ar?: string | null
         }
         Relationships: []
       }
@@ -163,6 +222,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      specialties: {
+        Row: {
+          id: string
+          sort_order: number
+          specialty_ar: string
+        }
+        Insert: {
+          id?: string
+          sort_order: number
+          specialty_ar: string
+        }
+        Update: {
+          id?: string
+          sort_order?: number
+          specialty_ar?: string
+        }
+        Relationships: []
       }
       tickets: {
         Row: {
