@@ -98,6 +98,7 @@ const Console = () => {
               <p className="text-sm text-muted-foreground">
               {user?.email} · {userRoles.map((r) => r.role).join(", ") || "No role"}
             </p>
+            </div>
           </div>
           <Button variant="ghost" size="sm" onClick={signOut}>
             <LogOut className="mr-2 h-4 w-4" />Sign Out
