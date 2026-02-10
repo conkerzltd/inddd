@@ -32,6 +32,13 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/clinic-profile"
+              element={
+                <ProtectedRoute>
+                  <ClinicProfile />
+                </ProtectedRoute>
+              }
             {/* Patient queue page - no auth required */}
             <Route path="/q/:token" element={<PatientQueue />} />
             <Route path="*" element={<NotFound />} />

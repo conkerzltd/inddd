@@ -102,9 +102,13 @@ const Console = () => {
             </p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={signOut}>
-            <LogOut className="mr-2 h-4 w-4" />Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/clinic-profile")}>
+              <Settings className="mr-2 h-4 w-4" />Profile
+            </Button>
+            <Button variant="ghost" size="sm" onClick={signOut}>
+              <LogOut className="mr-2 h-4 w-4" />Sign Out
+            </Button>
         </div>
       </header>
 
