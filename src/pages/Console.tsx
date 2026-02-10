@@ -109,6 +109,7 @@ const Console = () => {
             <Button variant="ghost" size="sm" onClick={signOut}>
               <LogOut className="mr-2 h-4 w-4" />Sign Out
             </Button>
+          </div>
         </div>
       </header>
 
