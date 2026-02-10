@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { LogOut, Plus, Database, Power } from "lucide-react";
+import logoSymbol from "@/assets/logo-symbol.png";
 import { toast } from "sonner";
 import { useClinicTickets } from "@/hooks/useClinicTickets";
 import { useTicketActions } from "@/hooks/useTicketActions";
@@ -90,11 +91,14 @@ const Console = () => {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card px-4 py-3">
         <div className="container mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-bold text-foreground">QueueLine Console</h1>
-            <p className="text-sm text-muted-foreground">
+          <div className="flex items-center gap-3">
+            <img src={logoSymbol} alt="inddd" className="h-8 w-8" />
+            <div>
+              <h1 className="text-lg font-bold text-foreground">inddd Console</h1>
+              <p className="text-sm text-muted-foreground">
               {user?.email} · {userRoles.map((r) => r.role).join(", ") || "No role"}
             </p>
+            </div>
           </div>
           <Button variant="ghost" size="sm" onClick={signOut}>
             <LogOut className="mr-2 h-4 w-4" />Sign Out
