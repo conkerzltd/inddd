@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Console from "./pages/Console";
 import PatientQueue from "./pages/PatientQueue";
+import ClinicProfile from "./pages/ClinicProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Console />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/clinic-profile"
+              element={
+                <ProtectedRoute>
+                  <ClinicProfile />
                 </ProtectedRoute>
               }
             />

@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { LogOut, Plus, Database, Power } from "lucide-react";
+import { LogOut, Plus, Database, Power, Settings } from "lucide-react";
 import logoSymbol from "@/assets/logo-symbol.png";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useClinicTickets } from "@/hooks/useClinicTickets";
 import { useTicketActions } from "@/hooks/useTicketActions";
@@ -23,6 +24,7 @@ const Console = () => {
   const [bootstrapping, setBootstrapping] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [clinicTimezone, setClinicTimezone] = useState<string>("UTC");
+  const navigate = useNavigate();
   const [sessionPaused, setSessionPaused] = useState(false);
   const [intakeOpen, setIntakeOpen] = useState(true);
 
@@ -100,9 +102,14 @@ const Console = () => {
             </p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={signOut}>
-            <LogOut className="mr-2 h-4 w-4" />Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/clinic-profile")}>
+              <Settings className="mr-2 h-4 w-4" />Profile
+            </Button>
+            <Button variant="ghost" size="sm" onClick={signOut}>
+              <LogOut className="mr-2 h-4 w-4" />Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
