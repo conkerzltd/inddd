@@ -3,14 +3,16 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { EgyptPhoneInput } from "@/components/inputs/EgyptPhoneInput";
+import { isValidEg10, toEgE164Digits } from "@/utils/phoneEG";
 
 interface Props {
   clinicId: string;
@@ -23,24 +25,28 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
   const [source, setSource] = useState<string>("WALK_IN");
   const [type, setType] = useState<string>("NORMAL");
   const [visitType, setVisitType] = useState<string>("CONSULTATION");
-  const [phone, setPhone] = useState("");
+  const [phone10, setPhone10] = useState("");
   const [name, setName] = useState("");
   const [apptTime, setApptTime] = useState("");
+  const [phoneError, setPhoneError] = useState("");
 
   const reset = () => {
     setSource("WALK_IN");
     setType("NORMAL");
     setVisitType("CONSULTATION");
-    setPhone("");
+    setPhone10("");
     setName("");
     setApptTime("");
+    setPhoneError("");
   };
 
   const handleSubmit = async () => {
-    if (!phone.trim()) {
-      toast.error("Phone number is required");
+    if (!isValidEg10(phone10)) {
+      setPhoneError("Enter 10 digits.");
       return;
     }
+    setPhoneError("");
+
     if (type === "SCHEDULED" && !apptTime) {
       toast.error("Appointment time is required for scheduled tickets");
       return;
@@ -53,7 +59,7 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
         p_source: source as any,
         p_type: type as any,
         p_visit_type: visitType as any,
-        p_patient_phone: phone.trim(),
+        p_patient_phone: toEgE164Digits(phone10),
         p_patient_name: name.trim() || null,
         p_appt_hhmm: type === "SCHEDULED" ? apptTime : null,
       });
@@ -118,14 +124,13 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
             </div>
           </div>
 
-          <div className="space-y-1">
-            <Label>Phone *</Label>
-            <Input
-              placeholder="+201000000000"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </div>
+          <EgyptPhoneInput
+            label="Phone *"
+            value10={phone10}
+            onChange10={setPhone10}
+            required
+            error={phoneError}
+          />
 
           <div className="space-y-1">
             <Label>Patient Name</Label>

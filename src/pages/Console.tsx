@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,8 @@ const Console = () => {
   const [bootstrapping, setBootstrapping] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [clinicTimezone, setClinicTimezone] = useState<string>("UTC");
+  const [clinicName, setClinicName] = useState("");
+  const [clinicWhatsApp, setClinicWhatsApp] = useState("");
   const navigate = useNavigate();
   const [sessionPaused, setSessionPaused] = useState(false);
   const [intakeOpen, setIntakeOpen] = useState(true);
@@ -42,7 +44,7 @@ const Console = () => {
     if (!clinicId) return;
     supabase
       .from("clinics")
-      .select("timezone, session_paused, intake_open")
+      .select("timezone, session_paused, intake_open, name, name_ar, whatsapp_e164_1, clinic_whatsapp_phone")
       .eq("id", clinicId)
       .single()
       .then(({ data }) => {
@@ -50,6 +52,8 @@ const Console = () => {
         if (data) {
           setSessionPaused(data.session_paused);
           setIntakeOpen(data.intake_open);
+          setClinicName(data.name || (data as any).name_ar || "");
+          setClinicWhatsApp((data as any).whatsapp_e164_1 || data.clinic_whatsapp_phone || "");
         }
       });
   }, [clinicId]);
@@ -59,6 +63,26 @@ const Console = () => {
   } = useClinicTickets(clinicId, clinicTimezone);
 
   const actions = useTicketActions(clinicId, refresh);
+
+  const handleSendLink = useCallback(async (ticketId: string) => {
+    // Call RPC to create/record the patient link
+    const data = await actions.sendLink(ticketId);
+    if (!data) return; // RPC failed, toast already shown
+
+    // Find the ticket to get the patient phone and token
+    const ticket = preArrival.find((t) => t.id === ticketId);
+    const patientPhone = ticket?.patient_phone?.replace(/\D/g, "") || "";
+    
+    // Build patient tracking URL using the token (from data or ticket)
+    const token = (data as any)?.token || ticket?.token;
+    if (!token) return;
+
+    const baseUrl = window.location.origin;
+    const patientLink = `${baseUrl}/q/${token}`;
+    const message = `Tap this link to check your number and estimated wait time at ${clinicName}: ${patientLink}`;
+    const waUrl = `https://wa.me/${patientPhone}?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, "_blank");
+  }, [actions, preArrival, clinicName]);
 
   const handleBootstrap = async () => {
     setBootstrapping(true);
@@ -190,7 +214,7 @@ const Console = () => {
             <PreArrivalList
               tickets={preArrival}
               clinicTimezone={clinicTimezone}
-              onSendLink={actions.sendLink}
+              onSendLink={handleSendLink}
               onConfirmArrival={actions.confirmArrival}
               onSetUrgent={actions.setUrgentAndInsert}
               onCancel={actions.cancelTicket}
