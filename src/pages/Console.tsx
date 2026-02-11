@@ -89,7 +89,11 @@ const Console = () => {
     const baseUrl = window.location.origin;
     const patientLink = `${baseUrl}/q/${token}`;
     const message = `Tap this link to check your number and estimated wait time at ${clinicName}: ${patientLink}`;
-    const waUrl = `https://wa.me/${patientPhone}?text=${encodeURIComponent(message)}`;
+    const encodedMessage = encodeURIComponent(message);
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const waUrl = isMobile
+      ? `https://wa.me/${patientPhone}?text=${encodedMessage}`
+      : `https://web.whatsapp.com/send?phone=${patientPhone}&text=${encodedMessage}`;
 
     if (popup) {
       popup.location.href = waUrl;
