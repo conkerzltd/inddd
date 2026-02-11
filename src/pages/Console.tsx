@@ -65,9 +65,15 @@ const Console = () => {
   const actions = useTicketActions(clinicId, refresh);
 
   const handleSendLink = useCallback(async (ticketId: string) => {
+    // Open blank tab immediately (before await) to avoid popup blockers
+    const popup = window.open("about:blank", "_blank");
+
     // Call RPC to create/record the patient link
     const data = await actions.sendLink(ticketId);
-    if (!data) return; // RPC failed, toast already shown
+    if (!data) {
+      if (popup) popup.close();
+      return;
+    }
 
     // Find the ticket to get the patient phone and token
     const ticket = preArrival.find((t) => t.id === ticketId);
@@ -75,13 +81,21 @@ const Console = () => {
     
     // Build patient tracking URL using the token (from data or ticket)
     const token = (data as any)?.token || ticket?.token;
-    if (!token) return;
+    if (!token) {
+      if (popup) popup.close();
+      return;
+    }
 
     const baseUrl = window.location.origin;
     const patientLink = `${baseUrl}/q/${token}`;
     const message = `Tap this link to check your number and estimated wait time at ${clinicName}: ${patientLink}`;
     const waUrl = `https://wa.me/${patientPhone}?text=${encodeURIComponent(message)}`;
-    window.open(waUrl, "_blank");
+
+    if (popup) {
+      popup.location.href = waUrl;
+    } else {
+      window.location.href = waUrl;
+    }
   }, [actions, preArrival, clinicName]);
 
   const handleBootstrap = async () => {
