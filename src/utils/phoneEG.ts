@@ -11,8 +11,10 @@ export function stripNonDigits(val: string): string {
 export function normalizeEgTo10(raw: string): string {
   const digits = stripNonDigits(raw);
   if (digits.length >= 11 && digits.startsWith("0")) return digits.slice(-10);
-  if (digits.length >= 10) return digits.slice(-10);
-  return digits; // partial typing
+  // Remove leading zeros immediately so maxLength doesn't cut the last real digit
+  const trimmed = digits.replace(/^0+/, "");
+  if (trimmed.length > 10) return trimmed.slice(-10);
+  return trimmed;
 }
 
 /** Exactly 10 digits? */
