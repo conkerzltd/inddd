@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Console from "./pages/Console";
 import PatientQueue from "./pages/PatientQueue";
 import ClinicProfile from "./pages/ClinicProfile";
+import QueueSettings from "./pages/QueueSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <ClinicProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/queue-settings"
+              element={
+                <ProtectedRoute>
+                  <QueueSettings />
                 </ProtectedRoute>
               }
             />

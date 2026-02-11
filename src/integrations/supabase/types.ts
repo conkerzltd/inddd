@@ -71,7 +71,10 @@ export type Database = {
       clinics: {
         Row: {
           address_text: string | null
+          allow_pause_intake: boolean | null
+          allow_urgent_insert: boolean | null
           avg_service_minutes: number
+          avg_service_time_seed_minutes: number | null
           clinic_whatsapp_phone: string | null
           close_time: string
           created_at: string
@@ -79,23 +82,33 @@ export type Database = {
           grace_minutes: number
           id: string
           intake_open: boolean
+          lat: number | null
           late_threshold_minutes: number
+          lng: number | null
           locality_level2_ar: string | null
           locality_level2_type: string | null
           locality_level3_ar: string | null
           maps_url: string | null
           name: string
+          name_ar: string | null
           open_time: string
           phone: string | null
           primary_specialty_id: string | null
           session_paused: boolean
           timezone: string
           wa_message_template: string
+          whatsapp_e164_1: string | null
+          whatsapp_e164_2: string | null
+          whatsapp_local_1: string | null
+          whatsapp_local_2: string | null
           working_hours_json: Json | null
         }
         Insert: {
           address_text?: string | null
+          allow_pause_intake?: boolean | null
+          allow_urgent_insert?: boolean | null
           avg_service_minutes?: number
+          avg_service_time_seed_minutes?: number | null
           clinic_whatsapp_phone?: string | null
           close_time?: string
           created_at?: string
@@ -103,23 +116,33 @@ export type Database = {
           grace_minutes?: number
           id?: string
           intake_open?: boolean
+          lat?: number | null
           late_threshold_minutes?: number
+          lng?: number | null
           locality_level2_ar?: string | null
           locality_level2_type?: string | null
           locality_level3_ar?: string | null
           maps_url?: string | null
           name: string
+          name_ar?: string | null
           open_time?: string
           phone?: string | null
           primary_specialty_id?: string | null
           session_paused?: boolean
           timezone?: string
           wa_message_template?: string
+          whatsapp_e164_1?: string | null
+          whatsapp_e164_2?: string | null
+          whatsapp_local_1?: string | null
+          whatsapp_local_2?: string | null
           working_hours_json?: Json | null
         }
         Update: {
           address_text?: string | null
+          allow_pause_intake?: boolean | null
+          allow_urgent_insert?: boolean | null
           avg_service_minutes?: number
+          avg_service_time_seed_minutes?: number | null
           clinic_whatsapp_phone?: string | null
           close_time?: string
           created_at?: string
@@ -127,18 +150,25 @@ export type Database = {
           grace_minutes?: number
           id?: string
           intake_open?: boolean
+          lat?: number | null
           late_threshold_minutes?: number
+          lng?: number | null
           locality_level2_ar?: string | null
           locality_level2_type?: string | null
           locality_level3_ar?: string | null
           maps_url?: string | null
           name?: string
+          name_ar?: string | null
           open_time?: string
           phone?: string | null
           primary_specialty_id?: string | null
           session_paused?: boolean
           timezone?: string
           wa_message_template?: string
+          whatsapp_e164_1?: string | null
+          whatsapp_e164_2?: string | null
+          whatsapp_local_1?: string | null
+          whatsapp_local_2?: string | null
           working_hours_json?: Json | null
         }
         Relationships: [

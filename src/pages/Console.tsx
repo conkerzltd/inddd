@@ -106,6 +106,9 @@ const Console = () => {
             <Button variant="ghost" size="sm" onClick={() => navigate("/clinic-profile")}>
               <Settings className="mr-2 h-4 w-4" />Profile
             </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/queue-settings")}>
+              Queue Settings
+            </Button>
             <Button variant="ghost" size="sm" onClick={signOut}>
               <LogOut className="mr-2 h-4 w-4" />Sign Out
             </Button>
