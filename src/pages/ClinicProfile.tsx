@@ -333,7 +333,6 @@ const ClinicProfile = () => {
               <Label>WhatsApp Number 1</Label>
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center rounded-md border border-input bg-muted px-3 h-10 text-sm text-muted-foreground">+20</span>
-                <span className="inline-flex items-center rounded-md border border-input bg-muted px-2 h-10 text-sm text-muted-foreground">0</span>
                 <Input
                   value={whatsappLocal1}
                   onChange={(e) => setWhatsappLocal1(normalizeWhatsappInput(e.target.value).slice(0, 10))}
@@ -343,13 +342,13 @@ const ClinicProfile = () => {
                   className="flex-1"
                 />
               </div>
+              <p className="text-xs text-muted-foreground">You can paste 01XXXXXXXXX — we auto-remove the leading 0.</p>
               {errors.whatsappLocal1 && <p className="text-sm text-destructive">{errors.whatsappLocal1}</p>}
             </div>
             <div className="space-y-2">
               <Label>WhatsApp Number 2 (Optional)</Label>
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center rounded-md border border-input bg-muted px-3 h-10 text-sm text-muted-foreground">+20</span>
-                <span className="inline-flex items-center rounded-md border border-input bg-muted px-2 h-10 text-sm text-muted-foreground">0</span>
                 <Input
                   value={whatsappLocal2}
                   onChange={(e) => setWhatsappLocal2(normalizeWhatsappInput(e.target.value).slice(0, 10))}
@@ -359,6 +358,7 @@ const ClinicProfile = () => {
                   className="flex-1"
                 />
               </div>
+              <p className="text-xs text-muted-foreground">You can paste 01XXXXXXXXX — we auto-remove the leading 0.</p>
               {errors.whatsappLocal2 && <p className="text-sm text-destructive">{errors.whatsappLocal2}</p>}
             </div>
           </CardContent>
