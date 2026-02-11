@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Save, Check, MapPin, ExternalLink } from "lucide-react";
+import { ArrowLeft, Save, Check, MapPin, ExternalLink, Copy, CopyCheck } from "lucide-react";
 import { toast } from "sonner";
 import logoSymbol from "@/assets/logo-symbol.png";
 
@@ -477,9 +477,31 @@ const ClinicProfile = () => {
 
         {/* Working Hours */}
         <Card>
-          <CardHeader><CardTitle className="text-base">Working Hours</CardTitle></CardHeader>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Working Hours</CardTitle>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const firstEnabled = DAYS.find((d) => workingHours[d.key]);
+                  if (!firstEnabled) { toast.info("Enable at least one day first"); return; }
+                  const tpl = workingHours[firstEnabled.key]!;
+                  setWorkingHours((prev) => {
+                    const next = { ...prev };
+                    DAYS.forEach((d) => { next[d.key] = { open: tpl.open, close: tpl.close }; });
+                    return next;
+                  });
+                  toast.success(`Applied ${firstEnabled.label} hours to all days`);
+                }}
+              >
+                <CopyCheck className="mr-1.5 h-3.5 w-3.5" />Apply to all days
+              </Button>
+            </div>
+          </CardHeader>
           <CardContent className="space-y-3">
-            {DAYS.map((day) => {
+            {DAYS.map((day, idx) => {
               const hours = workingHours[day.key];
               const enabled = hours !== null && hours !== undefined;
               return (
@@ -498,6 +520,24 @@ const ClinicProfile = () => {
                       <Input type="time" value={hours?.open || "09:00"} onChange={(e) => updateWorkingHour(day.key, "open", e.target.value)} className="w-28" />
                       <span className="text-muted-foreground text-sm">→</span>
                       <Input type="time" value={hours?.close || "17:00"} onChange={(e) => updateWorkingHour(day.key, "close", e.target.value)} className="w-28" />
+                      {idx < DAYS.length - 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2 text-xs"
+                          onClick={() => {
+                            const nextDay = DAYS[idx + 1];
+                            setWorkingHours((prev) => ({
+                              ...prev,
+                              [nextDay.key]: { open: hours!.open, close: hours!.close },
+                            }));
+                            toast.success(`Copied to ${nextDay.label}`);
+                          }}
+                        >
+                          <Copy className="mr-1 h-3 w-3" />→ {DAYS[idx + 1].label}
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>
