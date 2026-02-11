@@ -25,14 +25,17 @@ const DAYS = [
 
 type WorkingHours = Record<string, { open: string; close: string } | null>;
 
-function toE164(local: string | null | undefined): string | null {
-  if (!local) return null;
-  if (local.startsWith("0")) return "20" + local.slice(1);
-  return "20" + local;
+function toE164FromInput10(input10: string): string | null {
+  if (!input10) return null;
+  return "20" + input10;
 }
 
-function stripNonDigits(val: string): string {
-  return val.replace(/\D/g, "");
+function normalizeWhatsappInput(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length === 11 && digits.startsWith("0")) return digits.slice(1);
+  if (digits.length >= 11) return digits.slice(-10);
+  if (digits.length === 10) return digits;
+  return digits; // partial typing
 }
 
 const ClinicProfile = () => {
@@ -98,8 +101,10 @@ const ClinicProfile = () => {
         if (!data) return;
         setClinicName(data.name || "");
         setClinicNameAr((data as any).name_ar || "");
-        setWhatsappLocal1((data as any).whatsapp_local_1 || "");
-        setWhatsappLocal2((data as any).whatsapp_local_2 || "");
+        const raw1 = (data as any).whatsapp_local_1 || "";
+        setWhatsappLocal1(raw1.startsWith("0") ? raw1.slice(1) : raw1);
+        const raw2 = (data as any).whatsapp_local_2 || "";
+        setWhatsappLocal2(raw2.startsWith("0") ? raw2.slice(1) : raw2);
         setAddressText(data.address_text || "");
         setMapsUrl(data.maps_url || "");
         setLat((data as any).lat || null);
@@ -227,8 +232,8 @@ const ClinicProfile = () => {
     const errs: Record<string, string> = {};
     if (!clinicName.trim()) errs.clinicName = "Clinic Name (English) is required";
     if (!clinicNameAr.trim()) errs.clinicNameAr = "Clinic Name (Arabic) is required";
-    if (!whatsappLocal1 || !/^01\d{9}$/.test(whatsappLocal1)) errs.whatsappLocal1 = "Must be 11 digits starting with 01";
-    if (whatsappLocal2 && !/^01\d{9}$/.test(whatsappLocal2)) errs.whatsappLocal2 = "Must be 11 digits starting with 01";
+    if (!whatsappLocal1 || whatsappLocal1.length !== 10 || !/^\d{10}$/.test(whatsappLocal1)) errs.whatsappLocal1 = "Must be 10 digits (after the leading 0)";
+    if (whatsappLocal2 && (whatsappLocal2.length !== 10 || !/^\d{10}$/.test(whatsappLocal2))) errs.whatsappLocal2 = "Must be 10 digits (after the leading 0)";
     if (!selectedSpecialtyId) errs.specialty = "Specialty is required";
     if (!selectedGov) errs.gov = "Governorate is required";
     if (!selectedLevel2) errs.level2 = "District / City / Markaz is required";
@@ -256,11 +261,11 @@ const ClinicProfile = () => {
       .update({
         name: clinicName,
         name_ar: clinicNameAr,
-        whatsapp_local_1: whatsappLocal1 || null,
-        whatsapp_e164_1: toE164(whatsappLocal1),
-        whatsapp_local_2: whatsappLocal2 || null,
-        whatsapp_e164_2: toE164(whatsappLocal2),
-        clinic_whatsapp_phone: toE164(whatsappLocal1),
+        whatsapp_local_1: whatsappLocal1 ? "0" + whatsappLocal1 : null,
+        whatsapp_e164_1: toE164FromInput10(whatsappLocal1),
+        whatsapp_local_2: whatsappLocal2 ? "0" + whatsappLocal2 : null,
+        whatsapp_e164_2: toE164FromInput10(whatsappLocal2),
+        clinic_whatsapp_phone: toE164FromInput10(whatsappLocal1),
         address_text: addressText || null,
         maps_url: mapsUrl || null,
         lat: lat,
@@ -328,12 +333,13 @@ const ClinicProfile = () => {
               <Label>WhatsApp Number 1</Label>
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center rounded-md border border-input bg-muted px-3 h-10 text-sm text-muted-foreground">+20</span>
+                <span className="inline-flex items-center rounded-md border border-input bg-muted px-2 h-10 text-sm text-muted-foreground">0</span>
                 <Input
                   value={whatsappLocal1}
-                  onChange={(e) => setWhatsappLocal1(stripNonDigits(e.target.value).slice(0, 11))}
-                  placeholder="01XXXXXXXXX"
+                  onChange={(e) => setWhatsappLocal1(normalizeWhatsappInput(e.target.value).slice(0, 10))}
+                  placeholder="1XXXXXXXXX"
                   dir="ltr"
-                  maxLength={11}
+                  maxLength={10}
                   className="flex-1"
                 />
               </div>
@@ -343,12 +349,13 @@ const ClinicProfile = () => {
               <Label>WhatsApp Number 2 (Optional)</Label>
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center rounded-md border border-input bg-muted px-3 h-10 text-sm text-muted-foreground">+20</span>
+                <span className="inline-flex items-center rounded-md border border-input bg-muted px-2 h-10 text-sm text-muted-foreground">0</span>
                 <Input
                   value={whatsappLocal2}
-                  onChange={(e) => setWhatsappLocal2(stripNonDigits(e.target.value).slice(0, 11))}
-                  placeholder="01XXXXXXXXX"
+                  onChange={(e) => setWhatsappLocal2(normalizeWhatsappInput(e.target.value).slice(0, 10))}
+                  placeholder="1XXXXXXXXX"
                   dir="ltr"
-                  maxLength={11}
+                  maxLength={10}
                   className="flex-1"
                 />
               </div>
