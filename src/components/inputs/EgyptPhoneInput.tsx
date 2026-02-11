@@ -33,9 +33,13 @@ export function EgyptPhoneInput({
           onChange={(e) =>
             onChange10(normalizeEgTo10(e.target.value).slice(0, 10))
           }
+          onPaste={(e) => {
+            const pasted = e.clipboardData.getData("text");
+            onChange10(normalizeEgTo10(pasted).slice(0, 10));
+            e.preventDefault();
+          }}
           placeholder="1XXXXXXXXX"
           dir="ltr"
-          maxLength={10}
           disabled={disabled}
           className="flex-1"
         />
