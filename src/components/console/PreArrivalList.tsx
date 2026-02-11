@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TicketRow } from "@/hooks/useClinicTickets";
 import { TicketSection } from "./TicketSection";
 import { InsertPositionDialog } from "./InsertPositionDialog";
+import { PUBLIC_BASE_URL } from "@/config/publicBaseUrl";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -63,7 +64,7 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
                     <Ban className="h-3 w-3 mr-1" />Cancel
                   </Button>
                   {t.token && (
-                    <a href={`/q/${t.token}`} target="_blank" rel="noopener noreferrer">
+                    <a href={`${PUBLIC_BASE_URL}/q/${t.token}`} target="_blank" rel="noopener noreferrer">
                       <Button size="sm" variant="ghost">
                         <ExternalLink className="h-3 w-3" />
                       </Button>

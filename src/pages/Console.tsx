@@ -88,6 +88,14 @@ const Console = () => {
     }
 
     const patientLink = `${PUBLIC_BASE_URL}/q/${token}`;
+    
+    // Hard safety check - never send lovable links to patients
+    if (/lovableproject\.com|lovable\.dev/i.test(patientLink)) {
+      if (popup) popup.close();
+      toast.error("Misconfigured base URL. Patient links must use https://inddd.com");
+      return;
+    }
+    
     const message = `Tap this link to check your number and estimated wait time at ${clinicName}: ${patientLink}`;
     const encodedMessage = encodeURIComponent(message);
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
