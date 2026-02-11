@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
@@ -19,6 +19,8 @@ interface Props {
   onCreated: () => void;
 }
 
+interface BookingApp { id: string; code: string; label_en: string; }
+
 export function CreateTicketDialog({ clinicId, onCreated }: Props) {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -29,6 +31,21 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
   const [name, setName] = useState("");
   const [apptTime, setApptTime] = useState("");
   const [phoneError, setPhoneError] = useState("");
+  const [extAppId, setExtAppId] = useState<string>("");
+  const [extAppOther, setExtAppOther] = useState("");
+  const [bookingApps, setBookingApps] = useState<BookingApp[]>([]);
+
+  // Fetch booking apps once on mount
+  useEffect(() => {
+    supabase
+      .from("external_booking_apps")
+      .select("id, code, label_en")
+      .eq("is_active", true)
+      .order("sort_order")
+      .then(({ data }) => { if (data) setBookingApps(data); });
+  }, []);
+
+  const selectedAppCode = bookingApps.find((a) => a.id === extAppId)?.code;
 
   const reset = () => {
     setSource("WALK_IN");
@@ -38,6 +55,8 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
     setName("");
     setApptTime("");
     setPhoneError("");
+    setExtAppId("");
+    setExtAppOther("");
   };
 
   const handleSubmit = async () => {
@@ -62,6 +81,8 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
         p_patient_phone: toEgE164Digits(phone10),
         p_patient_name: name.trim() || null,
         p_appt_hhmm: type === "SCHEDULED" ? apptTime : null,
+        p_external_booking_app_id: source === "EXTERNAL" && extAppId ? extAppId : null,
+        p_external_booking_app_other: source === "EXTERNAL" && selectedAppCode === "OTHER" ? extAppOther : null,
       });
 
       if (error) throw error;
@@ -92,7 +113,7 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label>Source</Label>
-              <Select value={source} onValueChange={setSource}>
+              <Select value={source} onValueChange={(v) => { setSource(v); if (v !== "EXTERNAL") { setExtAppId(""); setExtAppOther(""); } }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="WALK_IN">Walk-in</SelectItem>
@@ -150,6 +171,32 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
                 onChange={(e) => setApptTime(e.target.value)}
               />
             </div>
+          )}
+
+          {source === "EXTERNAL" && bookingApps.length > 0 && (
+            <>
+              <div className="space-y-1">
+                <Label>External booking app (optional)</Label>
+                <Select value={extAppId} onValueChange={(v) => { setExtAppId(v); if (bookingApps.find((a) => a.id === v)?.code !== "OTHER") setExtAppOther(""); }}>
+                  <SelectTrigger><SelectValue placeholder="Select app…" /></SelectTrigger>
+                  <SelectContent>
+                    {bookingApps.map((a) => (
+                      <SelectItem key={a.id} value={a.id}>{a.label_en}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {selectedAppCode === "OTHER" && (
+                <div className="space-y-1">
+                  <Label>Other app name (optional)</Label>
+                  <Input
+                    placeholder="e.g. DocDoc"
+                    value={extAppOther}
+                    onChange={(e) => setExtAppOther(e.target.value)}
+                  />
+                </div>
+              )}
+            </>
           )}
 
           <Button className="w-full" onClick={handleSubmit} disabled={submitting}>
