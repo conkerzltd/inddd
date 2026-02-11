@@ -181,6 +181,33 @@ export type Database = {
           },
         ]
       }
+      external_booking_apps: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          label_en: string
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label_en: string
+          sort_order: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label_en?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       geo_localities: {
         Row: {
           governorate_ar: string
@@ -279,6 +306,8 @@ export type Database = {
           clinic_id: string
           completed_at: string | null
           created_at: string
+          external_booking_app_id: string | null
+          external_booking_app_other: string | null
           id: string
           manual_insert_n: number | null
           manual_insert_position:
@@ -303,6 +332,8 @@ export type Database = {
           clinic_id: string
           completed_at?: string | null
           created_at?: string
+          external_booking_app_id?: string | null
+          external_booking_app_other?: string | null
           id?: string
           manual_insert_n?: number | null
           manual_insert_position?:
@@ -327,6 +358,8 @@ export type Database = {
           clinic_id?: string
           completed_at?: string | null
           created_at?: string
+          external_booking_app_id?: string | null
+          external_booking_app_other?: string | null
           id?: string
           manual_insert_n?: number | null
           manual_insert_position?:
@@ -350,6 +383,13 @@ export type Database = {
             columns: ["clinic_id"]
             isOneToOne: false
             referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_external_booking_app_id_fkey"
+            columns: ["external_booking_app_id"]
+            isOneToOne: false
+            referencedRelation: "external_booking_apps"
             referencedColumns: ["id"]
           },
         ]
@@ -397,18 +437,33 @@ export type Database = {
       close_out_day: { Args: { p_clinic_id: string }; Returns: Json }
       complete_ticket: { Args: { p_ticket_id: string }; Returns: Json }
       confirm_arrival: { Args: { p_ticket_id: string }; Returns: Json }
-      create_ticket: {
-        Args: {
-          p_appt_hhmm?: string
-          p_clinic_id: string
-          p_patient_name?: string
-          p_patient_phone: string
-          p_source: Database["public"]["Enums"]["ticket_source"]
-          p_type: Database["public"]["Enums"]["ticket_type"]
-          p_visit_type: Database["public"]["Enums"]["visit_type"]
-        }
-        Returns: Json
-      }
+      create_ticket:
+        | {
+            Args: {
+              p_appt_hhmm?: string
+              p_clinic_id: string
+              p_patient_name?: string
+              p_patient_phone: string
+              p_source: Database["public"]["Enums"]["ticket_source"]
+              p_type: Database["public"]["Enums"]["ticket_type"]
+              p_visit_type: Database["public"]["Enums"]["visit_type"]
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_appt_hhmm?: string
+              p_clinic_id: string
+              p_external_booking_app_id?: string
+              p_external_booking_app_other?: string
+              p_patient_name?: string
+              p_patient_phone: string
+              p_source: Database["public"]["Enums"]["ticket_source"]
+              p_type: Database["public"]["Enums"]["ticket_type"]
+              p_visit_type: Database["public"]["Enums"]["visit_type"]
+            }
+            Returns: Json
+          }
       get_patient_queue_view: {
         Args: { p_token: string }
         Returns: Database["public"]["CompositeTypes"]["patient_queue_view"]

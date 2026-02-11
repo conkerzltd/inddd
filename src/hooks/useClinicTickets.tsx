@@ -18,6 +18,10 @@ export interface TicketRow {
   rank_key: number | null;
   miss_count: number;
   token: string | null;
+  external_booking_app_id: string | null;
+  external_booking_app_other: string | null;
+  external_booking_app_label: string | null;
+  external_booking_app_code: string | null;
 }
 
 export function useClinicTickets(clinicId: string | null, clinicTimezone: string) {
@@ -42,7 +46,7 @@ export function useClinicTickets(clinicId: string | null, clinicTimezone: string
       const today = getClinicToday(clinicTimezone);
       const { data: raw, error } = await supabase
         .from("tickets")
-        .select("id, status, type, source, visit_type, patient_name, patient_phone, appointment_time, arrival_confirmed_at, called_at, service_started_at, completed_at, rank_key, miss_count")
+        .select("id, status, type, source, visit_type, patient_name, patient_phone, appointment_time, arrival_confirmed_at, called_at, service_started_at, completed_at, rank_key, miss_count, external_booking_app_id, external_booking_app_other, external_booking_apps(label_en, code)")
         .eq("clinic_id", clinicId)
         .eq("visit_date", today)
         .order("rank_key", { ascending: true, nullsFirst: false });
@@ -60,7 +64,16 @@ export function useClinicTickets(clinicId: string | null, clinicTimezone: string
       const tokenMap = new Map((links || []).map((l) => [l.ticket_id, l.token]));
 
       setTickets(
-        raw.map((t) => ({ ...t, token: tokenMap.get(t.id) || null }))
+        raw.map((t: any) => {
+          const app = t.external_booking_apps;
+          return {
+            ...t,
+            token: tokenMap.get(t.id) || null,
+            external_booking_app_label: app?.label_en ?? null,
+            external_booking_app_code: app?.code ?? null,
+            external_booking_apps: undefined,
+          };
+        })
       );
     } catch (e: any) {
       toast.error(e.message || "Failed to load tickets");

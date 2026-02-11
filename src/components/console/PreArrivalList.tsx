@@ -43,7 +43,16 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
           <TableBody>
             {tickets.map((t) => (
               <TableRow key={t.id}>
-                <TableCell className="font-medium">{t.patient_name || "—"}</TableCell>
+                <TableCell>
+                  <span className="font-medium">{t.patient_name || "—"}</span>
+                  {t.source === "EXTERNAL" && t.external_booking_app_label && (
+                    <span className="block text-xs text-muted-foreground">
+                      External · {t.external_booking_app_code === "OTHER" && t.external_booking_app_other
+                        ? `Other: ${t.external_booking_app_other}`
+                        : t.external_booking_app_label}
+                    </span>
+                  )}
+                </TableCell>
                 <TableCell>{t.source}</TableCell>
                 <TableCell>{t.type}</TableCell>
                 <TableCell>
