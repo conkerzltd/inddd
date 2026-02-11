@@ -8,7 +8,8 @@ export const PUBLIC_BASE_URL = (() => {
 
   const isLovable =
     /lovableproject\.com$/i.test(host) ||
-    /(^|\.)lovable\.dev$/i.test(host);
+    /(^|\.)lovable\.dev$/i.test(host) ||
+    /(^|\.)lovable\.app$/i.test(host);
 
   if (isLovable) return "https://inddd.com";
   return origin;
