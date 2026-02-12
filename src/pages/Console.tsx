@@ -164,7 +164,7 @@ const Console = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {clinicId && <CreateTicketDialog clinicId={clinicId} onCreated={refresh} />}
+                  {clinicId && <CreateTicketDialog clinicId={clinicId} clinicName={clinicName} onCreated={refresh} />}
                   {isOwnerOrAdmin && (
                     <Button variant="outline" size="sm" onClick={handleSeed} disabled={seeding}>
                       <Database className="ml-2 h-4 w-4" />

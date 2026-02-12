@@ -13,15 +13,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { EgyptPhoneInput } from "@/components/inputs/EgyptPhoneInput";
 import { isValidEg10, toEgE164Digits } from "@/utils/phoneEG";
+import { PUBLIC_BASE_URL } from "@/config/publicBaseUrl";
 
 interface Props {
   clinicId: string;
+  clinicName: string;
   onCreated: () => void;
 }
 
 interface BookingApp { id: string; code: string; label_en: string; }
 
-export function CreateTicketDialog({ clinicId, onCreated }: Props) {
+export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [source, setSource] = useState<string>("WALK_IN");
@@ -81,6 +83,8 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
       return;
     }
     setSubmitting(true);
+    // Open popup immediately to avoid popup blocker
+    const popup = window.open("about:blank", "_blank");
     try {
       const { data, error } = await supabase.rpc("create_ticket", {
         p_clinic_id: clinicId,
@@ -94,11 +98,46 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
         p_external_booking_app_other: source === "EXTERNAL" && selectedAppCode === "OTHER" ? extAppOther : null,
       });
       if (error) throw error;
-      toast.success("تم إنشاء التذكرة!");
+
+      const ticketId = (data as any)?.ticket_id;
+      if (!ticketId) throw new Error("لم يتم إرجاع معرف التذكرة");
+
+      // Send patient link
+      const { data: linkData, error: linkError } = await supabase.rpc("send_patient_link", {
+        p_ticket_id: ticketId,
+      });
+      if (linkError) {
+        toast.warning("تم إنشاء التذكرة لكن فشل إرسال الرابط: " + linkError.message);
+        if (popup) popup.close();
+      } else {
+        const token = (linkData as any)?.token;
+        if (token) {
+          const patientLink = `${PUBLIC_BASE_URL}/q/${token}`;
+          if (/lovableproject\.com|lovable\.dev/i.test(patientLink)) {
+            if (popup) popup.close();
+            toast.error("خطأ في إعداد الرابط. روابط المرضى يجب أن تستخدم https://inddd.com");
+          } else {
+            const patientPhone = toEgE164Digits(phone10);
+            const message = `اضغط على الرابط لمتابعة دورك ووقت الانتظار المتوقع في ${clinicName}: ${patientLink}`;
+            const encodedMessage = encodeURIComponent(message);
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const waUrl = isMobile
+              ? `https://wa.me/${patientPhone}?text=${encodedMessage}`
+              : `https://web.whatsapp.com/send?phone=${patientPhone}&text=${encodedMessage}`;
+            if (popup) { popup.location.href = waUrl; } else { window.location.href = waUrl; }
+            toast.success("تم إنشاء التذكرة وفتح رابط الإرسال!");
+          }
+        } else {
+          if (popup) popup.close();
+          toast.success("تم إنشاء التذكرة!");
+        }
+      }
+
       reset();
       setOpen(false);
       onCreated();
     } catch (e: any) {
+      if (popup) popup.close();
       toast.error(e.message || "فشل إنشاء التذكرة");
     } finally {
       setSubmitting(false);
@@ -207,7 +246,7 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
           )}
 
           <Button className="w-full" onClick={handleSubmit} disabled={submitting}>
-            {submitting ? "جاري الإنشاء…" : "إنشاء تذكرة"}
+            {submitting ? "جاري الإنشاء والإرسال…" : "إنشاء تذكرة وإرسال الرابط"}
           </Button>
         </div>
       </DialogContent>
