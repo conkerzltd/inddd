@@ -3,11 +3,13 @@ import Seo from "@/components/seo/Seo";
 import { buildBreadcrumbSchema } from "@/components/seo/schema";
 import { getAreaBySlug, getCityBySlug, getSpecialtyBySlug } from "@/data/directory";
 import { PUBLIC_BASE_URL } from "@/config/publicBaseUrl";
+import { useLocale } from "@/i18n/useLocale";
 
 const DoctorsArea = () => {
   const { specialty, city, area } = useParams();
   const [searchParams] = useSearchParams();
   const baseUrl = PUBLIC_BASE_URL;
+  const { localePath } = useLocale();
   const specialtyData = getSpecialtyBySlug(specialty);
   const cityData = getCityBySlug(city);
   const areaData = getAreaBySlug(cityData, area);
@@ -18,7 +20,7 @@ const DoctorsArea = () => {
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-12">
           <h1 className="text-2xl font-bold text-foreground">Page not found</h1>
-          <Link className="mt-4 inline-block text-sm text-primary" to="/doctors">
+          <Link className="mt-4 inline-block text-sm text-primary" to={localePath("/doctors")}>
             Back to directory
           </Link>
         </div>

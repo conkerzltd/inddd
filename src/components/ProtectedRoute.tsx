@@ -1,5 +1,7 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { getLocaleFromPathname } from "@/i18n/locale";
+import { withLocalePath } from "@/i18n/paths";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -8,6 +10,8 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children, requiredRoles }: ProtectedRouteProps) => {
   const { user, userRoles, loading } = useAuth();
+  const { pathname } = useLocation();
+  const locale = getLocaleFromPathname(pathname);
 
   if (loading) {
     return (
@@ -18,7 +22,7 @@ const ProtectedRoute = ({ children, requiredRoles }: ProtectedRouteProps) => {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={withLocalePath(locale, "/login")} replace />;
   }
 
   if (requiredRoles && requiredRoles.length > 0) {

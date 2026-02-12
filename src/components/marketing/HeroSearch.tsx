@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import type { City, Specialty } from "@/data/directory";
+import { useLocale } from "@/i18n/useLocale";
 
 export type HeroSearchLabels = {
   title: string;
@@ -25,6 +26,7 @@ type HeroSearchProps = {
 
 const HeroSearch = ({ specialties, cities, labels }: HeroSearchProps) => {
   const navigate = useNavigate();
+  const { localePath } = useLocale();
   const [specialty, setSpecialty] = useState("");
   const [city, setCity] = useState("");
   const [area, setArea] = useState("");
@@ -41,7 +43,7 @@ const HeroSearch = ({ specialties, cities, labels }: HeroSearchProps) => {
     const params = new URLSearchParams();
     if (doctor.trim()) params.set("doctor", doctor.trim());
 
-    let path = "/doctors";
+    let path = localePath("/doctors");
     if (specialty) path += `/${specialty}`;
     if (specialty && city) path += `/${city}`;
     if (specialty && city && area) path += `/${area}`;

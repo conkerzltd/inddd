@@ -3,9 +3,11 @@ import Seo from "@/components/seo/Seo";
 import { buildBreadcrumbSchema } from "@/components/seo/schema";
 import { cities, specialties } from "@/data/directory";
 import { PUBLIC_BASE_URL } from "@/config/publicBaseUrl";
+import { useLocale } from "@/i18n/useLocale";
 
 const DoctorsIndex = () => {
   const baseUrl = PUBLIC_BASE_URL;
+  const { localePath } = useLocale();
 
   return (
     <div className="min-h-screen bg-background">
@@ -35,7 +37,7 @@ const DoctorsIndex = () => {
               {specialties.map((item) => (
                 <Link
                   key={item.slug}
-                  to={`/doctors/${item.slug}`}
+                  to={localePath(`/doctors/${item.slug}`)}
                   className="rounded-xl border border-border px-4 py-3 text-sm font-medium text-foreground hover:border-primary/60"
                 >
                   {item.name}

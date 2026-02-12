@@ -3,11 +3,13 @@ import Seo from "@/components/seo/Seo";
 import { buildBreadcrumbSchema } from "@/components/seo/schema";
 import { getCityBySlug, getSpecialtyBySlug } from "@/data/directory";
 import { PUBLIC_BASE_URL } from "@/config/publicBaseUrl";
+import { useLocale } from "@/i18n/useLocale";
 
 const DoctorsCity = () => {
   const { specialty, city } = useParams();
   const [searchParams] = useSearchParams();
   const baseUrl = PUBLIC_BASE_URL;
+  const { localePath } = useLocale();
   const specialtyData = getSpecialtyBySlug(specialty);
   const cityData = getCityBySlug(city);
   const doctorQuery = searchParams.get("doctor");
@@ -17,7 +19,7 @@ const DoctorsCity = () => {
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-12">
           <h1 className="text-2xl font-bold text-foreground">Page not found</h1>
-          <Link className="mt-4 inline-block text-sm text-primary" to="/doctors">
+          <Link className="mt-4 inline-block text-sm text-primary" to={localePath("/doctors")}>
             Back to directory
           </Link>
         </div>
@@ -69,7 +71,7 @@ const DoctorsCity = () => {
             {cityData.areas.map((area) => (
               <Link
                 key={area.slug}
-                to={`/doctors/${specialtyData.slug}/${cityData.slug}/${area.slug}`}
+                to={localePath(`/doctors/${specialtyData.slug}/${cityData.slug}/${area.slug}`)}
                 className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground hover:border-primary/60 hover:text-foreground"
               >
                 {area.name}
