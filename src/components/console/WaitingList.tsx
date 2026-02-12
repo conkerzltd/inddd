@@ -48,7 +48,7 @@ export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, 
             <TableRow>
               <TableHead className="w-12">#</TableHead>
               <TableHead>المريض</TableHead>
-              <TableHead>النوع</TableHead>
+              <TableHead>كشف</TableHead>
               <TableHead>الوصول</TableHead>
               <TableHead>المسار</TableHead>
               <TableHead className="text-left">الإجراءات</TableHead>
