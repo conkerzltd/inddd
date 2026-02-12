@@ -14,7 +14,7 @@ const ClinicCta = () => {
             {isAr ? "للعيادات" : "For clinics"}
           </p>
           <h2 className="text-3xl font-bold text-foreground">
-            {isAr ? "نظّم يوم عيادتك بطابور واحد مباشر" : "Run your clinic day with one live queue"}
+            {isAr ? "نظّم يوم عيادتك بقائمة انتظار واحدة مباشرة" : "Run your clinic day with one live queue"}
           </h2>
           <p className="text-sm text-muted-foreground">
             {isAr

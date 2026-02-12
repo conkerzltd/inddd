@@ -134,7 +134,7 @@ const Console = () => {
               <Settings className="ml-2 h-4 w-4" />الملف الشخصي
             </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate("/queue-settings")}>
-              إعدادات الطابور
+              إعدادات قائمة الانتظار
             </Button>
             <Button variant="ghost" size="sm" onClick={signOut}>
               <LogOut className="ml-2 h-4 w-4" />تسجيل الخروج

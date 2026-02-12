@@ -53,7 +53,7 @@ export function InsertPositionDialog({ open, onOpenChange, title, onSubmit }: Pr
               <SelectContent>
                 <SelectItem value="AFTER_CURRENT">بعد الحالي</SelectItem>
                 <SelectItem value="AFTER_N">بعد الموضع N</SelectItem>
-                <SelectItem value="END">نهاية الطابور</SelectItem>
+                <SelectItem value="END">نهاية قائمة الانتظار</SelectItem>
               </SelectContent>
             </Select>
           </div>

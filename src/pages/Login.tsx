@@ -46,7 +46,7 @@ const Login = () => {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-3">
-          <CardDescription>نظام إدارة الطابور</CardDescription>
+          <CardDescription>نظام إدارة قائمة الانتظار</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin">

@@ -76,7 +76,7 @@ const QueueSettings = () => {
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={logoSymbol} alt="inddd" className="h-8 w-8" />
-            <h1 className="text-lg font-bold text-foreground">إعدادات الطابور</h1>
+            <h1 className="text-lg font-bold text-foreground">إعدادات قائمة الانتظار</h1>
           </div>
           <Button variant="ghost" size="sm" onClick={() => navigate("/console")}>
             <ArrowLeft className="ml-2 h-4 w-4" />العودة للوحة التحكم
@@ -108,18 +108,18 @@ const QueueSettings = () => {
                 value={lateThreshold}
                 onChange={(e) => setLateThreshold(Number(e.target.value))}
               />
-              <p className="text-xs text-muted-foreground">المرضى الذين يصلون متأخرين أكثر من هذا الحد يتم تأخيرهم في الطابور.</p>
+              <p className="text-xs text-muted-foreground">المرضى الذين يصلون متأخرين أكثر من هذا الحد يتم تأخيرهم في قائمة الانتظار.</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">إعدادات الطابور</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">إعدادات قائمة الانتظار</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <Label>السماح بالإدراج العاجل</Label>
-                <p className="text-xs text-muted-foreground">السماح بتحديد التذاكر كعاجلة وإدراجها في مقدمة الطابور.</p>
+                <p className="text-xs text-muted-foreground">السماح بتحديد التذاكر كعاجلة وإدراجها في مقدمة قائمة الانتظار.</p>
               </div>
               <Switch checked={allowUrgent} onCheckedChange={setAllowUrgent} />
             </div>
