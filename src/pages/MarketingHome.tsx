@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import TopNav from "@/components/marketing/TopNav";
 import HeroSearch from "@/components/marketing/HeroSearch";
 import ValueProps from "@/components/marketing/ValueProps";
@@ -15,9 +15,7 @@ import { useLocale } from "@/i18n/useLocale";
 
 const MarketingHome = () => {
   const { locale } = useLocale();
-  // If on /en, force English; otherwise allow toggle (default ar)
-  const [languageOverride, setLanguageOverride] = useState<"en" | "ar" | null>(null);
-  const language = locale === "en" ? "en" : (languageOverride ?? "ar");
+  const language = locale === "en" ? "en" : "ar";
   const baseUrl = PUBLIC_BASE_URL;
 
   const copy = useMemo(
@@ -32,7 +30,6 @@ const MarketingHome = () => {
               faq: "الاسئلة",
               ctaPrimary: "للعيادات: نظم يومك",
               ctaSecondary: "افتح رابط المريض",
-              language: "تبديل اللغة",
             },
             hero: {
               title: "اعرف دورك ووقت الوصول قبل ما تخرج",
@@ -61,7 +58,6 @@ const MarketingHome = () => {
               faq: "FAQ",
               ctaPrimary: "For Clinics: Run your day",
               ctaSecondary: "Open patient link",
-              language: "Toggle language",
             },
             hero: {
               title: "Know your turn and ETA before you leave",
@@ -88,19 +84,12 @@ const MarketingHome = () => {
   return (
     <div className="min-h-screen bg-background" dir={language === "ar" ? "rtl" : "ltr"}>
       <Seo
-        title="inddd | Patients-first clinic queues"
-        description="Patients-first queue clarity for clinics. See your turn and ETA range before you arrive."
+        title={language === "ar" ? "inddd | وضوح الطابور للعيادات" : "inddd | Patients-first clinic queues"}
+        description={language === "ar" ? "وضوح الطابور للعيادات. اعرف دورك ووقت الوصول المتوقع قبل ما توصل." : "Patients-first queue clarity for clinics. See your turn and ETA range before you arrive."}
         canonical={`${baseUrl}/`}
         schema={buildWebsiteSchema(baseUrl)}
       />
-      <TopNav
-        labels={copy.nav}
-        language={language}
-        onToggleLanguage={() => {
-          if (locale === "en") return; // no toggle on /en routes
-          setLanguageOverride((prev) => (prev ?? "en") === "en" ? "ar" : "en");
-        }}
-      />
+      <TopNav labels={copy.nav} />
       <main>
         <div id="find-doctor">
           <HeroSearch specialties={specialties} cities={cities} labels={copy.hero} />

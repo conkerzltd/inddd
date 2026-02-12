@@ -21,13 +21,13 @@ const fmtTime = (iso: string, tz: string) =>
 
 export function CalledList({ tickets, clinicTimezone, onStartService, onMarkMissed, onCancel }: Props) {
   return (
-    <TicketSection title="Called" count={tickets.length}>
+    <TicketSection title="تم النداء" count={tickets.length}>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Patient</TableHead>
-            <TableHead>Called At</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>المريض</TableHead>
+            <TableHead>وقت النداء</TableHead>
+            <TableHead className="text-left">الإجراءات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -35,15 +35,15 @@ export function CalledList({ tickets, clinicTimezone, onStartService, onMarkMiss
             <TableRow key={t.id}>
               <TableCell className="font-medium">{t.patient_name || "—"}</TableCell>
               <TableCell>{t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—"}</TableCell>
-              <TableCell className="text-right space-x-1">
+              <TableCell className="text-left space-x-1 space-x-reverse">
                 <Button size="sm" onClick={() => onStartService(t.id)}>
-                  <Play className="h-3 w-3 mr-1" />Start Service
+                  <Play className="h-3 w-3 ml-1" />بدء الخدمة
                 </Button>
                 <Button size="sm" variant="destructive" onClick={() => onMarkMissed(t.id)}>
-                  <XCircle className="h-3 w-3 mr-1" />Missed
+                  <XCircle className="h-3 w-3 ml-1" />لم يحضر
                 </Button>
                 <Button size="sm" variant="destructive" onClick={() => onCancel(t.id)}>
-                  <Ban className="h-3 w-3 mr-1" />Cancel
+                  <Ban className="h-3 w-3 ml-1" />إلغاء
                 </Button>
               </TableCell>
             </TableRow>

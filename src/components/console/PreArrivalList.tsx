@@ -23,21 +23,35 @@ const fmtTime = (iso: string, tz: string) =>
     timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
   }).format(new Date(iso));
 
+const sourceLabel = (s: string) => {
+  if (s === "WALK_IN") return "حضور";
+  if (s === "PHONE_CALL") return "تليفون";
+  if (s === "EXTERNAL") return "خارجي";
+  return s;
+};
+
+const typeLabel = (t: string) => {
+  if (t === "NORMAL") return "عادي";
+  if (t === "SCHEDULED") return "مجدول";
+  if (t === "URGENT") return "عاجل";
+  return t;
+};
+
 export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmArrival, onSetUrgent, onCancel }: Props) {
   const [urgentTicketId, setUrgentTicketId] = useState<string | null>(null);
 
   return (
     <>
-      <TicketSection title="Pre-Arrival" count={tickets.length}>
+      <TicketSection title="قبل الوصول" count={tickets.length}>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Patient</TableHead>
-              <TableHead>Source</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Appointment</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>المريض</TableHead>
+              <TableHead>المصدر</TableHead>
+              <TableHead>النوع</TableHead>
+              <TableHead>الموعد</TableHead>
+              <TableHead>الحالة</TableHead>
+              <TableHead className="text-left">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -47,30 +61,30 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
                   <span className="font-medium">{t.patient_name || "—"}</span>
                   {t.source === "EXTERNAL" && t.external_booking_app_label && (
                     <span className="block text-xs text-muted-foreground">
-                      External · {t.external_booking_app_code === "OTHER" && t.external_booking_app_other
-                        ? `Other: ${t.external_booking_app_other}`
+                      خارجي · {t.external_booking_app_code === "OTHER" && t.external_booking_app_other
+                        ? `أخرى: ${t.external_booking_app_other}`
                         : t.external_booking_app_label}
                     </span>
                   )}
                 </TableCell>
-                <TableCell>{t.source}</TableCell>
-                <TableCell>{t.type}</TableCell>
+                <TableCell>{sourceLabel(t.source)}</TableCell>
+                <TableCell>{typeLabel(t.type)}</TableCell>
                 <TableCell>
                   {t.appointment_time ? fmtTime(t.appointment_time, clinicTimezone) : "—"}
                 </TableCell>
                 <TableCell>{t.status}</TableCell>
-                <TableCell className="text-right space-x-1">
+                <TableCell className="text-left space-x-1 space-x-reverse">
                   <Button size="sm" variant="outline" onClick={() => onSendLink(t.id)}>
-                    <Send className="h-3 w-3 mr-1" />Send Link
+                    <Send className="h-3 w-3 ml-1" />إرسال الرابط
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => onConfirmArrival(t.id)}>
-                    <UserCheck className="h-3 w-3 mr-1" />Confirm Arrival
+                    <UserCheck className="h-3 w-3 ml-1" />تأكيد الحضور
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => setUrgentTicketId(t.id)}>
-                    <Zap className="h-3 w-3 mr-1" />Set Urgent
+                    <Zap className="h-3 w-3 ml-1" />عاجل
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => onCancel(t.id)}>
-                    <Ban className="h-3 w-3 mr-1" />Cancel
+                    <Ban className="h-3 w-3 ml-1" />إلغاء
                   </Button>
                   {t.token && (
                     <a href={`${PUBLIC_BASE_URL}/q/${t.token}`} target="_blank" rel="noopener noreferrer">
@@ -89,7 +103,7 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
       <InsertPositionDialog
         open={!!urgentTicketId}
         onOpenChange={(o) => { if (!o) setUrgentTicketId(null); }}
-        title="Urgent Insert (confirms arrival)"
+        title="إدراج عاجل (يؤكد الحضور)"
         onSubmit={async (pos, n, note) => {
           if (!urgentTicketId) return;
           await onSetUrgent(urgentTicketId, pos, n, note);

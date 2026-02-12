@@ -11,16 +11,13 @@ export type TopNavLabels = {
   faq: string;
   ctaPrimary: string;
   ctaSecondary: string;
-  language: string;
 };
 
 type TopNavProps = {
   labels: TopNavLabels;
-  language: "en" | "ar";
-  onToggleLanguage: () => void;
 };
 
-const TopNav = ({ labels, language, onToggleLanguage }: TopNavProps) => {
+const TopNav = ({ labels }: TopNavProps) => {
   const { localePath } = useLocale();
 
   return (
@@ -55,14 +52,6 @@ const TopNav = ({ labels, language, onToggleLanguage }: TopNavProps) => {
           <Button asChild>
             <Link to={localePath("/login")}>{labels.ctaPrimary}</Link>
           </Button>
-          <button
-            type="button"
-            onClick={onToggleLanguage}
-            className="ml-2 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground"
-            aria-label={labels.language}
-          >
-            {language === "en" ? "AR" : "EN"}
-          </button>
         </div>
       </div>
     </header>

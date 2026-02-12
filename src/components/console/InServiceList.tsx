@@ -19,13 +19,13 @@ const fmtTime = (iso: string, tz: string) =>
 
 export function InServiceList({ tickets, clinicTimezone, onComplete }: Props) {
   return (
-    <TicketSection title="In Service" count={tickets.length}>
+    <TicketSection title="في الخدمة" count={tickets.length}>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Patient</TableHead>
-            <TableHead>Started At</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>المريض</TableHead>
+            <TableHead>وقت البدء</TableHead>
+            <TableHead className="text-left">الإجراءات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -33,9 +33,9 @@ export function InServiceList({ tickets, clinicTimezone, onComplete }: Props) {
             <TableRow key={t.id}>
               <TableCell className="font-medium">{t.patient_name || "—"}</TableCell>
               <TableCell>{t.service_started_at ? fmtTime(t.service_started_at, clinicTimezone) : "—"}</TableCell>
-              <TableCell className="text-right">
+              <TableCell className="text-left">
                 <Button size="sm" onClick={() => onComplete(t.id)}>
-                  <CheckCircle className="h-3 w-3 mr-1" />Complete
+                  <CheckCircle className="h-3 w-3 ml-1" />إتمام
                 </Button>
               </TableCell>
             </TableRow>

@@ -20,26 +20,26 @@ export function ReturnedList({ tickets, onReinsert, onSetUrgent }: Props) {
 
   return (
     <>
-      <TicketSection title="Returned" count={tickets.length}>
+      <TicketSection title="عاد" count={tickets.length}>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Patient</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>المريض</TableHead>
+              <TableHead>النوع</TableHead>
+              <TableHead className="text-left">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {tickets.map((t) => (
               <TableRow key={t.id}>
                 <TableCell className="font-medium">{t.patient_name || "—"}</TableCell>
-                <TableCell>{t.type}</TableCell>
-                <TableCell className="text-right space-x-1">
+                <TableCell>{t.type === "NORMAL" ? "عادي" : t.type === "SCHEDULED" ? "مجدول" : t.type === "URGENT" ? "عاجل" : t.type}</TableCell>
+                <TableCell className="text-left space-x-1 space-x-reverse">
                   <Button size="sm" variant="outline" onClick={() => { setDialogTicketId(t.id); setDialogMode("reinsert"); }}>
-                    <RotateCcw className="h-3 w-3 mr-1" />Reinsert
+                    <RotateCcw className="h-3 w-3 ml-1" />إعادة إدراج
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => { setDialogTicketId(t.id); setDialogMode("urgent"); }}>
-                    <Zap className="h-3 w-3 mr-1" />Set Urgent
+                    <Zap className="h-3 w-3 ml-1" />عاجل
                   </Button>
                 </TableCell>
               </TableRow>
@@ -51,7 +51,7 @@ export function ReturnedList({ tickets, onReinsert, onSetUrgent }: Props) {
       <InsertPositionDialog
         open={!!dialogTicketId}
         onOpenChange={(o) => { if (!o) setDialogTicketId(null); }}
-        title={dialogMode === "reinsert" ? "Reinsert Patient" : "Urgent Insert"}
+        title={dialogMode === "reinsert" ? "إعادة إدراج المريض" : "إدراج عاجل"}
         onSubmit={async (pos, n, note) => {
           if (!dialogTicketId) return;
           if (dialogMode === "reinsert") {
