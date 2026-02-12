@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import logoWordmark from "@/assets/logo-wordmark.png";
+import logo from "@/assets/logo.svg";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -45,7 +45,7 @@ const Login = () => {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-3">
-          
+          <img src={logo} alt="inddd" className="h-10 w-auto mx-auto" />
           <CardDescription>Queue Management System</CardDescription>
         </CardHeader>
         <CardContent>
