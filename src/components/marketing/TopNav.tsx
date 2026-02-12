@@ -24,7 +24,7 @@ const TopNav = ({ labels, language, onToggleLanguage }: TopNavProps) =>
     <div className="container mx-auto flex items-center justify-between px-4 py-4">
       <div className="flex items-center gap-8">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="inddd" className="h-8 w-auto" />
+          <img src={logo} alt="inddd" className="h-10 w-auto" />
         </Link>
         <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
           <Link to="/doctors" className="hover:text-foreground">
