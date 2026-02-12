@@ -41,9 +41,11 @@ function calcRemaining(targetIso: string): string | null {
   const diff = new Date(targetIso).getTime() - Date.now();
   if (diff <= 0) return null;
   const h = Math.floor(diff / 3_600_000);
-  const m = Math.ceil((diff % 3_600_000) / 60_000);
-  if (h > 0) return `${h} ساعة و ${m} دقيقة`;
-  return `${m} دقيقة`;
+  const m = Math.floor((diff % 3_600_000) / 60_000);
+  const s = Math.floor((diff % 60_000) / 1_000);
+  if (h > 0) return `${h} ساعة و ${m} دقيقة و ${s} ثانية`;
+  if (m > 0) return `${m} دقيقة و ${s} ثانية`;
+  return `${s} ثانية`;
 }
 
 /* ═══════════════ main component ═══════════════ */
@@ -96,14 +98,14 @@ export default function PatientQueue() {
     return () => { stop(); document.removeEventListener("visibilitychange", vis); };
   }, [fetchQueue, isValidToken, data?.status_badge]);
 
-  /* ── remaining‑time countdown every 30s ── */
+  /* ── remaining‑time live countdown every 1s ── */
   useEffect(() => {
     if (!data) return;
     const target = data.appointment_time || data.expected_window_start;
     if (!target) { setRemaining(null); return; }
     const tick = () => setRemaining(calcRemaining(target));
     tick();
-    const id = setInterval(tick, 30_000);
+    const id = setInterval(tick, 1_000);
     return () => clearInterval(id);
   }, [data]);
 
