@@ -40,7 +40,6 @@ const Console = () => {
       timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
     }).format(new Date());
 
-  // Fetch clinic timezone and flags
   useEffect(() => {
     if (!clinicId) return;
     supabase
@@ -66,48 +65,26 @@ const Console = () => {
   const actions = useTicketActions(clinicId, refresh);
 
   const handleSendLink = useCallback(async (ticketId: string) => {
-    // Open blank tab immediately (before await) to avoid popup blockers
     const popup = window.open("about:blank", "_blank");
-
-    // Call RPC to create/record the patient link
     const data = await actions.sendLink(ticketId);
-    if (!data) {
-      if (popup) popup.close();
-      return;
-    }
-
-    // Find the ticket to get the patient phone and token
+    if (!data) { if (popup) popup.close(); return; }
     const ticket = preArrival.find((t) => t.id === ticketId);
     const patientPhone = ticket?.patient_phone?.replace(/\D/g, "") || "";
-    
-    // Build patient tracking URL using the token (from data or ticket)
     const token = (data as any)?.token || ticket?.token;
-    if (!token) {
-      if (popup) popup.close();
-      return;
-    }
-
+    if (!token) { if (popup) popup.close(); return; }
     const patientLink = `${PUBLIC_BASE_URL}/q/${token}`;
-    
-    // Hard safety check - never send lovable links to patients
     if (/lovableproject\.com|lovable\.dev/i.test(patientLink)) {
       if (popup) popup.close();
-      toast.error("Misconfigured base URL. Patient links must use https://inddd.com");
+      toast.error("خطأ في إعداد الرابط. روابط المرضى يجب أن تستخدم https://inddd.com");
       return;
     }
-    
-    const message = `Tap this link to check your number and estimated wait time at ${clinicName}: ${patientLink}`;
+    const message = `اضغط على الرابط لمتابعة دورك ووقت الانتظار المتوقع في ${clinicName}: ${patientLink}`;
     const encodedMessage = encodeURIComponent(message);
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const waUrl = isMobile
       ? `https://wa.me/${patientPhone}?text=${encodedMessage}`
       : `https://web.whatsapp.com/send?phone=${patientPhone}&text=${encodedMessage}`;
-
-    if (popup) {
-      popup.location.href = waUrl;
-    } else {
-      window.location.href = waUrl;
-    }
+    if (popup) { popup.location.href = waUrl; } else { window.location.href = waUrl; }
   }, [actions, preArrival, clinicName]);
 
   const handleBootstrap = async () => {
@@ -115,10 +92,10 @@ const Console = () => {
     try {
       const { error } = await supabase.rpc("bootstrap_demo_clinic");
       if (error) throw error;
-      toast.success("Demo clinic created!");
+      toast.success("تم إنشاء عيادة تجريبية!");
       window.location.reload();
     } catch (e: any) {
-      toast.error(e.message || "Failed to create demo clinic");
+      toast.error(e.message || "فشل إنشاء العيادة التجريبية");
     } finally {
       setBootstrapping(false);
     }
@@ -130,10 +107,10 @@ const Console = () => {
     try {
       const { data, error } = await supabase.rpc("seed_demo_day", { p_clinic_id: clinicId });
       if (error) throw error;
-      toast.success(`Seeded ${data} demo tickets for today.`);
+      toast.success(`تم إضافة ${data} تذكرة تجريبية لليوم.`);
       await refresh();
     } catch (e: any) {
-      toast.error(e.message || "Failed to seed demo data");
+      toast.error(e.message || "فشل إضافة البيانات التجريبية");
     } finally {
       setSeeding(false);
     }
@@ -146,21 +123,21 @@ const Console = () => {
           <div className="flex items-center gap-3">
             <img src={logoSymbol} alt="inddd" className="h-8 w-8" />
             <div>
-              <h1 className="text-lg font-bold text-foreground">inddd Console</h1>
+              <h1 className="text-lg font-bold text-foreground">لوحة التحكم</h1>
               <p className="text-sm text-muted-foreground">
-              {user?.email} · {userRoles.map((r) => r.role).join(", ") || "No role"}
-            </p>
+                {user?.email} · {userRoles.map((r) => r.role).join("، ") || "بدون صلاحية"}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => navigate("/clinic-profile")}>
-              <Settings className="mr-2 h-4 w-4" />Profile
+              <Settings className="ml-2 h-4 w-4" />الملف الشخصي
             </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate("/queue-settings")}>
-              Queue Settings
+              إعدادات الطابور
             </Button>
             <Button variant="ghost" size="sm" onClick={signOut}>
-              <LogOut className="mr-2 h-4 w-4" />Sign Out
+              <LogOut className="ml-2 h-4 w-4" />تسجيل الخروج
             </Button>
           </div>
         </div>
@@ -169,20 +146,19 @@ const Console = () => {
       <main className="container mx-auto p-4 space-y-4">
         {!clinicId && !loading ? (
           <div className="rounded-lg border border-border bg-card p-8 text-center space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">No Clinic Found</h2>
-            <p className="text-muted-foreground">Create a demo clinic to get started.</p>
+            <h2 className="text-xl font-semibold text-foreground">لا توجد عيادة</h2>
+            <p className="text-muted-foreground">أنشئ عيادة تجريبية للبدء.</p>
             <Button onClick={handleBootstrap} disabled={bootstrapping}>
-              <Plus className="mr-2 h-4 w-4" />
-              {bootstrapping ? "Creating…" : "Create Demo Clinic"}
+              <Plus className="ml-2 h-4 w-4" />
+              {bootstrapping ? "جاري الإنشاء…" : "إنشاء عيادة تجريبية"}
             </Button>
           </div>
         ) : (
           <>
-            {/* Header bar */}
             <div className="rounded-lg border border-border bg-card p-4 flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold text-foreground">Today's Dashboard</h2>
+                  <h2 className="text-xl font-semibold text-foreground">لوحة اليوم</h2>
                   <p className="text-sm text-muted-foreground">
                     {getClinicToday(clinicTimezone)} ({clinicTimezone})
                   </p>
@@ -191,17 +167,17 @@ const Console = () => {
                   {clinicId && <CreateTicketDialog clinicId={clinicId} onCreated={refresh} />}
                   {isOwnerOrAdmin && (
                     <Button variant="outline" size="sm" onClick={handleSeed} disabled={seeding}>
-                      <Database className="mr-2 h-4 w-4" />
-                      {seeding ? "Seeding…" : "Seed Demo Day"}
+                      <Database className="ml-2 h-4 w-4" />
+                      {seeding ? "جاري الإضافة…" : "بيانات تجريبية"}
                     </Button>
                   )}
                   {isOwnerOrAdmin && (
                     <Button variant="destructive" size="sm" onClick={() => {
-                      if (window.confirm("Close out all remaining tickets for today? This cannot be undone.")) {
+                      if (window.confirm("هل تريد إغلاق جميع التذاكر المتبقية لليوم؟ لا يمكن التراجع.")) {
                         actions.closeOutDay();
                       }
                     }}>
-                      <Power className="mr-2 h-4 w-4" />Close Out Day
+                      <Power className="ml-2 h-4 w-4" />إغلاق اليوم
                     </Button>
                   )}
                 </div>
@@ -217,7 +193,7 @@ const Console = () => {
                     }}
                   />
                   <Label htmlFor="pause-toggle" className="text-sm">
-                    {sessionPaused ? "Session Paused" : "Session Active"}
+                    {sessionPaused ? "الجلسة متوقفة" : "الجلسة نشطة"}
                   </Label>
                 </div>
                 <div className="flex items-center gap-2">
@@ -230,13 +206,12 @@ const Console = () => {
                     }}
                   />
                   <Label htmlFor="intake-toggle" className="text-sm">
-                    {intakeOpen ? "Intake Open" : "Intake Closed"}
+                    {intakeOpen ? "الاستقبال مفتوح" : "الاستقبال مغلق"}
                   </Label>
                 </div>
               </div>
             </div>
 
-            {/* Dashboard sections */}
             <PreArrivalList
               tickets={preArrival}
               clinicTimezone={clinicTimezone}

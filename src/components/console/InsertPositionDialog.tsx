@@ -47,40 +47,40 @@ export function InsertPositionDialog({ open, onOpenChange, title, onSubmit }: Pr
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1">
-            <Label>Insert Position</Label>
+            <Label>موضع الإدراج</Label>
             <Select value={position} onValueChange={setPosition}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="AFTER_CURRENT">After Current</SelectItem>
-                <SelectItem value="AFTER_N">After Position N</SelectItem>
-                <SelectItem value="END">End of Queue</SelectItem>
+                <SelectItem value="AFTER_CURRENT">بعد الحالي</SelectItem>
+                <SelectItem value="AFTER_N">بعد الموضع N</SelectItem>
+                <SelectItem value="END">نهاية الطابور</SelectItem>
               </SelectContent>
             </Select>
           </div>
           {position === "AFTER_N" && (
             <div className="space-y-1">
-              <Label>Position N</Label>
+              <Label>الموضع N</Label>
               <Input
                 type="number"
                 min={1}
                 value={n}
                 onChange={(e) => setN(e.target.value)}
-                placeholder="e.g. 3"
+                placeholder="مثال: ٣"
               />
             </div>
           )}
           <div className="space-y-1">
-            <Label>Note (optional)</Label>
+            <Label>ملاحظة (اختياري)</Label>
             <Input
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Reason for reinsertion"
+              placeholder="سبب إعادة الإدراج"
             />
           </div>
         </div>
         <DialogFooter>
           <Button onClick={handleSubmit} disabled={submitting} className="w-full">
-            {submitting ? "Submitting…" : "Confirm"}
+            {submitting ? "جاري الإرسال…" : "تأكيد"}
           </Button>
         </DialogFooter>
       </DialogContent>

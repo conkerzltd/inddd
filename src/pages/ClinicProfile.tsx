@@ -16,13 +16,13 @@ import { EgyptPhoneInput } from "@/components/inputs/EgyptPhoneInput";
 import { isValidEg10, toEgE164Digits, storedToInput10 } from "@/utils/phoneEG";
 
 const DAYS = [
-  { key: "sat", label: "Sat" },
-  { key: "sun", label: "Sun" },
-  { key: "mon", label: "Mon" },
-  { key: "tue", label: "Tue" },
-  { key: "wed", label: "Wed" },
-  { key: "thu", label: "Thu" },
-  { key: "fri", label: "Fri" },
+  { key: "sat", label: "السبت" },
+  { key: "sun", label: "الأحد" },
+  { key: "mon", label: "الاثنين" },
+  { key: "tue", label: "الثلاثاء" },
+  { key: "wed", label: "الأربعاء" },
+  { key: "thu", label: "الخميس" },
+  { key: "fri", label: "الجمعة" },
 ];
 
 type WorkingHours = Record<string, { open: string; close: string } | null>;
@@ -33,7 +33,6 @@ const ClinicProfile = () => {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  // Clinic fields
   const [clinicName, setClinicName] = useState("");
   const [clinicNameAr, setClinicNameAr] = useState("");
   const [whatsappLocal1, setWhatsappLocal1] = useState("");
@@ -44,11 +43,9 @@ const ClinicProfile = () => {
   const [lng, setLng] = useState<number | null>(null);
   const [workingHours, setWorkingHours] = useState<WorkingHours>({});
 
-  // Specialty
   const [specialties, setSpecialties] = useState<{ id: string; specialty_ar: string }[]>([]);
   const [selectedSpecialtyId, setSelectedSpecialtyId] = useState<string>("");
 
-  // Location cascade
   const [governorates, setGovernorates] = useState<string[]>([]);
   const [selectedGov, setSelectedGov] = useState("");
   const [level2Options, setLevel2Options] = useState<{ level2_ar: string; level2_type: string }[]>([]);
@@ -59,10 +56,7 @@ const ClinicProfile = () => {
   const [villageOther, setVillageOther] = useState("");
   const [showVillageOther, setShowVillageOther] = useState(false);
 
-  // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Geolocation
   const [geoLoading, setGeoLoading] = useState(false);
 
   // Load specialties + governorates
@@ -143,10 +137,7 @@ const ClinicProfile = () => {
         if (data) {
           const villages = data.map((r) => r.level3_ar!).filter(Boolean).sort((a, b) => a.localeCompare(b, "ar"));
           setVillageOptions(villages);
-          // If no villages found, auto-show manual input
-          if (villages.length === 0) {
-            setShowVillageOther(true);
-          }
+          if (villages.length === 0) setShowVillageOther(true);
         }
       });
   }, [selectedGov, selectedLevel2, selectedLevel2Type]);
@@ -196,7 +187,7 @@ const ClinicProfile = () => {
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser");
+      toast.error("المتصفح لا يدعم تحديد الموقع");
       return;
     }
     setGeoLoading(true);
@@ -205,11 +196,11 @@ const ClinicProfile = () => {
         setLat(pos.coords.latitude);
         setLng(pos.coords.longitude);
         setGeoLoading(false);
-        toast.success("Location captured!");
+        toast.success("تم تحديد الموقع!");
       },
       (err) => {
         setGeoLoading(false);
-        toast.error("Failed to get location: " + err.message);
+        toast.error("فشل تحديد الموقع: " + err.message);
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
@@ -217,16 +208,16 @@ const ClinicProfile = () => {
 
   const validate = (): boolean => {
     const errs: Record<string, string> = {};
-    if (!clinicName.trim()) errs.clinicName = "Clinic Name (English) is required";
-    if (!clinicNameAr.trim()) errs.clinicNameAr = "Clinic Name (Arabic) is required";
-    if (!whatsappLocal1 || whatsappLocal1.length !== 10 || !/^\d{10}$/.test(whatsappLocal1)) errs.whatsappLocal1 = "Must be 10 digits (after the leading 0)";
-    if (whatsappLocal2 && (whatsappLocal2.length !== 10 || !/^\d{10}$/.test(whatsappLocal2))) errs.whatsappLocal2 = "Must be 10 digits (after the leading 0)";
-    if (!selectedSpecialtyId) errs.specialty = "Specialty is required";
-    if (!selectedGov) errs.gov = "Governorate is required";
-    if (!selectedLevel2) errs.level2 = "District / City / Markaz is required";
-    if (!addressText.trim()) errs.address = "Detailed address is required";
+    if (!clinicName.trim()) errs.clinicName = "اسم العيادة (إنجليزي) مطلوب";
+    if (!clinicNameAr.trim()) errs.clinicNameAr = "اسم العيادة (عربي) مطلوب";
+    if (!whatsappLocal1 || whatsappLocal1.length !== 10 || !/^\d{10}$/.test(whatsappLocal1)) errs.whatsappLocal1 = "يجب أن يكون ١٠ أرقام";
+    if (whatsappLocal2 && (whatsappLocal2.length !== 10 || !/^\d{10}$/.test(whatsappLocal2))) errs.whatsappLocal2 = "يجب أن يكون ١٠ أرقام";
+    if (!selectedSpecialtyId) errs.specialty = "التخصص مطلوب";
+    if (!selectedGov) errs.gov = "المحافظة مطلوبة";
+    if (!selectedLevel2) errs.level2 = "المدينة / المركز مطلوب";
+    if (!addressText.trim()) errs.address = "العنوان التفصيلي مطلوب";
     if (selectedLevel2Type === "MARKAZ" && showVillageOther && !villageOther.trim()) {
-      errs.villageOther = "Please enter the village name";
+      errs.villageOther = "يرجى إدخال اسم القرية";
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -235,14 +226,12 @@ const ClinicProfile = () => {
   const handleSave = async () => {
     if (!clinicId) return;
     if (!validate()) {
-      toast.error("Please fix the errors before saving");
+      toast.error("يرجى تصحيح الأخطاء قبل الحفظ");
       return;
     }
     setSaving(true);
     setSaved(false);
-
     const finalVillage = showVillageOther ? villageOther : selectedVillage;
-
     const { error } = await supabase
       .from("clinics")
       .update({
@@ -265,27 +254,26 @@ const ClinicProfile = () => {
         locality_level3_ar: (selectedLevel2Type === "MARKAZ" && finalVillage) ? finalVillage : null,
       } as any)
       .eq("id", clinicId);
-
     setSaving(false);
     if (error) {
-      toast.error("Save failed: " + error.message);
+      toast.error("فشل الحفظ: " + error.message);
     } else {
       setSaved(true);
-      toast.success("Saved successfully!");
+      toast.success("تم الحفظ بنجاح!");
       setTimeout(() => setSaved(false), 3000);
     }
   };
 
-  if (authLoading) return <div className="min-h-screen flex items-center justify-center bg-background">Loading...</div>;
+  if (authLoading) return <div className="min-h-screen flex items-center justify-center bg-background">جاري التحميل...</div>;
   if (!clinicId) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">No clinic found. Please set up a clinic first.</p>
+        <p className="text-muted-foreground">لا توجد عيادة. يرجى إعداد عيادة أولاً.</p>
       </div>
     );
   }
 
-  const typeLabel = (t: string) => t === "MARKAZ" ? "Markaz" : t === "CITY" ? "City" : "District";
+  const typeLabel = (t: string) => t === "MARKAZ" ? "مركز" : t === "CITY" ? "مدينة" : "حي";
 
   return (
     <div className="min-h-screen bg-background">
@@ -293,38 +281,37 @@ const ClinicProfile = () => {
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={logoSymbol} alt="inddd" className="h-8 w-8" />
-            <h1 className="text-lg font-bold text-foreground">Clinic Profile</h1>
+            <h1 className="text-lg font-bold text-foreground">ملف العيادة</h1>
           </div>
           <Button variant="ghost" size="sm" onClick={() => navigate("/console")}>
-            <ArrowLeft className="mr-2 h-4 w-4" />Back to Console
+            <ArrowLeft className="ml-2 h-4 w-4" />العودة للوحة التحكم
           </Button>
         </div>
       </header>
 
       <main className="container mx-auto p-4 max-w-2xl space-y-6">
-        {/* Clinic Details */}
         <Card>
-          <CardHeader><CardTitle className="text-base">Clinic Details</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">بيانات العيادة</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Clinic Name (English)</Label>
+              <Label>اسم العيادة (إنجليزي)</Label>
               <Input value={clinicName} onChange={(e) => setClinicName(e.target.value)} dir="ltr" placeholder="e.g. Cairo Heart Clinic" />
               {errors.clinicName && <p className="text-sm text-destructive">{errors.clinicName}</p>}
             </div>
             <div className="space-y-2">
-              <Label>Clinic Name (Arabic)</Label>
+              <Label>اسم العيادة (عربي)</Label>
               <Input value={clinicNameAr} onChange={(e) => setClinicNameAr(e.target.value)} dir="rtl" placeholder="مثال: عيادة القلب" />
               {errors.clinicNameAr && <p className="text-sm text-destructive">{errors.clinicNameAr}</p>}
             </div>
             <EgyptPhoneInput
-              label="WhatsApp Number 1"
+              label="رقم واتساب ١"
               value10={whatsappLocal1}
               onChange10={setWhatsappLocal1}
               required
               error={errors.whatsappLocal1}
             />
             <EgyptPhoneInput
-              label="WhatsApp Number 2 (Optional)"
+              label="رقم واتساب ٢ (اختياري)"
               value10={whatsappLocal2}
               onChange10={setWhatsappLocal2}
               error={errors.whatsappLocal2}
@@ -332,12 +319,11 @@ const ClinicProfile = () => {
           </CardContent>
         </Card>
 
-        {/* Specialty */}
         <Card>
-          <CardHeader><CardTitle className="text-base">Specialty</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">التخصص</CardTitle></CardHeader>
           <CardContent>
             <Select value={selectedSpecialtyId} onValueChange={setSelectedSpecialtyId}>
-              <SelectTrigger dir="rtl"><SelectValue placeholder="Select specialty" /></SelectTrigger>
+              <SelectTrigger dir="rtl"><SelectValue placeholder="اختر التخصص" /></SelectTrigger>
               <SelectContent dir="rtl">
                 {specialties.map((s) => (
                   <SelectItem key={s.id} value={s.id}>{s.specialty_ar}</SelectItem>
@@ -348,14 +334,13 @@ const ClinicProfile = () => {
           </CardContent>
         </Card>
 
-        {/* Location */}
         <Card>
-          <CardHeader><CardTitle className="text-base">Location</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">الموقع</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Governorate</Label>
+              <Label>المحافظة</Label>
               <Select value={selectedGov} onValueChange={handleGovChange}>
-                <SelectTrigger dir="rtl"><SelectValue placeholder="Select governorate" /></SelectTrigger>
+                <SelectTrigger dir="rtl"><SelectValue placeholder="اختر المحافظة" /></SelectTrigger>
                 <SelectContent dir="rtl">
                   {governorates.map((g) => (
                     <SelectItem key={g} value={g}>{g}</SelectItem>
@@ -367,12 +352,12 @@ const ClinicProfile = () => {
 
             {selectedGov && (
               <div className="space-y-2">
-                <Label>District / City / Markaz</Label>
+                <Label>المدينة / المركز / الحي</Label>
                 <Select
                   value={selectedLevel2 ? `${selectedLevel2}|${selectedLevel2Type}` : ""}
                   onValueChange={handleLevel2Change}
                 >
-                  <SelectTrigger dir="rtl"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectTrigger dir="rtl"><SelectValue placeholder="اختر" /></SelectTrigger>
                   <SelectContent dir="rtl">
                     {level2Options.map((opt) => (
                       <SelectItem key={`${opt.level2_ar}|${opt.level2_type}`} value={`${opt.level2_ar}|${opt.level2_type}`}>
@@ -390,28 +375,27 @@ const ClinicProfile = () => {
               </div>
             )}
 
-            {/* Village: only for MARKAZ */}
             {selectedLevel2 && selectedLevel2Type === "MARKAZ" && (
               <div className="space-y-2">
-                <Label>Village (Optional)</Label>
+                <Label>القرية (اختياري)</Label>
                 {villageOptions.length > 0 ? (
                   <Select value={showVillageOther ? "__other__" : selectedVillage} onValueChange={handleVillageChange}>
-                    <SelectTrigger dir="rtl"><SelectValue placeholder="Select village (optional)" /></SelectTrigger>
+                    <SelectTrigger dir="rtl"><SelectValue placeholder="اختر القرية (اختياري)" /></SelectTrigger>
                     <SelectContent dir="rtl">
                       {villageOptions.map((v) => (
                         <SelectItem key={v} value={v}>{v}</SelectItem>
                       ))}
-                      <SelectItem value="__other__">Other / Not listed</SelectItem>
+                      <SelectItem value="__other__">أخرى / غير مدرجة</SelectItem>
                     </SelectContent>
                   </Select>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No villages found. Enter manually below:</p>
+                  <p className="text-sm text-muted-foreground">لا توجد قرى. أدخل يدوياً:</p>
                 )}
                 {(showVillageOther || villageOptions.length === 0) && (
                   <Input
                     value={villageOther}
                     onChange={(e) => setVillageOther(e.target.value)}
-                    placeholder="Enter village name"
+                    placeholder="أدخل اسم القرية"
                     dir="rtl"
                     className="mt-2"
                   />
@@ -421,13 +405,13 @@ const ClinicProfile = () => {
             )}
 
             <div className="space-y-2">
-              <Label>Detailed Address</Label>
-              <Textarea value={addressText} onChange={(e) => setAddressText(e.target.value)} dir="rtl" rows={2} placeholder="Street, building, floor..." />
+              <Label>العنوان التفصيلي</Label>
+              <Textarea value={addressText} onChange={(e) => setAddressText(e.target.value)} dir="rtl" rows={2} placeholder="الشارع، المبنى، الدور..." />
               {errors.address && <p className="text-sm text-destructive">{errors.address}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label>Google Maps Link (Optional)</Label>
+              <Label>رابط خرائط جوجل (اختياري)</Label>
               <div className="flex items-center gap-2">
                 <Input value={mapsUrl} onChange={(e) => setMapsUrl(e.target.value)} placeholder="https://maps.google.com/..." dir="ltr" className="flex-1" />
                 <Button type="button" variant="outline" size="sm" onClick={() => window.open("https://www.google.com/maps", "_blank")}>
@@ -438,40 +422,39 @@ const ClinicProfile = () => {
 
             <div className="flex items-center gap-3">
               <Button type="button" variant="outline" size="sm" onClick={handleGetLocation} disabled={geoLoading}>
-                <MapPin className="mr-2 h-4 w-4" />
-                {geoLoading ? "Getting location..." : "Use my current location"}
+                <MapPin className="ml-2 h-4 w-4" />
+                {geoLoading ? "جاري تحديد الموقع..." : "استخدم موقعي الحالي"}
               </Button>
               {lat !== null && lng !== null && (
                 <span className="text-sm text-muted-foreground">
-                  Lat/Lng captured ({lat.toFixed(4)}, {lng.toFixed(4)})
+                  تم تحديد الموقع ({lat.toFixed(4)}, {lng.toFixed(4)})
                 </span>
               )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Working Hours */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Working Hours</CardTitle>
+              <CardTitle className="text-base">ساعات العمل</CardTitle>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => {
                   const firstEnabled = DAYS.find((d) => workingHours[d.key]);
-                  if (!firstEnabled) { toast.info("Enable at least one day first"); return; }
+                  if (!firstEnabled) { toast.info("فعّل يوم واحد على الأقل أولاً"); return; }
                   const tpl = workingHours[firstEnabled.key]!;
                   setWorkingHours((prev) => {
                     const next = { ...prev };
                     DAYS.forEach((d) => { next[d.key] = { open: tpl.open, close: tpl.close }; });
                     return next;
                   });
-                  toast.success(`Applied ${firstEnabled.label} hours to all days`);
+                  toast.success(`تم تطبيق ساعات ${firstEnabled.label} على كل الأيام`);
                 }}
               >
-                <CopyCheck className="mr-1.5 h-3.5 w-3.5" />Apply to all days
+                <CopyCheck className="ml-1.5 h-3.5 w-3.5" />تطبيق على الكل
               </Button>
             </div>
           </CardHeader>
@@ -481,7 +464,7 @@ const ClinicProfile = () => {
               const enabled = hours !== null && hours !== undefined;
               return (
                 <div key={day.key} className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 w-20 text-sm">
+                  <label className="flex items-center gap-2 w-24 text-sm">
                     <input
                       type="checkbox"
                       checked={enabled}
@@ -493,7 +476,7 @@ const ClinicProfile = () => {
                   {enabled && (
                     <div className="flex items-center gap-2">
                       <Input type="time" value={hours?.open || "09:00"} onChange={(e) => updateWorkingHour(day.key, "open", e.target.value)} className="w-28" />
-                      <span className="text-muted-foreground text-sm">→</span>
+                      <span className="text-muted-foreground text-sm">←</span>
                       <Input type="time" value={hours?.close || "17:00"} onChange={(e) => updateWorkingHour(day.key, "close", e.target.value)} className="w-28" />
                       {idx < DAYS.length - 1 && (
                         <Button
@@ -507,10 +490,10 @@ const ClinicProfile = () => {
                               ...prev,
                               [nextDay.key]: { open: hours!.open, close: hours!.close },
                             }));
-                            toast.success(`Copied to ${nextDay.label}`);
+                            toast.success(`تم النسخ إلى ${nextDay.label}`);
                           }}
                         >
-                          <Copy className="mr-1 h-3 w-3" />→ {DAYS[idx + 1].label}
+                          <Copy className="ml-1 h-3 w-3" />← {DAYS[idx + 1].label}
                         </Button>
                       )}
                     </div>
@@ -521,13 +504,12 @@ const ClinicProfile = () => {
           </CardContent>
         </Card>
 
-        {/* Save */}
         <div className="flex justify-end pb-8">
           <Button onClick={handleSave} disabled={saving} className="min-w-32">
-            {saving ? "Saving..." : saved ? (
-              <><Check className="mr-2 h-4 w-4" />Saved</>
+            {saving ? "جاري الحفظ..." : saved ? (
+              <><Check className="ml-2 h-4 w-4" />تم الحفظ</>
             ) : (
-              <><Save className="mr-2 h-4 w-4" />Save</>
+              <><Save className="ml-2 h-4 w-4" />حفظ</>
             )}
           </Button>
         </div>

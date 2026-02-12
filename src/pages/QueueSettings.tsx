@@ -42,7 +42,6 @@ const QueueSettings = () => {
     if (!clinicId) return;
     setSaving(true);
     setSaved(false);
-
     const { error } = await supabase
       .from("clinics")
       .update({
@@ -52,22 +51,21 @@ const QueueSettings = () => {
         allow_pause_intake: allowPauseIntake,
       } as any)
       .eq("id", clinicId);
-
     setSaving(false);
     if (error) {
-      toast.error("Save failed: " + error.message);
+      toast.error("فشل الحفظ: " + error.message);
     } else {
       setSaved(true);
-      toast.success("Settings saved!");
+      toast.success("تم حفظ الإعدادات!");
       setTimeout(() => setSaved(false), 3000);
     }
   };
 
-  if (authLoading) return <div className="min-h-screen flex items-center justify-center bg-background">Loading...</div>;
+  if (authLoading) return <div className="min-h-screen flex items-center justify-center bg-background">جاري التحميل...</div>;
   if (!clinicId) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">No clinic found.</p>
+        <p className="text-muted-foreground">لا توجد عيادة.</p>
       </div>
     );
   }
@@ -78,20 +76,20 @@ const QueueSettings = () => {
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={logoSymbol} alt="inddd" className="h-8 w-8" />
-            <h1 className="text-lg font-bold text-foreground">Queue Settings</h1>
+            <h1 className="text-lg font-bold text-foreground">إعدادات الطابور</h1>
           </div>
           <Button variant="ghost" size="sm" onClick={() => navigate("/console")}>
-            <ArrowLeft className="mr-2 h-4 w-4" />Back to Console
+            <ArrowLeft className="ml-2 h-4 w-4" />العودة للوحة التحكم
           </Button>
         </div>
       </header>
 
       <main className="container mx-auto p-4 max-w-2xl space-y-6">
         <Card>
-          <CardHeader><CardTitle className="text-base">Timing</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">التوقيت</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Average Service Time (minutes)</Label>
+              <Label>متوسط وقت الخدمة (دقائق)</Label>
               <Input
                 type="number"
                 min={1}
@@ -99,10 +97,10 @@ const QueueSettings = () => {
                 value={avgServiceMinutes}
                 onChange={(e) => setAvgServiceMinutes(Number(e.target.value))}
               />
-              <p className="text-xs text-muted-foreground">Used for ETA estimates shown to patients.</p>
+              <p className="text-xs text-muted-foreground">يُستخدم لتقدير وقت الانتظار المعروض للمرضى.</p>
             </div>
             <div className="space-y-2">
-              <Label>Late Threshold (minutes)</Label>
+              <Label>حد التأخير (دقائق)</Label>
               <Input
                 type="number"
                 min={1}
@@ -110,25 +108,25 @@ const QueueSettings = () => {
                 value={lateThreshold}
                 onChange={(e) => setLateThreshold(Number(e.target.value))}
               />
-              <p className="text-xs text-muted-foreground">Patients arriving later than this after their appointment are demoted in queue priority.</p>
+              <p className="text-xs text-muted-foreground">المرضى الذين يصلون متأخرين أكثر من هذا الحد يتم تأخيرهم في الطابور.</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Queue Controls</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">إعدادات الطابور</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <Label>Allow Urgent Insert</Label>
-                <p className="text-xs text-muted-foreground">Allow marking tickets as urgent and inserting them ahead in queue.</p>
+                <Label>السماح بالإدراج العاجل</Label>
+                <p className="text-xs text-muted-foreground">السماح بتحديد التذاكر كعاجلة وإدراجها في مقدمة الطابور.</p>
               </div>
               <Switch checked={allowUrgent} onCheckedChange={setAllowUrgent} />
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <Label>Allow Pause Intake</Label>
-                <p className="text-xs text-muted-foreground">Allow pausing new patient intake from the console.</p>
+                <Label>السماح بإيقاف الاستقبال</Label>
+                <p className="text-xs text-muted-foreground">السماح بإيقاف استقبال مرضى جدد من لوحة التحكم.</p>
               </div>
               <Switch checked={allowPauseIntake} onCheckedChange={setAllowPauseIntake} />
             </div>
@@ -137,10 +135,10 @@ const QueueSettings = () => {
 
         <div className="flex justify-end pb-8">
           <Button onClick={handleSave} disabled={saving} className="min-w-32">
-            {saving ? "Saving..." : saved ? (
-              <><Check className="mr-2 h-4 w-4" />Saved</>
+            {saving ? "جاري الحفظ..." : saved ? (
+              <><Check className="ml-2 h-4 w-4" />تم الحفظ</>
             ) : (
-              <><Save className="mr-2 h-4 w-4" />Save</>
+              <><Save className="ml-2 h-4 w-4" />حفظ</>
             )}
           </Button>
         </div>

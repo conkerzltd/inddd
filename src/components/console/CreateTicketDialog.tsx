@@ -35,7 +35,6 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
   const [extAppOther, setExtAppOther] = useState("");
   const [bookingApps, setBookingApps] = useState<BookingApp[]>([]);
 
-  // Fetch booking apps once on mount
   useEffect(() => {
     supabase
       .from("external_booking_apps")
@@ -61,16 +60,14 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
 
   const handleSubmit = async () => {
     if (!isValidEg10(phone10)) {
-      setPhoneError("Enter 10 digits.");
+      setPhoneError("أدخل ١٠ أرقام.");
       return;
     }
     setPhoneError("");
-
     if (type === "SCHEDULED" && !apptTime) {
-      toast.error("Appointment time is required for scheduled tickets");
+      toast.error("وقت الموعد مطلوب للتذاكر المجدولة");
       return;
     }
-
     setSubmitting(true);
     try {
       const { data, error } = await supabase.rpc("create_ticket", {
@@ -84,15 +81,13 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
         p_external_booking_app_id: source === "EXTERNAL" && extAppId ? extAppId : null,
         p_external_booking_app_other: source === "EXTERNAL" && selectedAppCode === "OTHER" ? extAppOther : null,
       });
-
       if (error) throw error;
-
-      toast.success("Ticket created!");
+      toast.success("تم إنشاء التذكرة!");
       reset();
       setOpen(false);
       onCreated();
     } catch (e: any) {
-      toast.error(e.message || "Failed to create ticket");
+      toast.error(e.message || "فشل إنشاء التذكرة");
     } finally {
       setSubmitting(false);
     }
@@ -102,51 +97,51 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm">
-          <Plus className="h-4 w-4 mr-1" />Create Ticket
+          <Plus className="h-4 w-4 ml-1" />إنشاء تذكرة
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Ticket</DialogTitle>
+          <DialogTitle>إنشاء تذكرة</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
-              <Label>Source</Label>
+              <Label>المصدر</Label>
               <Select value={source} onValueChange={(v) => { setSource(v); if (v !== "EXTERNAL") { setExtAppId(""); setExtAppOther(""); } }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="WALK_IN">Walk-in</SelectItem>
-                  <SelectItem value="PHONE_CALL">Phone</SelectItem>
-                  <SelectItem value="EXTERNAL">External</SelectItem>
+                  <SelectItem value="WALK_IN">حضور مباشر</SelectItem>
+                  <SelectItem value="PHONE_CALL">تليفون</SelectItem>
+                  <SelectItem value="EXTERNAL">خارجي</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1">
-              <Label>Type</Label>
+              <Label>النوع</Label>
               <Select value={type} onValueChange={setType}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="NORMAL">Normal</SelectItem>
-                  <SelectItem value="SCHEDULED">Scheduled</SelectItem>
-                  <SelectItem value="URGENT">Urgent</SelectItem>
+                  <SelectItem value="NORMAL">عادي</SelectItem>
+                  <SelectItem value="SCHEDULED">مجدول</SelectItem>
+                  <SelectItem value="URGENT">عاجل</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1">
-              <Label>Visit</Label>
+              <Label>الزيارة</Label>
               <Select value={visitType} onValueChange={setVisitType}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="CONSULTATION">Consultation</SelectItem>
-                  <SelectItem value="NEW">New</SelectItem>
+                  <SelectItem value="CONSULTATION">استشارة</SelectItem>
+                  <SelectItem value="NEW">جديد</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <EgyptPhoneInput
-            label="Phone *"
+            label="الهاتف *"
             value10={phone10}
             onChange10={setPhone10}
             required
@@ -154,9 +149,9 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
           />
 
           <div className="space-y-1">
-            <Label>Patient Name</Label>
+            <Label>اسم المريض</Label>
             <Input
-              placeholder="Optional"
+              placeholder="اختياري"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -164,7 +159,7 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
 
           {type === "SCHEDULED" && (
             <div className="space-y-1">
-              <Label>Appointment Time *</Label>
+              <Label>وقت الموعد *</Label>
               <Input
                 type="time"
                 value={apptTime}
@@ -176,9 +171,9 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
           {source === "EXTERNAL" && bookingApps.length > 0 && (
             <>
               <div className="space-y-1">
-                <Label>External booking app (optional)</Label>
+                <Label>تطبيق الحجز الخارجي (اختياري)</Label>
                 <Select value={extAppId} onValueChange={(v) => { setExtAppId(v); if (bookingApps.find((a) => a.id === v)?.code !== "OTHER") setExtAppOther(""); }}>
-                  <SelectTrigger><SelectValue placeholder="Select app…" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="اختر التطبيق…" /></SelectTrigger>
                   <SelectContent>
                     {bookingApps.map((a) => (
                       <SelectItem key={a.id} value={a.id}>{a.label_en}</SelectItem>
@@ -188,9 +183,9 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
               </div>
               {selectedAppCode === "OTHER" && (
                 <div className="space-y-1">
-                  <Label>Other app name (optional)</Label>
+                  <Label>اسم التطبيق الآخر (اختياري)</Label>
                   <Input
-                    placeholder="e.g. DocDoc"
+                    placeholder="مثال: DocDoc"
                     value={extAppOther}
                     onChange={(e) => setExtAppOther(e.target.value)}
                   />
@@ -200,7 +195,7 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
           )}
 
           <Button className="w-full" onClick={handleSubmit} disabled={submitting}>
-            {submitting ? "Creating…" : "Create Ticket"}
+            {submitting ? "جاري الإنشاء…" : "إنشاء تذكرة"}
           </Button>
         </div>
       </DialogContent>
