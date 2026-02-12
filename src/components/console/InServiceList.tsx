@@ -4,12 +4,13 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Phone } from "lucide-react";
 
 interface Props {
   tickets: TicketRow[];
   clinicTimezone: string;
   onComplete: (id: string) => void;
+  onCallNext: () => void;
 }
 
 const fmtTime = (iso: string, tz: string) =>
@@ -17,9 +18,17 @@ const fmtTime = (iso: string, tz: string) =>
     timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
   }).format(new Date(iso));
 
-export function InServiceList({ tickets, clinicTimezone, onComplete }: Props) {
+export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext }: Props) {
   return (
-    <TicketSection title="في الخدمة" count={tickets.length}>
+    <TicketSection
+      title="داخل الكشف"
+      count={tickets.length}
+      action={
+        <Button size="sm" onClick={onCallNext}>
+          <Phone className="h-3 w-3 ml-1" />نداء التالي
+        </Button>
+      }
+    >
       <Table>
         <TableHeader>
           <TableRow>

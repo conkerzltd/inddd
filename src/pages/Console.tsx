@@ -15,8 +15,7 @@ import { PreArrivalList } from "@/components/console/PreArrivalList";
 import { WaitingList } from "@/components/console/WaitingList";
 import { CalledList } from "@/components/console/CalledList";
 import { InServiceList } from "@/components/console/InServiceList";
-import { MissedList } from "@/components/console/MissedList";
-import { ReturnedList } from "@/components/console/ReturnedList";
+import { NotPresentList } from "@/components/console/NotPresentList";
 import { DoneList } from "@/components/console/DoneList";
 import { CreateTicketDialog } from "@/components/console/CreateTicketDialog";
 
@@ -238,14 +237,16 @@ const Console = () => {
               tickets={inService}
               clinicTimezone={clinicTimezone}
               onComplete={actions.completeTicket}
+              onCallNext={actions.callNext}
             />
-            <MissedList tickets={missed} onMarkReturned={actions.markReturned} />
-            <ReturnedList
-              tickets={returned}
+            <NotPresentList
+              missedTickets={missed}
+              returnedTickets={returned}
+              clinicTimezone={clinicTimezone}
+              onMarkReturned={actions.markReturned}
               onReinsert={actions.reinsertReturned}
-              onSetUrgent={actions.setUrgentAndInsert}
             />
-            <DoneList tickets={done} />
+            <DoneList tickets={done} clinicTimezone={clinicTimezone} />
           </>
         )}
       </main>
