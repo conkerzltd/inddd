@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Save, Check, MapPin, ExternalLink, Copy, CopyCheck } from "lucide-react";
+import { ArrowLeft, Save, Check, MapPin, Copy, CopyCheck } from "lucide-react";
 import { toast } from "sonner";
 import logoSymbol from "@/assets/logo-symbol.png";
 import { EgyptPhoneInput } from "@/components/inputs/EgyptPhoneInput";
@@ -410,25 +410,33 @@ const ClinicProfile = () => {
               {errors.address && <p className="text-sm text-destructive">{errors.address}</p>}
             </div>
 
-            <div className="space-y-2">
-              <Label>رابط خرائط جوجل (اختياري)</Label>
-              <div className="flex items-center gap-2">
-                <Input value={mapsUrl} onChange={(e) => setMapsUrl(e.target.value)} placeholder="https://maps.google.com/..." dir="ltr" className="flex-1" />
-                <Button type="button" variant="outline" size="sm" onClick={() => window.open("https://www.google.com/maps", "_blank")}>
-                  <ExternalLink className="h-4 w-4" />
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Button type="button" variant="outline" size="sm" onClick={handleGetLocation} disabled={geoLoading}>
+                  <MapPin className="ml-2 h-4 w-4" />
+                  {geoLoading ? "جاري تحديد الموقع..." : "استخدم موقعي الحالي"}
                 </Button>
+                {lat !== null && lng !== null && (
+                  <span className="text-sm text-muted-foreground">
+                    تم تحديد الموقع ({lat.toFixed(4)}, {lng.toFixed(4)})
+                  </span>
+                )}
               </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Button type="button" variant="outline" size="sm" onClick={handleGetLocation} disabled={geoLoading}>
-                <MapPin className="ml-2 h-4 w-4" />
-                {geoLoading ? "جاري تحديد الموقع..." : "استخدم موقعي الحالي"}
-              </Button>
               {lat !== null && lng !== null && (
-                <span className="text-sm text-muted-foreground">
-                  تم تحديد الموقع ({lat.toFixed(4)}, {lng.toFixed(4)})
-                </span>
+                <div className="rounded-lg overflow-hidden border border-border">
+                  <iframe
+                    title="موقع العيادة"
+                    width="100%"
+                    height="250"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    src={`https://www.google.com/maps?q=${lat},${lng}&z=16&output=embed`}
+                  />
+                  <p className="text-xs text-muted-foreground p-2 text-center">
+                    يمكنك الضغط على "استخدم موقعي الحالي" لتحديث الموقع
+                  </p>
+                </div>
               )}
             </div>
           </CardContent>
