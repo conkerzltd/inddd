@@ -51,6 +51,22 @@ const HeroSearch = ({ specialties, cities, labels }: HeroSearchProps) => {
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-white via-[#f4f1fb] to-[#e8e1fb]">
+      <div className="absolute inset-0 -z-10 motion-reduce:hidden pointer-events-none">
+        <video
+          className="h-full w-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster="/2.png"
+          aria-hidden="true"
+          tabIndex={-1}
+        >
+          <source src="/media/hero/Untitled%20design.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-black/45" aria-hidden="true"></div>
+      </div>
       <div className="container mx-auto grid gap-10 px-4 py-16 lg:grid-cols-[1.2fr_1fr] lg:items-center">
         <div className="space-y-6">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
