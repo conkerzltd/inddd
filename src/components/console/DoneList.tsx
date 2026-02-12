@@ -6,6 +6,7 @@ import {
 
 interface Props {
   tickets: TicketRow[];
+  clinicTimezone: string;
 }
 
 const visitTypeLabel = (v: string) => {
@@ -14,7 +15,12 @@ const visitTypeLabel = (v: string) => {
   return v;
 };
 
-export function DoneList({ tickets }: Props) {
+const fmtTime = (iso: string, tz: string) =>
+  new Intl.DateTimeFormat("en-US", {
+    timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
+  }).format(new Date(iso));
+
+export function DoneList({ tickets, clinicTimezone }: Props) {
   return (
     <TicketSection title="مكتمل" count={tickets.length} collapsible defaultOpen={false}>
       <Table>
@@ -23,6 +29,7 @@ export function DoneList({ tickets }: Props) {
             <TableHead className="w-12">الرقم</TableHead>
             <TableHead>اسم المريض</TableHead>
             <TableHead>نوع الزيارة</TableHead>
+            <TableHead>وقت إنهاء الزيارة</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -33,6 +40,7 @@ export function DoneList({ tickets }: Props) {
                 <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "غير معروف"}</span>
               </TableCell>
               <TableCell>{visitTypeLabel(t.visit_type)}</TableCell>
+              <TableCell>{t.completed_at ? fmtTime(t.completed_at, clinicTimezone) : "—"}</TableCell>
             </TableRow>
           ))}
         </TableBody>
