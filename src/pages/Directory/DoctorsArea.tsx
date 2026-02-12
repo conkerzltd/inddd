@@ -9,7 +9,8 @@ const DoctorsArea = () => {
   const { specialty, city, area } = useParams();
   const [searchParams] = useSearchParams();
   const baseUrl = PUBLIC_BASE_URL;
-  const { localePath } = useLocale();
+  const { locale, localePath } = useLocale();
+  const isAr = locale === "ar";
   const specialtyData = getSpecialtyBySlug(specialty);
   const cityData = getCityBySlug(city);
   const areaData = getAreaBySlug(cityData, area);
@@ -19,51 +20,57 @@ const DoctorsArea = () => {
     return (
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-12">
-          <h1 className="text-2xl font-bold text-foreground">Page not found</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            {isAr ? "الصفحة غير موجودة" : "Page not found"}
+          </h1>
           <Link className="mt-4 inline-block text-sm text-primary" to={localePath("/doctors")}>
-            Back to directory
+            {isAr ? "العودة للدليل" : "Back to directory"}
           </Link>
         </div>
       </div>
     );
   }
 
+  const specName = isAr ? specialtyData.nameAr : specialtyData.name;
+  const cityName = isAr ? cityData.nameAr : cityData.name;
+  const areaName = isAr ? areaData.nameAr : areaData.name;
   const canonical = `${baseUrl}/doctors/${specialtyData.slug}/${cityData.slug}/${areaData.slug}`;
 
   const demoResults = Array.from({ length: 3 }).map((_, index) => ({
-    name: `Dr. ${specialtyData.name} ${index + 1}`,
-    clinic: `${areaData.name} Clinic`,
-    eta: "ETA ranges shown via patient link",
+    name: isAr ? `د. ${specName} ${index + 1}` : `Dr. ${specialtyData.name} ${index + 1}`,
+    clinic: isAr ? `عيادة ${areaName}` : `${areaData.name} Clinic`,
+    eta: isAr ? "أوقات الانتظار تظهر عبر رابط المريض" : "ETA ranges shown via patient link",
   }));
 
   return (
     <div className="min-h-screen bg-background">
       <Seo
-        title={`${specialtyData.name} in ${areaData.name}, ${cityData.name} | inddd`}
-        description={`Demo listings for ${specialtyData.name} in ${areaData.name}. Live results coming soon.`}
+        title={isAr ? `${specName} في ${areaName}، ${cityName} | inddd` : `${specialtyData.name} in ${areaData.name}, ${cityData.name} | inddd`}
+        description={isAr ? `نتائج تجريبية لـ ${specName} في ${areaName}. النتائج المباشرة قريباً.` : `Demo listings for ${specialtyData.name} in ${areaData.name}. Live results coming soon.`}
         canonical={canonical}
         schema={buildBreadcrumbSchema([
-          { name: "Home", item: `${baseUrl}/` },
-          { name: "Doctors", item: `${baseUrl}/doctors` },
-          { name: specialtyData.name, item: `${baseUrl}/doctors/${specialtyData.slug}` },
-          { name: cityData.name, item: `${baseUrl}/doctors/${specialtyData.slug}/${cityData.slug}` },
-          { name: areaData.name, item: canonical },
+          { name: isAr ? "الرئيسية" : "Home", item: `${baseUrl}/` },
+          { name: isAr ? "الأطباء" : "Doctors", item: `${baseUrl}/doctors` },
+          { name: specName, item: `${baseUrl}/doctors/${specialtyData.slug}` },
+          { name: cityName, item: `${baseUrl}/doctors/${specialtyData.slug}/${cityData.slug}` },
+          { name: areaName, item: canonical },
         ])}
       />
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-2xl space-y-3">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            {areaData.name}
+            {areaName}
           </p>
           <h1 className="text-3xl font-bold text-foreground">
-            {specialtyData.name} doctors in {areaData.name}
+            {isAr ? `أطباء ${specName} في ${areaName}` : `${specialtyData.name} doctors in ${areaData.name}`}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Demo results only. Live clinic listings will be connected soon.
+            {isAr ? "نتائج تجريبية فقط. سيتم ربط النتائج المباشرة قريباً." : "Demo results only. Live clinic listings will be connected soon."}
           </p>
           {doctorQuery && (
             <p className="text-sm text-muted-foreground">
-              Showing demo results for: <span className="font-semibold">{doctorQuery}</span>
+              {isAr ? "نتائج تجريبية لـ:" : "Showing demo results for:"}{" "}
+              <span className="font-semibold">{doctorQuery}</span>
             </p>
           )}
         </div>
@@ -74,7 +81,7 @@ const DoctorsArea = () => {
               <p className="text-sm text-muted-foreground">{result.clinic}</p>
               <p className="mt-2 text-xs text-muted-foreground">{result.eta}</p>
               <span className="mt-3 inline-block rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
-                Coming soon
+                {isAr ? "قريباً" : "Coming soon"}
               </span>
             </div>
           ))}
