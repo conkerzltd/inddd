@@ -64,8 +64,20 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
       return;
     }
     setPhoneError("");
+    if (!name.trim()) {
+      toast.error("اسم المريض مطلوب");
+      return;
+    }
     if (type === "SCHEDULED" && !apptTime) {
-      toast.error("وقت الموعد مطلوب للتذاكر المجدولة");
+      toast.error("وقت الموعد مطلوب للتذاكر بميعاد");
+      return;
+    }
+    if (source === "EXTERNAL" && !extAppId) {
+      toast.error("تطبيق الحجز الخارجي مطلوب");
+      return;
+    }
+    if (source === "EXTERNAL" && selectedAppCode === "OTHER" && !extAppOther.trim()) {
+      toast.error("اسم التطبيق الآخر مطلوب");
       return;
     }
     setSubmitting(true);
@@ -76,7 +88,7 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
         p_type: type as any,
         p_visit_type: visitType as any,
         p_patient_phone: toEgE164Digits(phone10),
-        p_patient_name: name.trim() || null,
+        p_patient_name: name.trim(),
         p_appt_hhmm: type === "SCHEDULED" ? apptTime : null,
         p_external_booking_app_id: source === "EXTERNAL" && extAppId ? extAppId : null,
         p_external_booking_app_other: source === "EXTERNAL" && selectedAppCode === "OTHER" ? extAppOther : null,
@@ -123,7 +135,7 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="NORMAL">عادي</SelectItem>
-                  <SelectItem value="SCHEDULED">مجدول</SelectItem>
+                  <SelectItem value="SCHEDULED">ميعاد</SelectItem>
                   <SelectItem value="URGENT">عاجل</SelectItem>
                 </SelectContent>
               </Select>
@@ -133,8 +145,8 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
               <Select value={visitType} onValueChange={setVisitType}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="CONSULTATION">استشارة</SelectItem>
                   <SelectItem value="NEW">جديد</SelectItem>
+                  <SelectItem value="CONSULTATION">استشارة</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -149,9 +161,9 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
           />
 
           <div className="space-y-1">
-            <Label>اسم المريض</Label>
+            <Label>اسم المريض *</Label>
             <Input
-              placeholder="اختياري"
+              placeholder="اسم المريض"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -171,7 +183,7 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
           {source === "EXTERNAL" && bookingApps.length > 0 && (
             <>
               <div className="space-y-1">
-                <Label>تطبيق الحجز الخارجي (اختياري)</Label>
+                <Label>تطبيق الحجز الخارجي *</Label>
                 <Select value={extAppId} onValueChange={(v) => { setExtAppId(v); if (bookingApps.find((a) => a.id === v)?.code !== "OTHER") setExtAppOther(""); }}>
                   <SelectTrigger><SelectValue placeholder="اختر التطبيق…" /></SelectTrigger>
                   <SelectContent>
@@ -183,7 +195,7 @@ export function CreateTicketDialog({ clinicId, onCreated }: Props) {
               </div>
               {selectedAppCode === "OTHER" && (
                 <div className="space-y-1">
-                  <Label>اسم التطبيق الآخر (اختياري)</Label>
+                  <Label>اسم التطبيق الآخر *</Label>
                   <Input
                     placeholder="مثال: DocDoc"
                     value={extAppOther}
