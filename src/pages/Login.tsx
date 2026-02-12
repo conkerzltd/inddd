@@ -45,7 +45,7 @@ const Login = () => {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-3">
-          <img src={logoWordmark} alt="inddd.com" className="h-10 mx-auto" />
+          
           <CardDescription>Queue Management System</CardDescription>
         </CardHeader>
         <CardContent>
@@ -64,8 +64,8 @@ const Login = () => {
                     placeholder="you@clinic.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
+                    required />
+
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">Password</Label>
@@ -74,8 +74,8 @@ const Login = () => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
+                    required />
+
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Signing in…" : "Sign In"}
@@ -92,8 +92,8 @@ const Login = () => {
                     placeholder="you@clinic.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
+                    required />
+
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
@@ -104,8 +104,8 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    minLength={6}
-                  />
+                    minLength={6} />
+
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Creating account…" : "Create Account"}
@@ -115,8 +115,8 @@ const Login = () => {
           </Tabs>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Login;
