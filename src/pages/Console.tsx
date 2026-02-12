@@ -218,7 +218,6 @@ const Console = () => {
               clinicTimezone={clinicTimezone}
               onSendLink={handleSendLink}
               onConfirmArrival={actions.confirmArrival}
-              onSetUrgent={actions.setUrgentAndInsert}
               onCancel={actions.cancelTicket}
             />
             <WaitingList
