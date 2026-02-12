@@ -4,6 +4,8 @@ This guide helps resolve common issues when opening GitHub Codespaces for this r
 
 > 🚀 **Quick Fix?** See the [Quick Reference Guide](./CODESPACE_QUICK_FIX.md) for fast solutions.
 
+> ⚠️ **Deleted Codespace Error?** If VS Code says your codespace "has been deleted or you do not have permission", see the [Deleted Codespace Fix Guide](./DELETED_CODESPACE_FIX.md).
+
 ## Quick Diagnostic Tool
 
 Run our diagnostic script to automatically check your codespace health:

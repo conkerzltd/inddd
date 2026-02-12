@@ -1,6 +1,18 @@
 # Codespace Connection Error - Quick Reference
 
-## Error: "Failed to connect to codespace. Codespace..."
+## Common Errors
+
+### Error 1: "Failed to connect to codespace. Codespace has been deleted..."
+
+**This is a different issue!** VS Code is trying to connect to an old/deleted codespace.
+
+👉 **Solution:** See [Deleted Codespace Fix Guide](./DELETED_CODESPACE_FIX.md)
+
+**Quick fix:** Clear VS Code cache at `%APPDATA%\Code\User\globalStorage\github.codespaces` (Windows) or equivalent on Mac/Linux, then reconnect.
+
+---
+
+## Error 2: "Failed to connect to codespace. Codespace..." (during startup)
 
 ### 🚀 Quick Fix (Try This First)
 ```bash

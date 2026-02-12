@@ -53,7 +53,8 @@ npm run dev
 **Troubleshooting Codespaces**
 
 If you encounter connection issues:
-- Run the diagnostic tool: `npm run diagnose`
+- **Deleted Codespace Error?** If VS Code says your codespace "has been deleted", see [docs/DELETED_CODESPACE_FIX.md](docs/DELETED_CODESPACE_FIX.md)
+- **General Connection Issues?** Run the diagnostic tool: `npm run diagnose`
 - See the complete troubleshooting guide: [docs/CODESPACE_TROUBLESHOOTING.md](docs/CODESPACE_TROUBLESHOOTING.md)
 
 ## What technologies are used for this project?
