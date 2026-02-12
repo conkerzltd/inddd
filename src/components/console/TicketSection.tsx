@@ -11,6 +11,7 @@ interface TicketSectionProps {
   defaultOpen?: boolean;
   children: ReactNode;
   action?: ReactNode;
+  alwaysShow?: boolean;
 }
 
 export function TicketSection({
@@ -21,10 +22,11 @@ export function TicketSection({
   defaultOpen = true,
   children,
   action,
+  alwaysShow = false,
 }: TicketSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
 
-  if (count === 0) return null;
+  if (count === 0 && !alwaysShow) return null;
 
   return (
     <Card>
