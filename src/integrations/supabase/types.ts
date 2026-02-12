@@ -570,6 +570,10 @@ export type Database = {
         message: string | null
         expected_window_start: string | null
         expected_window_end: string | null
+        clinic_name_ar: string | null
+        clinic_lat: number | null
+        clinic_lng: number | null
+        clinic_maps_url: string | null
       }
     }
   }

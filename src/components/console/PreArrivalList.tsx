@@ -64,7 +64,11 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
               <TableCell>{sourceLabel(t.source)}</TableCell>
               <TableCell>{visitTypeLabel(t.visit_type)}</TableCell>
               <TableCell>
-                {t.appointment_time ? fmtTime(t.appointment_time, clinicTimezone) : "—"}
+                {t.appointment_time
+                  ? fmtTime(t.appointment_time, clinicTimezone)
+                  : t.created_at
+                    ? fmtTime(t.created_at, clinicTimezone)
+                    : "—"}
               </TableCell>
               <TableCell className="text-left w-[220px] space-x-1 space-x-reverse">
                 <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => onSendLink(t.id)} title="إعادة الإرسال">
