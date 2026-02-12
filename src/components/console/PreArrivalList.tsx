@@ -1,11 +1,11 @@
 import { TicketRow } from "@/hooks/useClinicTickets";
 import { TicketSection } from "./TicketSection";
-import { PUBLIC_BASE_URL } from "@/config/publicBaseUrl";
+
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Send, ExternalLink, UserCheck, Ban } from "lucide-react";
+import { Send, UserCheck, Ban } from "lucide-react";
 
 interface Props {
   tickets: TicketRow[];
@@ -40,7 +40,7 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>المريض</TableHead>
+            <TableHead>اسم المريض</TableHead>
             <TableHead>المصدر</TableHead>
             <TableHead>كشف</TableHead>
             <TableHead>الموعد</TableHead>
@@ -68,8 +68,8 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
               </TableCell>
               <TableCell>{t.status}</TableCell>
               <TableCell className="text-left space-x-1 space-x-reverse">
-                <Button size="sm" variant="outline" onClick={() => onSendLink(t.id)}>
-                  <Send className="h-3 w-3 ml-1" />إرسال الرابط
+                <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => onSendLink(t.id)} title="إعادة الإرسال">
+                  <Send className="h-3 w-3" />
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => onConfirmArrival(t.id)}>
                   <UserCheck className="h-3 w-3 ml-1" />تأكيد الحضور
@@ -77,13 +77,6 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
                 <Button size="sm" variant="destructive" onClick={() => onCancel(t.id)}>
                   <Ban className="h-3 w-3 ml-1" />إلغاء
                 </Button>
-                {t.token && (
-                  <a href={`${PUBLIC_BASE_URL}/q/${t.token}`} target="_blank" rel="noopener noreferrer">
-                    <Button size="sm" variant="ghost">
-                      <ExternalLink className="h-3 w-3" />
-                    </Button>
-                  </a>
-                )}
               </TableCell>
             </TableRow>
           ))}
