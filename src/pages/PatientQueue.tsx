@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, Clock, RefreshCw, Users, Pause, XCircle } from "lucide-react";
+import { AlertCircle, Clock, RefreshCw, Users, Pause, XCircle, MapPin } from "lucide-react";
 import logoSymbol from "@/assets/logo-symbol.png";
+import { playQueueChime } from "@/utils/chimeSound";
 
 interface PatientQueueView {
   status_badge: string | null;
@@ -19,6 +19,10 @@ interface PatientQueueView {
   message: string | null;
   expected_window_start: string | null;
   expected_window_end: string | null;
+  clinic_name_ar: string | null;
+  clinic_lat: number | null;
+  clinic_lng: number | null;
+  clinic_maps_url: string | null;
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -38,6 +42,7 @@ export default function PatientQueue() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const prevBadgeRef = useRef<string | null>(null);
 
   const isValidToken = token && UUID_RE.test(token);
 
@@ -48,7 +53,15 @@ export default function PatientQueue() {
         p_token: token!,
       });
       if (rpcError) throw rpcError;
-      setData(result as unknown as PatientQueueView);
+      const view = result as unknown as PatientQueueView;
+      
+      // Play notification sound when status transitions to CALLED
+      if (view.status_badge === "CALLED" && prevBadgeRef.current !== null && prevBadgeRef.current !== "CALLED") {
+        playQueueChime();
+      }
+      prevBadgeRef.current = view.status_badge;
+      
+      setData(view);
       setError(null);
     } catch (e: any) {
       setError(e.message || "حدث خطأ. يرجى المحاولة مرة أخرى.");
@@ -62,11 +75,13 @@ export default function PatientQueue() {
     fetchQueue();
   }, [fetchQueue, isValidToken]);
 
+  // Adaptive polling: 10s when WAITING, 25s otherwise
   useEffect(() => {
     if (!isValidToken) return;
+    const interval = data?.status_badge === "WAITING" ? 10_000 : 25_000;
     const start = () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
-      intervalRef.current = setInterval(fetchQueue, 25_000);
+      intervalRef.current = setInterval(fetchQueue, interval);
     };
     const stop = () => {
       if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
@@ -75,7 +90,7 @@ export default function PatientQueue() {
     document.addEventListener("visibilitychange", onVisibility);
     start();
     return () => { stop(); document.removeEventListener("visibilitychange", onVisibility); };
-  }, [fetchQueue, isValidToken]);
+  }, [fetchQueue, isValidToken, data?.status_badge]);
 
   // Set page direction to RTL
   useEffect(() => {
@@ -124,6 +139,9 @@ export default function PatientQueue() {
   if (!data) return null;
 
   const badge = data.status_badge;
+  const clinicName = data.clinic_name_ar;
+  const mapsUrl = data.clinic_maps_url || 
+    (data.clinic_lat && data.clinic_lng ? `https://www.google.com/maps?q=${data.clinic_lat},${data.clinic_lng}` : null);
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center p-4" dir="rtl">
@@ -188,8 +206,24 @@ export default function PatientQueue() {
           )}
           {!badge && data.message && <SimpleMessage text={data.message} icon="ℹ️" />}
 
-          {data.message && badge && (
-            <p className="text-sm text-muted-foreground text-center">{data.message}</p>
+          {/* Clinic info footer */}
+          {(clinicName || mapsUrl) && (
+            <div className="border-t border-border pt-3 space-y-2 text-center">
+              {mapsUrl && (
+                <a
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                >
+                  <MapPin className="h-4 w-4" />
+                  موقع العيادة
+                </a>
+              )}
+              {clinicName && (
+                <p className="text-sm text-muted-foreground">نشكركم — {clinicName}</p>
+              )}
+            </div>
           )}
 
           <div className="flex justify-center pt-2">
@@ -201,7 +235,7 @@ export default function PatientQueue() {
       </Card>
 
       <p className="text-xs text-muted-foreground mt-4 text-center">
-        يتم تحديث البيانات تلقائياً كل ٢٥ ثانية
+        يتم تحديث البيانات تلقائياً
       </p>
     </div>
   );
@@ -220,7 +254,7 @@ function CenteredCard({ children }: { children: React.ReactNode }) {
 function StatusBadge({ badge }: { badge: string | null }) {
   if (!badge) return null;
   const labels: Record<string, string> = {
-    BOOKED: "محجوز",
+    BOOKED: "تم تأكيد الحجز",
     WAITING: "في قائمة الانتظار",
     CALLED: "تم النداء",
     IN_SERVICE: "داخل الكشف",
@@ -255,7 +289,7 @@ function BookedView({ data }: { data: PatientQueueView }) {
     <div className="space-y-3 text-center">
       {data.appointment_time && (
         <div className="rounded-lg bg-muted/50 p-4">
-          <p className="text-sm text-muted-foreground mb-1">موعد الحجز</p>
+          <p className="text-sm text-muted-foreground mb-1">الوقت المتوقع للحجز</p>
           <div className="flex items-center justify-center gap-2 text-lg">
             <Clock className="h-5 w-5 text-primary" />
             <span className="font-bold text-xl">{formatTimeAr(data.appointment_time)}</span>
@@ -271,14 +305,13 @@ function BookedView({ data }: { data: PatientQueueView }) {
         </div>
       )}
       <p className="text-sm text-muted-foreground">
-        يرجى الحضور في الوقت المحدد لضمان مكانك في قائمة الانتظار.
+        {data.message}
       </p>
     </div>
   );
 }
 
 function WaitingView({ data }: { data: PatientQueueView }) {
-  // Compute expected arrival time
   const etaTime = (() => {
     if (data.eta_min_minutes != null && data.eta_max_minutes != null) {
       const now = new Date();
@@ -308,25 +341,23 @@ function WaitingView({ data }: { data: PatientQueueView }) {
             {data.eta_min_minutes} – {data.eta_max_minutes} دقيقة
           </p>
           {etaTime && (
-            <>
-              <div className="border-t border-border pt-2">
-                <p className="text-sm text-muted-foreground">الوقت المتوقع للدخول</p>
-                <div className="flex items-center justify-center gap-2 mt-1">
-                  <Clock className="h-4 w-4 text-primary" />
-                  <span className="font-medium">
-                    {etaTime.min.toLocaleTimeString("ar-EG", { hour: "numeric", minute: "2-digit", hour12: true })}
-                    {" – "}
-                    {etaTime.max.toLocaleTimeString("ar-EG", { hour: "numeric", minute: "2-digit", hour12: true })}
-                  </span>
-                </div>
+            <div className="border-t border-border pt-2">
+              <p className="text-sm text-muted-foreground">الوقت المتوقع للدخول</p>
+              <div className="flex items-center justify-center gap-2 mt-1">
+                <Clock className="h-4 w-4 text-primary" />
+                <span className="font-medium">
+                  {etaTime.min.toLocaleTimeString("ar-EG", { hour: "numeric", minute: "2-digit", hour12: true })}
+                  {" – "}
+                  {etaTime.max.toLocaleTimeString("ar-EG", { hour: "numeric", minute: "2-digit", hour12: true })}
+                </span>
               </div>
-            </>
+            </div>
           )}
         </div>
       )}
 
       <p className="text-sm text-muted-foreground">
-        يرجى البقاء في منطقة الانتظار حتى يتم نداءك.
+        {data.message}
       </p>
     </div>
   );
