@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://inddd.com/</loc>
+  </url>
+  <url>
+    <loc>https://inddd.com/doctors</loc>
+  </url>
+  <url>
+    <loc>https://inddd.com/doctors/cardiology</loc>
+  </url>
+  <url>
+    <loc>https://inddd.com/doctors/dermatology</loc>
+  </url>
+  <url>
+    <loc>https://inddd.com/doctors/dentistry</loc>
+  </url>
+  <url>
+    <loc>https://inddd.com/doctors/pediatrics</loc>
+  </url>
+  <url>
+    <loc>https://inddd.com/doctors/orthopedics</loc>
+  </url>
+  <url>
+    <loc>https://inddd.com/doctors/cardiology/cairo</loc>
+  </url>
+  <url>
+    <loc>https://inddd.com/doctors/dermatology/cairo</loc>
+  </url>
+  <url>
+    <loc>https://inddd.com/doctors/pediatrics/giza</loc>
+  </url>
+</urlset>

@@ -6,6 +6,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
+import MarketingHome from "./pages/MarketingHome";
+import DoctorsIndex from "./pages/Directory/DoctorsIndex";
+import DoctorsSpecialty from "./pages/Directory/DoctorsSpecialty";
+import DoctorsCity from "./pages/Directory/DoctorsCity";
+import DoctorsArea from "./pages/Directory/DoctorsArea";
+import Privacy from "./pages/Legal/Privacy";
+import Terms from "./pages/Legal/Terms";
+import Contact from "./pages/Legal/Contact";
 import Login from "./pages/Login";
 import Console from "./pages/Console";
 import PatientQueue from "./pages/PatientQueue";
@@ -23,8 +31,16 @@ const App = () => (
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<MarketingHome />} />
+            <Route path="/app" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/doctors" element={<DoctorsIndex />} />
+            <Route path="/doctors/:specialty" element={<DoctorsSpecialty />} />
+            <Route path="/doctors/:specialty/:city" element={<DoctorsCity />} />
+            <Route path="/doctors/:specialty/:city/:area" element={<DoctorsArea />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/contact" element={<Contact />} />
             <Route
               path="/console"
               element={
