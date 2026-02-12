@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { TicketRow } from "@/hooks/useClinicTickets";
 import { TicketSection } from "./TicketSection";
 import {
@@ -19,16 +19,31 @@ const fmtTime = (iso: string, tz: string) =>
     timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
   }).format(new Date(iso));
 
+const CHIME_URL = "https://cdn.freesound.org/previews/536/536420_4921277-lq.mp3";
+
 export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext }: Props) {
-  const [justCompleted, setJustCompleted] = useState<string | null>(null);
+  const [completedId, setCompletedId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const playChime = useCallback(() => {
+    try {
+      if (!audioRef.current) {
+        audioRef.current = new Audio(CHIME_URL);
+        audioRef.current.volume = 0.5;
+      }
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {});
+    } catch {}
+  }, []);
 
   const handleComplete = async (id: string) => {
     await onComplete(id);
-    setJustCompleted(id);
+    setCompletedId(id);
   };
 
   const handleCallNext = async () => {
-    setJustCompleted(null);
+    playChime();
+    setCompletedId(null);
     await onCallNext();
   };
 
@@ -48,24 +63,27 @@ export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext 
             <TableHead className="w-12">الرقم</TableHead>
             <TableHead>اسم المريض</TableHead>
             <TableHead>وقت البدء</TableHead>
-            <TableHead className="text-left w-[160px]">الإجراءات</TableHead>
+            <TableHead className="text-left w-[140px]">الإجراءات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {tickets.map((t, i) => (
-            <TableRow key={t.id}>
+            <TableRow key={t.id} className="animate-fade-in">
               <TableCell className="font-mono">{i + 1}</TableCell>
               <TableCell>
                 <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
               </TableCell>
               <TableCell>{t.service_started_at ? fmtTime(t.service_started_at, clinicTimezone) : "—"}</TableCell>
-              <TableCell className="text-left w-[160px] space-x-1 space-x-reverse">
-                <Button size="sm" onClick={() => handleComplete(t.id)}>
-                  <CheckCircle className="h-3 w-3 ml-1" />إتمام
-                </Button>
-                <Button size="sm" variant="outline" onClick={handleCallNext}>
-                  <Phone className="h-3 w-3 ml-1" />التالي
-                </Button>
+              <TableCell className="text-left w-[140px]">
+                {completedId === t.id ? (
+                  <Button size="sm" variant="outline" onClick={handleCallNext} className="animate-scale-in">
+                    <Phone className="h-3 w-3 ml-1" />نداء التالي
+                  </Button>
+                ) : (
+                  <Button size="sm" onClick={() => handleComplete(t.id)}>
+                    <CheckCircle className="h-3 w-3 ml-1" />إتمام
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           ))}

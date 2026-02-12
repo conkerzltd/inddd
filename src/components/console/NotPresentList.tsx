@@ -46,7 +46,7 @@ export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone,
           </TableHeader>
           <TableBody>
             {allTickets.map((t, i) => (
-              <TableRow key={t.id}>
+              <TableRow key={t.id} className="animate-fade-in">
                 <TableCell className="font-mono">{i + 1}</TableCell>
                 <TableCell>
                   <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
