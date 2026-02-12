@@ -51,37 +51,23 @@ const HeroSearch = ({ specialties, cities, labels }: HeroSearchProps) => {
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-white via-[#f4f1fb] to-[#e8e1fb]">
-      <video
-        className="absolute inset-0 h-full w-full object-cover motion-reduce:hidden"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        poster="/2.png"
-        aria-hidden="true"
-        tabIndex={-1}
-      >
-        <source src="/media/hero/Untitled%20design.mp4" type="video/mp4" />
-      </video>
-      <div className="absolute inset-0 bg-black/45 motion-reduce:hidden" />
-      <div className="relative z-10 container mx-auto grid gap-10 px-4 py-16 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+      <div className="container mx-auto grid gap-10 px-4 py-16 lg:grid-cols-[1.2fr_1fr] lg:items-center">
         <div className="space-y-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             Patients-first queue clarity
           </p>
-          <h1 className="text-4xl font-bold text-white md:text-5xl">
+          <h1 className="text-4xl font-bold text-foreground md:text-5xl">
             {labels.title}
           </h1>
-          <p className="text-lg text-white/80">
+          <p className="text-lg text-muted-foreground">
             {labels.subtitle}
           </p>
-          <p className="text-sm text-white/70">{labels.helper}</p>
+          <p className="text-sm text-muted-foreground">{labels.helper}</p>
           <div
             id="patient-link"
-            className="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm p-4 text-sm text-white/80"
+            className="rounded-2xl border border-border bg-white/70 p-4 text-sm text-muted-foreground"
           >
-            <p className="font-semibold text-white">{labels.patientLinkTitle}</p>
+            <p className="font-semibold text-foreground">{labels.patientLinkTitle}</p>
             <p>{labels.patientLinkBody}</p>
           </div>
         </div>
