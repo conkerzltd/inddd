@@ -84,8 +84,8 @@ const MarketingHome = () => {
   return (
     <div className="min-h-screen bg-background" dir={language === "ar" ? "rtl" : "ltr"}>
       <Seo
-        title={language === "ar" ? "inddd | وضوح الطابور للعيادات" : "inddd | Patients-first clinic queues"}
-        description={language === "ar" ? "وضوح الطابور للعيادات. اعرف دورك ووقت الوصول المتوقع قبل ما توصل." : "Patients-first queue clarity for clinics. See your turn and ETA range before you arrive."}
+        title={language === "ar" ? "inddd | وضوح قائمة الانتظار للعيادات" : "inddd | Patients-first clinic queues"}
+        description={language === "ar" ? "وضوح قائمة الانتظار للعيادات. اعرف دورك ووقت الوصول المتوقع قبل ما توصل." : "Patients-first queue clarity for clinics. See your turn and ETA range before you arrive."}
         canonical={`${baseUrl}/`}
         schema={buildWebsiteSchema(baseUrl)}
       />

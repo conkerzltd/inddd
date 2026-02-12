@@ -73,7 +73,7 @@ const HeroSearch = ({ specialties, cities, labels }: HeroSearchProps) => {
       <div className="container mx-auto grid gap-10 px-4 py-16 lg:grid-cols-[1.2fr_1fr] lg:items-center">
         <div className="space-y-6">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            {isAr ? "وضوح الطابور للمرضى أولاً" : "Patients-first queue clarity"}
+            {isAr ? "وضوح قائمة الانتظار للمرضى أولاً" : "Patients-first queue clarity"}
           </p>
           <h1 className="text-4xl font-bold text-foreground md:text-5xl">
             {labels.title}

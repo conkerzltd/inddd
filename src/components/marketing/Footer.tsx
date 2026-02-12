@@ -11,7 +11,7 @@ const Footer = () => {
         <div className="space-y-2">
           <p className="text-sm font-semibold text-foreground">inddd</p>
           <p className="text-xs text-muted-foreground">
-            {isAr ? "وضوح الطابور للعيادات، المريض أولاً." : "Patients-first queue clarity for clinics."}
+            {isAr ? "وضوح قائمة الانتظار للعيادات، المريض أولاً." : "Patients-first queue clarity for clinics."}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">

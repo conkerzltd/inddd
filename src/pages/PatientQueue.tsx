@@ -130,7 +130,7 @@ export default function PatientQueue() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center pb-2">
           <StatusBadge badge={badge} />
-          <CardTitle className="text-xl mt-2">حالة الطابور</CardTitle>
+          <CardTitle className="text-xl mt-2">حالة قائمة الانتظار</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {(badge === "BOOKED") && <BookedView data={data} />}
@@ -139,7 +139,7 @@ export default function PatientQueue() {
           {badge === "IN_SERVICE" && <SimpleMessage text="أنت في الخدمة الآن." icon="🩺" />}
           {badge === "DONE" && <SimpleMessage text="تمت زيارتك. شكراً لك!" icon="✅" />}
           {badge === "MISSED" && <SimpleMessage text="تم نداءك ولم يتم العثور عليك. تواصل مع السكرتارية." icon="⚠️" />}
-          {badge === "RETURNED" && <SimpleMessage text="يتم إعادة إدراجك في الطابور. انتظر من فضلك." icon="🔄" />}
+          {badge === "RETURNED" && <SimpleMessage text="يتم إعادة إدراجك في قائمة الانتظار. انتظر من فضلك." icon="🔄" />}
           {(badge === "CANCELLED" || badge === "CLOSED") && (
             <SimpleMessage text="تم إلغاء/إغلاق هذه الزيارة. تواصل مع العيادة." icon="❌" />
           )}
@@ -228,7 +228,7 @@ function WaitingView({ data }: { data: PatientQueueView }) {
         <div className="flex items-center justify-center gap-2">
           <Users className="h-5 w-5 text-muted-foreground" />
           <span className="text-3xl font-bold">#{data.eligible_position}</span>
-          <span className="text-sm text-muted-foreground">في الطابور</span>
+          <span className="text-sm text-muted-foreground">في قائمة الانتظار</span>
         </div>
       )}
       {data.eta_min_minutes != null && data.eta_max_minutes != null && (

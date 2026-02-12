@@ -35,7 +35,7 @@ export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, 
   return (
     <>
       <TicketSection
-        title="طابور الانتظار"
+        title="قائمة الانتظار"
         count={tickets.length}
         action={
           <Button size="sm" onClick={onCallNext} disabled={tickets.length === 0}>
