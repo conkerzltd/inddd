@@ -2,12 +2,13 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, Clock, RefreshCw, Users, Pause, XCircle, MapPin } from "lucide-react";
+import { AlertCircle, Clock, RefreshCw, Users, Pause, XCircle, MapPin, Timer } from "lucide-react";
 import logoSymbol from "@/assets/logo-symbol.png";
 import { playQueueChime } from "@/utils/chimeSound";
 
+/* ───── types ───── */
 interface PatientQueueView {
   status_badge: string | null;
   appointment_time: string | null;
@@ -27,40 +28,48 @@ interface PatientQueueView {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function formatTimeAr(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleTimeString("ar-EG", { hour: "numeric", minute: "2-digit", hour12: true });
+/* ───── helpers ───── */
+function fmtTimeAr(iso: string): string {
+  return new Date(iso).toLocaleTimeString("ar-EG", { hour: "numeric", minute: "2-digit", hour12: true });
 }
 
-function addMinutes(date: Date, mins: number): Date {
-  return new Date(date.getTime() + mins * 60_000);
+function addMin(d: Date, m: number) {
+  return new Date(d.getTime() + m * 60_000);
 }
 
+function calcRemaining(targetIso: string): string | null {
+  const diff = new Date(targetIso).getTime() - Date.now();
+  if (diff <= 0) return null;
+  const h = Math.floor(diff / 3_600_000);
+  const m = Math.ceil((diff % 3_600_000) / 60_000);
+  if (h > 0) return `${h} ساعة و ${m} دقيقة`;
+  return `${m} دقيقة`;
+}
+
+/* ═══════════════ main component ═══════════════ */
 export default function PatientQueue() {
   const { token } = useParams<{ token: string }>();
   const [data, setData] = useState<PatientQueueView | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [remaining, setRemaining] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevBadgeRef = useRef<string | null>(null);
 
   const isValidToken = token && UUID_RE.test(token);
 
+  /* ── fetch ── */
   const fetchQueue = useCallback(async () => {
     if (!isValidToken) return;
     try {
-      const { data: result, error: rpcError } = await supabase.rpc("get_patient_queue_view", {
-        p_token: token!,
-      });
+      const { data: result, error: rpcError } = await supabase.rpc("get_patient_queue_view", { p_token: token! });
       if (rpcError) throw rpcError;
       const view = result as unknown as PatientQueueView;
-      
-      // Play notification sound when status transitions to CALLED
+
       if (view.status_badge === "CALLED" && prevBadgeRef.current !== null && prevBadgeRef.current !== "CALLED") {
         playQueueChime();
       }
       prevBadgeRef.current = view.status_badge;
-      
       setData(view);
       setError(null);
     } catch (e: any) {
@@ -75,158 +84,89 @@ export default function PatientQueue() {
     fetchQueue();
   }, [fetchQueue, isValidToken]);
 
-  // Adaptive polling: 10s when WAITING, 25s otherwise
+  /* ── adaptive polling ── */
   useEffect(() => {
     if (!isValidToken) return;
-    const interval = data?.status_badge === "WAITING" ? 10_000 : 25_000;
-    const start = () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      intervalRef.current = setInterval(fetchQueue, interval);
-    };
-    const stop = () => {
-      if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
-    };
-    const onVisibility = () => { document.hidden ? stop() : start(); };
-    document.addEventListener("visibilitychange", onVisibility);
+    const ms = data?.status_badge === "WAITING" ? 10_000 : 25_000;
+    const start = () => { if (intervalRef.current) clearInterval(intervalRef.current); intervalRef.current = setInterval(fetchQueue, ms); };
+    const stop = () => { if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; } };
+    const vis = () => { document.hidden ? stop() : start(); };
+    document.addEventListener("visibilitychange", vis);
     start();
-    return () => { stop(); document.removeEventListener("visibilitychange", onVisibility); };
+    return () => { stop(); document.removeEventListener("visibilitychange", vis); };
   }, [fetchQueue, isValidToken, data?.status_badge]);
 
-  // Set page direction to RTL
+  /* ── remaining‑time countdown every 30s ── */
   useEffect(() => {
-    document.documentElement.dir = "rtl";
-    document.documentElement.lang = "ar";
-  }, []);
+    if (!data) return;
+    const target = data.appointment_time || data.expected_window_start;
+    if (!target) { setRemaining(null); return; }
+    const tick = () => setRemaining(calcRemaining(target));
+    tick();
+    const id = setInterval(tick, 30_000);
+    return () => clearInterval(id);
+  }, [data]);
 
-  if (!isValidToken) {
-    return (
-      <CenteredCard>
-        <div className="flex flex-col items-center gap-3 text-center">
-          <AlertCircle className="h-10 w-10 text-destructive" />
-          <p className="text-lg font-medium">رابط غير صالح</p>
-          <p className="text-sm text-muted-foreground">يرجى التواصل مع العيادة للحصول على رابط جديد.</p>
-        </div>
-      </CenteredCard>
-    );
-  }
+  /* ── RTL ── */
+  useEffect(() => { document.documentElement.dir = "rtl"; document.documentElement.lang = "ar"; }, []);
 
-  if (loading) {
-    return (
-      <CenteredCard>
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-40 mx-auto" />
-          <Skeleton className="h-6 w-64 mx-auto" />
-          <Skeleton className="h-6 w-48 mx-auto" />
-        </div>
-      </CenteredCard>
-    );
-  }
-
-  if (error) {
-    return (
-      <CenteredCard>
-        <div className="flex flex-col items-center gap-3 text-center">
-          <AlertCircle className="h-10 w-10 text-destructive" />
-          <p className="text-muted-foreground">{error}</p>
-          <Button variant="outline" onClick={() => { setLoading(true); setError(null); fetchQueue(); }}>
-            <RefreshCw className="h-4 w-4 ml-1" /> إعادة المحاولة
-          </Button>
-        </div>
-      </CenteredCard>
-    );
-  }
-
+  /* ── guards ── */
+  if (!isValidToken) return <Centered><AlertCircle className="h-10 w-10 text-destructive mx-auto" /><p className="text-lg font-bold mt-3">رابط غير صالح</p><p className="text-sm text-muted-foreground">يرجى التواصل مع العيادة للحصول على رابط جديد.</p></Centered>;
+  if (loading) return <Centered><Skeleton className="h-8 w-40 mx-auto" /><Skeleton className="h-6 w-64 mx-auto mt-3" /><Skeleton className="h-6 w-48 mx-auto mt-2" /></Centered>;
+  if (error) return <Centered><AlertCircle className="h-10 w-10 text-destructive mx-auto" /><p className="text-muted-foreground mt-3">{error}</p><Button variant="outline" className="mt-3" onClick={() => { setLoading(true); setError(null); fetchQueue(); }}><RefreshCw className="h-4 w-4 ml-1" /> إعادة المحاولة</Button></Centered>;
   if (!data) return null;
 
   const badge = data.status_badge;
   const clinicName = data.clinic_name_ar;
-  const mapsUrl = data.clinic_maps_url || 
-    (data.clinic_lat && data.clinic_lng ? `https://www.google.com/maps?q=${data.clinic_lat},${data.clinic_lng}` : null);
+  const mapsUrl = data.clinic_maps_url || (data.clinic_lat && data.clinic_lng ? `https://www.google.com/maps?q=${data.clinic_lat},${data.clinic_lng}` : null);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center p-4" dir="rtl">
-      <div className="w-full max-w-md mb-4 flex justify-center">
-        <img src={logoSymbol} alt="inddd" className="h-10 w-10" />
-      </div>
+    <div className="min-h-screen bg-background flex flex-col items-center p-4 pt-6" dir="rtl">
+      {/* logo */}
+      <img src={logoSymbol} alt="inddd" className="h-10 w-10 mb-4" />
 
-      {data.session_paused && (
-        <div className="w-full max-w-md mb-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3 flex items-center gap-2 text-sm">
-          <Pause className="h-4 w-4 text-yellow-600 shrink-0" />
-          <span>الطبيب متوقف مؤقتاً — مكانك محفوظ في قائمة الانتظار.</span>
-        </div>
-      )}
-      {data.intake_open === false && (
-        <div className="w-full max-w-md mb-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3 flex items-center gap-2 text-sm">
-          <XCircle className="h-4 w-4 text-destructive shrink-0" />
-          <span>العيادة لم تعد تستقبل مرضى جدد اليوم.</span>
-        </div>
-      )}
+      {/* banners */}
+      {data.session_paused && <Banner icon={<Pause className="h-4 w-4 text-yellow-600 shrink-0" />} className="border-yellow-500/30 bg-yellow-500/10">الطبيب متوقف مؤقتاً — مكانك محفوظ في قائمة الانتظار.</Banner>}
+      {data.intake_open === false && <Banner icon={<XCircle className="h-4 w-4 text-destructive shrink-0" />} className="border-destructive/30 bg-destructive/10">العيادة لم تعد تستقبل مرضى جدد اليوم.</Banner>}
 
+      {/* main card */}
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center pb-2">
-          <StatusBadge badge={badge} />
-          <CardTitle className="text-xl mt-2">متابعة دورك</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {badge === "BOOKED" && <BookedView data={data} />}
-          {badge === "WAITING" && <WaitingView data={data} />}
-          {badge === "CALLED" && (
-            <SimpleMessage
-              text="تم نداءك! توجّه إلى غرفة الكشف الآن."
-              icon="🔔"
-              subtitle="يرجى الحضور فوراً حتى لا يُنادى مريض آخر."
-            />
-          )}
-          {badge === "IN_SERVICE" && (
-            <SimpleMessage text="أنت داخل الكشف الآن." icon="🩺" />
-          )}
-          {badge === "DONE" && (
-            <SimpleMessage text="تمت زيارتك بنجاح. شكراً لك ونتمنى لك السلامة!" icon="✅" />
-          )}
-          {badge === "MISSED" && (
-            <SimpleMessage
-              text="تم نداءك ولم يتم العثور عليك."
-              icon="⚠️"
-              subtitle="يرجى التواصل مع السكرتارية لإعادة إدراجك."
-            />
-          )}
-          {badge === "RETURNED" && (
-            <SimpleMessage
-              text="يتم إعادة إدراجك في قائمة الانتظار."
-              icon="🔄"
-              subtitle="انتظر من فضلك حتى يتم نداءك مرة أخرى."
-            />
-          )}
-          {(badge === "CANCELLED" || badge === "CLOSED") && (
-            <SimpleMessage
-              text="تم إلغاء هذه الزيارة."
-              icon="❌"
-              subtitle="للاستفسار يرجى التواصل مع العيادة."
-            />
-          )}
-          {!badge && data.message && <SimpleMessage text={data.message} icon="ℹ️" />}
+        <CardContent className="pt-6 pb-5 space-y-5">
+          {/* status badge */}
+          <StatusChip badge={badge} />
 
-          {/* Clinic info footer */}
+          {/* per‑status body */}
+          {badge === "BOOKED" && <BookedBody data={data} remaining={remaining} />}
+          {badge === "WAITING" && <WaitingBody data={data} remaining={remaining} />}
+          {badge === "CALLED" && <Msg icon="🔔" text="تم نداءك! توجّه إلى غرفة الكشف الآن." sub="يرجى الحضور فوراً حتى لا يُنادى مريض آخر." />}
+          {badge === "IN_SERVICE" && <Msg icon="🩺" text="أنت داخل الكشف الآن." />}
+          {badge === "DONE" && <Msg icon="✅" text="تمت زيارتك بنجاح. شكراً لك ونتمنى لك السلامة!" />}
+          {badge === "MISSED" && <Msg icon="⚠️" text="تم نداءك ولم يتم العثور عليك." sub="يرجى التواصل مع السكرتارية لإعادة إدراجك." />}
+          {badge === "RETURNED" && <Msg icon="🔄" text="يتم إعادة إدراجك في قائمة الانتظار." sub="انتظر من فضلك حتى يتم نداءك مرة أخرى." />}
+          {(badge === "CANCELLED" || badge === "CLOSED") && <Msg icon="❌" text="تم إلغاء هذه الزيارة." sub="للاستفسار يرجى التواصل مع العيادة." />}
+          {!badge && data.message && <Msg icon="ℹ️" text={data.message} />}
+
+          {/* warning for active statuses */}
+          {(badge === "BOOKED" || badge === "WAITING") && (
+            <p className="text-sm text-muted-foreground text-center leading-relaxed">
+              يرجى القدوم في الموعد المحدد لتجنب فقدان دورك في قائمة الانتظار.
+            </p>
+          )}
+
+          {/* clinic footer */}
           {(clinicName || mapsUrl) && (
-            <div className="border-t border-border pt-3 space-y-2 text-center">
+            <div className="border-t border-border pt-4 space-y-2 text-center">
               {mapsUrl && (
-                <a
-                  href={mapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                >
-                  <MapPin className="h-4 w-4" />
-                  موقع العيادة
+                <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline font-medium">
+                  <MapPin className="h-4 w-4" /> موقع العيادة
                 </a>
               )}
-              {clinicName && (
-                <p className="text-sm text-muted-foreground">نشكركم — {clinicName}</p>
-              )}
+              {clinicName && <p className="text-sm text-muted-foreground">نشكركم — {clinicName}</p>}
             </div>
           )}
 
-          <div className="flex justify-center pt-2">
+          {/* refresh */}
+          <div className="flex justify-center pt-1">
             <Button variant="ghost" size="sm" onClick={() => { setLoading(true); fetchQueue(); }}>
               <RefreshCw className="h-4 w-4 ml-1" /> تحديث
             </Button>
@@ -234,90 +174,68 @@ export default function PatientQueue() {
         </CardContent>
       </Card>
 
-      <p className="text-xs text-muted-foreground mt-4 text-center">
-        يتم تحديث البيانات تلقائياً
-      </p>
+      <p className="text-xs text-muted-foreground mt-4 text-center">يتم تحديث البيانات تلقائياً</p>
     </div>
   );
 }
 
-function CenteredCard({ children }: { children: React.ReactNode }) {
+/* ═══════════════ sub‑components ═══════════════ */
+
+function Centered({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4" dir="rtl">
-      <Card className="w-full max-w-md">
-        <CardContent className="pt-6">{children}</CardContent>
-      </Card>
+      <Card className="w-full max-w-md"><CardContent className="pt-6 text-center">{children}</CardContent></Card>
     </div>
   );
 }
 
-function StatusBadge({ badge }: { badge: string | null }) {
+function Banner({ children, icon, className }: { children: React.ReactNode; icon: React.ReactNode; className: string }) {
+  return <div className={`w-full max-w-md mb-3 rounded-lg border p-3 flex items-center gap-2 text-sm ${className}`}>{icon}<span>{children}</span></div>;
+}
+
+function StatusChip({ badge }: { badge: string | null }) {
   if (!badge) return null;
-  const labels: Record<string, string> = {
-    BOOKED: "تم تأكيد الحجز",
-    WAITING: "في قائمة الانتظار",
-    CALLED: "تم النداء",
-    IN_SERVICE: "داخل الكشف",
-    DONE: "مكتمل",
-    MISSED: "غير متواجد",
-    RETURNED: "تم إعادة الإدراج",
-    CANCELLED: "ملغي",
-    CLOSED: "مغلق",
-  };
-  const variants: Record<string, string> = {
-    BOOKED: "bg-blue-500/15 text-blue-700 border-blue-500/30",
-    WAITING: "bg-yellow-500/15 text-yellow-700 border-yellow-500/30",
-    CALLED: "bg-green-500/15 text-green-700 border-green-500/30",
-    IN_SERVICE: "bg-purple-500/15 text-purple-700 border-purple-500/30",
-    DONE: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30",
-    MISSED: "bg-red-500/15 text-red-700 border-red-500/30",
-    RETURNED: "bg-orange-500/15 text-orange-700 border-orange-500/30",
-    CANCELLED: "bg-muted text-muted-foreground border-border",
-    CLOSED: "bg-muted text-muted-foreground border-border",
-  };
-  return (
-    <div className="flex justify-center">
-      <span className={`inline-flex items-center rounded-full border px-3 py-1 text-sm font-semibold ${variants[badge] || ""}`}>
-        {labels[badge] || badge}
-      </span>
-    </div>
-  );
+  const labels: Record<string, string> = { BOOKED: "تم تأكيد الحجز", WAITING: "في قائمة الانتظار", CALLED: "تم النداء", IN_SERVICE: "داخل الكشف", DONE: "مكتمل", MISSED: "غير متواجد", RETURNED: "تم إعادة الإدراج", CANCELLED: "ملغي", CLOSED: "مغلق" };
+  const styles: Record<string, string> = { BOOKED: "bg-blue-500/15 text-blue-700 border-blue-500/30", WAITING: "bg-yellow-500/15 text-yellow-700 border-yellow-500/30", CALLED: "bg-green-500/15 text-green-700 border-green-500/30", IN_SERVICE: "bg-purple-500/15 text-purple-700 border-purple-500/30", DONE: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30", MISSED: "bg-red-500/15 text-red-700 border-red-500/30", RETURNED: "bg-orange-500/15 text-orange-700 border-orange-500/30", CANCELLED: "bg-muted text-muted-foreground border-border", CLOSED: "bg-muted text-muted-foreground border-border" };
+  return <div className="flex justify-center"><span className={`inline-flex items-center rounded-full border px-4 py-1 text-sm font-semibold ${styles[badge] || ""}`}>{labels[badge] || badge}</span></div>;
 }
 
-function BookedView({ data }: { data: PatientQueueView }) {
+function BookedBody({ data, remaining }: { data: PatientQueueView; remaining: string | null }) {
   return (
     <div className="space-y-3 text-center">
       {data.appointment_time && (
         <div className="rounded-lg bg-muted/50 p-4">
-          <p className="text-sm text-muted-foreground mb-1">الوقت المتوقع للحجز</p>
-          <div className="flex items-center justify-center gap-2 text-lg">
+          <p className="text-sm text-muted-foreground mb-1">الوقت المتوقع للكشف</p>
+          <div className="flex items-center justify-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
-            <span className="font-bold text-xl">{formatTimeAr(data.appointment_time)}</span>
+            <span className="font-bold text-2xl">{fmtTimeAr(data.appointment_time)}</span>
           </div>
         </div>
       )}
       {data.expected_window_start && data.expected_window_end && (
         <div className="rounded-lg border border-border p-3">
-          <p className="text-sm text-muted-foreground mb-1">الوقت المتوقع للحضور</p>
-          <p className="font-medium">
-            {formatTimeAr(data.expected_window_start)} – {formatTimeAr(data.expected_window_end)}
-          </p>
+          <p className="text-sm text-muted-foreground mb-1">الفترة المتوقعة</p>
+          <p className="font-medium">{fmtTimeAr(data.expected_window_start)} – {fmtTimeAr(data.expected_window_end)}</p>
         </div>
       )}
-      <p className="text-sm text-muted-foreground">
-        {data.message}
-      </p>
+      {remaining && (
+        <div className="rounded-lg border border-border p-3 flex items-center justify-center gap-2">
+          <Timer className="h-4 w-4 text-primary" />
+          <p className="text-sm"><span className="text-muted-foreground">الوقت المتبقي: </span><span className="font-semibold">{remaining}</span></p>
+        </div>
+      )}
+      {data.eligible_position != null && (
+        <p className="text-sm text-muted-foreground">رقم الحجز: <span className="font-bold text-foreground">{data.eligible_position}</span></p>
+      )}
     </div>
   );
 }
 
-function WaitingView({ data }: { data: PatientQueueView }) {
+function WaitingBody({ data, remaining }: { data: PatientQueueView; remaining: string | null }) {
   const etaTime = (() => {
     if (data.eta_min_minutes != null && data.eta_max_minutes != null) {
       const now = new Date();
-      const minTime = addMinutes(now, data.eta_min_minutes);
-      const maxTime = addMinutes(now, data.eta_max_minutes);
-      return { min: minTime, max: maxTime };
+      return { min: addMin(now, data.eta_min_minutes), max: addMin(now, data.eta_max_minutes) };
     }
     return null;
   })();
@@ -333,16 +251,13 @@ function WaitingView({ data }: { data: PatientQueueView }) {
           </div>
         </div>
       )}
-
       {data.eta_min_minutes != null && data.eta_max_minutes != null && (
         <div className="rounded-lg border border-border p-3 space-y-2">
-          <p className="text-sm text-muted-foreground">وقت الانتظار المتوقع</p>
-          <p className="font-bold text-lg">
-            {data.eta_min_minutes} – {data.eta_max_minutes} دقيقة
-          </p>
+          <p className="text-sm text-muted-foreground">الوقت المتوقع للكشف</p>
+          <p className="font-bold text-lg">{data.eta_min_minutes} – {data.eta_max_minutes} دقيقة</p>
           {etaTime && (
             <div className="border-t border-border pt-2">
-              <p className="text-sm text-muted-foreground">الوقت المتوقع للدخول</p>
+              <p className="text-sm text-muted-foreground">الفترة المتوقعة</p>
               <div className="flex items-center justify-center gap-2 mt-1">
                 <Clock className="h-4 w-4 text-primary" />
                 <span className="font-medium">
@@ -355,20 +270,22 @@ function WaitingView({ data }: { data: PatientQueueView }) {
           )}
         </div>
       )}
-
-      <p className="text-sm text-muted-foreground">
-        {data.message}
-      </p>
+      {remaining && (
+        <div className="rounded-lg border border-border p-3 flex items-center justify-center gap-2">
+          <Timer className="h-4 w-4 text-primary" />
+          <p className="text-sm"><span className="text-muted-foreground">الوقت المتبقي: </span><span className="font-semibold">{remaining}</span></p>
+        </div>
+      )}
     </div>
   );
 }
 
-function SimpleMessage({ text, icon, subtitle }: { text: string; icon: string; subtitle?: string }) {
+function Msg({ icon, text, sub }: { icon: string; text: string; sub?: string }) {
   return (
     <div className="text-center py-2">
       <span className="text-3xl">{icon}</span>
       <p className="mt-2 text-lg font-medium">{text}</p>
-      {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
+      {sub && <p className="mt-1 text-sm text-muted-foreground">{sub}</p>}
     </div>
   );
 }
