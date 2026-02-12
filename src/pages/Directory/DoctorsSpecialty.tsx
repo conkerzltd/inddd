@@ -3,10 +3,12 @@ import Seo from "@/components/seo/Seo";
 import { buildBreadcrumbSchema } from "@/components/seo/schema";
 import { cities, getSpecialtyBySlug } from "@/data/directory";
 import { PUBLIC_BASE_URL } from "@/config/publicBaseUrl";
+import { useLocale } from "@/i18n/useLocale";
 
 const DoctorsSpecialty = () => {
   const { specialty } = useParams();
   const baseUrl = PUBLIC_BASE_URL;
+  const { localePath } = useLocale();
   const specialtyData = getSpecialtyBySlug(specialty);
 
   if (!specialtyData) {
@@ -14,7 +16,7 @@ const DoctorsSpecialty = () => {
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-12">
           <h1 className="text-2xl font-bold text-foreground">Specialty not found</h1>
-          <Link className="mt-4 inline-block text-sm text-primary" to="/doctors">
+          <Link className="mt-4 inline-block text-sm text-primary" to={localePath("/doctors")}>
             Back to directory
           </Link>
         </div>
@@ -52,7 +54,7 @@ const DoctorsSpecialty = () => {
             {cities.map((city) => (
               <Link
                 key={city.slug}
-                to={`/doctors/${specialtyData.slug}/${city.slug}`}
+                to={localePath(`/doctors/${specialtyData.slug}/${city.slug}`)}
                 className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground hover:border-primary/60 hover:text-foreground"
               >
                 {city.name}

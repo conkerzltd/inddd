@@ -11,9 +11,13 @@ import Seo from "@/components/seo/Seo";
 import { buildWebsiteSchema } from "@/components/seo/schema";
 import { cities, specialties } from "@/data/directory";
 import { PUBLIC_BASE_URL } from "@/config/publicBaseUrl";
+import { useLocale } from "@/i18n/useLocale";
 
 const MarketingHome = () => {
-  const [language, setLanguage] = useState<"en" | "ar">("en");
+  const { locale } = useLocale();
+  // If on /en, force English; otherwise allow toggle (default ar)
+  const [languageOverride, setLanguageOverride] = useState<"en" | "ar" | null>(null);
+  const language = locale === "en" ? "en" : (languageOverride ?? "en");
   const baseUrl = PUBLIC_BASE_URL;
 
   const copy = useMemo(
@@ -92,7 +96,10 @@ const MarketingHome = () => {
       <TopNav
         labels={copy.nav}
         language={language}
-        onToggleLanguage={() => setLanguage((prev) => (prev === "en" ? "ar" : "en"))}
+        onToggleLanguage={() => {
+          if (locale === "en") return; // no toggle on /en routes
+          setLanguageOverride((prev) => (prev ?? "en") === "en" ? "ar" : "en");
+        }}
       />
       <main>
         <div id="find-doctor">
