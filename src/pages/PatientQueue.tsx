@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 import { AlertCircle, Clock, RefreshCw, Users, Pause, XCircle, MapPin, Timer } from "lucide-react";
 import logoSymbol from "@/assets/logo-symbol.png";
 import { playQueueChime } from "@/utils/chimeSound";
@@ -55,6 +56,7 @@ export default function PatientQueue() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<string | null>(null);
+  const [progress, setProgress] = useState<number>(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevBadgeRef = useRef<string | null>(null);
 
@@ -99,11 +101,28 @@ export default function PatientQueue() {
   }, [fetchQueue, isValidToken, data?.status_badge]);
 
   /* ── remaining‑time live countdown every 1s ── */
+  const createdAtRef = useRef<number | null>(null);
   useEffect(() => {
     if (!data) return;
-    const target = data.appointment_time || data.expected_window_start;
-    if (!target) { setRemaining(null); return; }
-    const tick = () => setRemaining(calcRemaining(target));
+    // For WAITING: use ETA max as dynamic target; for BOOKED: use appointment_time
+    let target = data.appointment_time || data.expected_window_start;
+    if (!target && data.eta_max_minutes != null) {
+      target = addMin(new Date(), data.eta_max_minutes).toISOString();
+    }
+    if (!target) { setRemaining(null); setProgress(0); return; }
+
+    const targetMs = new Date(target).getTime();
+    // Use created_at or first fetch time as the "start" anchor for progress
+    if (!createdAtRef.current) createdAtRef.current = Date.now();
+    const startMs = createdAtRef.current;
+    const totalDuration = targetMs - startMs;
+
+    const tick = () => {
+      setRemaining(calcRemaining(target));
+      if (totalDuration <= 0) { setProgress(100); return; }
+      const elapsed = Date.now() - startMs;
+      setProgress(Math.min(100, Math.max(0, (elapsed / totalDuration) * 100)));
+    };
     tick();
     const id = setInterval(tick, 1_000);
     return () => clearInterval(id);
@@ -138,8 +157,8 @@ export default function PatientQueue() {
           <StatusChip badge={badge} />
 
           {/* per‑status body */}
-          {badge === "BOOKED" && <BookedBody data={data} remaining={remaining} />}
-          {badge === "WAITING" && <WaitingBody data={data} remaining={remaining} />}
+          {badge === "BOOKED" && <BookedBody data={data} remaining={remaining} progress={progress} />}
+          {badge === "WAITING" && <WaitingBody data={data} remaining={remaining} progress={progress} />}
           {badge === "CALLED" && <Msg icon="🔔" text="تم نداءك! توجّه إلى غرفة الكشف الآن." sub="يرجى الحضور فوراً حتى لا يُنادى مريض آخر." />}
           {badge === "IN_SERVICE" && <Msg icon="🩺" text="أنت داخل الكشف الآن." />}
           {badge === "DONE" && <Msg icon="✅" text="تمت زيارتك بنجاح. شكراً لك ونتمنى لك السلامة!" />}
@@ -202,7 +221,7 @@ function StatusChip({ badge }: { badge: string | null }) {
   return <div className="flex justify-center"><span className={`inline-flex items-center rounded-full border px-4 py-1 text-sm font-semibold ${styles[badge] || ""}`}>{labels[badge] || badge}</span></div>;
 }
 
-function BookedBody({ data, remaining }: { data: PatientQueueView; remaining: string | null }) {
+function BookedBody({ data, remaining, progress }: { data: PatientQueueView; remaining: string | null; progress: number }) {
   return (
     <div className="space-y-3 text-center">
       {data.appointment_time && (
@@ -221,9 +240,13 @@ function BookedBody({ data, remaining }: { data: PatientQueueView; remaining: st
         </div>
       )}
       {remaining && (
-        <div className="rounded-lg border border-border p-3 flex items-center justify-center gap-2">
-          <Timer className="h-4 w-4 text-primary" />
-          <p className="text-sm"><span className="text-muted-foreground">الوقت المتبقي: </span><span className="font-semibold">{remaining}</span></p>
+        <div className="rounded-lg border border-border p-3 space-y-2">
+          <div className="flex items-center justify-center gap-2">
+            <Timer className="h-4 w-4 text-primary" />
+            <p className="text-sm"><span className="text-muted-foreground">الوقت المتبقي: </span><span className="font-semibold">{remaining}</span></p>
+          </div>
+          <Progress value={progress} className="h-2 [direction:ltr]" />
+          <p className="text-xs text-muted-foreground">{Math.round(progress)}٪ من الوقت انقضى</p>
         </div>
       )}
       {data.eligible_position != null && (
@@ -233,7 +256,7 @@ function BookedBody({ data, remaining }: { data: PatientQueueView; remaining: st
   );
 }
 
-function WaitingBody({ data, remaining }: { data: PatientQueueView; remaining: string | null }) {
+function WaitingBody({ data, remaining, progress }: { data: PatientQueueView; remaining: string | null; progress: number }) {
   const etaTime = (() => {
     if (data.eta_min_minutes != null && data.eta_max_minutes != null) {
       const now = new Date();
@@ -273,9 +296,13 @@ function WaitingBody({ data, remaining }: { data: PatientQueueView; remaining: s
         </div>
       )}
       {remaining && (
-        <div className="rounded-lg border border-border p-3 flex items-center justify-center gap-2">
-          <Timer className="h-4 w-4 text-primary" />
-          <p className="text-sm"><span className="text-muted-foreground">الوقت المتبقي: </span><span className="font-semibold">{remaining}</span></p>
+        <div className="rounded-lg border border-border p-3 space-y-2">
+          <div className="flex items-center justify-center gap-2">
+            <Timer className="h-4 w-4 text-primary" />
+            <p className="text-sm"><span className="text-muted-foreground">الوقت المتبقي: </span><span className="font-semibold">{remaining}</span></p>
+          </div>
+          <Progress value={progress} className="h-2 [direction:ltr]" />
+          <p className="text-xs text-muted-foreground">{Math.round(progress)}٪ من الوقت انقضى</p>
         </div>
       )}
     </div>
