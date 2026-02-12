@@ -48,7 +48,7 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
             <TableRow>
               <TableHead>المريض</TableHead>
               <TableHead>المصدر</TableHead>
-              <TableHead>النوع</TableHead>
+              <TableHead>كشف</TableHead>
               <TableHead>الموعد</TableHead>
               <TableHead>الحالة</TableHead>
               <TableHead className="text-left">الإجراءات</TableHead>
