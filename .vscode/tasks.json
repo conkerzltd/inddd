@@ -18,7 +18,7 @@
     {
       "label": "Check Codespace Health",
       "type": "shell",
-      "command": "echo '=== Codespace Health Check ===' && echo 'Codespace Name:' $CODESPACE_NAME && echo 'Node Version:' $(node --version) && echo 'Package Manager:' $(which bun || which npm) && echo 'Dependencies:' && ([ -d node_modules ] && echo '✓ Installed' || echo '✗ Not installed') && echo 'Port 5173:' && (nc -z localhost 5173 2>/dev/null && echo '✓ Open' || echo '⚠ Not listening')",
+      "command": "bash scripts/quick-health-check.sh",
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",
