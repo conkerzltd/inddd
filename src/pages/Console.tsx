@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { LogOut, Plus, Database, Power, Settings } from "lucide-react";
+import { ScrollFabs } from "@/components/console/ScrollFabs";
 import logoSymbol from "@/assets/logo-symbol.png";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -117,30 +118,32 @@ const Console = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card px-4 py-3">
-        <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={logoSymbol} alt="inddd" className="h-8 w-8" />
-            <div>
+      <header className="border-b border-border bg-card px-4 py-3 sticky top-0 z-20">
+        <div className="container mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <img src={logoSymbol} alt="inddd" className="h-8 w-8 shrink-0" />
+            <div className="min-w-0">
               <h1 className="text-lg font-bold text-foreground">لوحة التحكم</h1>
-              <p className="text-sm text-muted-foreground">
-                {user?.email} · {userRoles.map((r) => r.role).join("، ") || "بدون صلاحية"}
+              <p className="text-xs text-muted-foreground truncate">
+                {user?.email}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/clinic-profile")}>
-              <Settings className="ml-2 h-4 w-4" />الملف الشخصي
+          <div className="flex items-center gap-1 shrink-0">
+            <Button variant="ghost" size="icon" className="h-10 w-10 md:h-auto md:w-auto md:px-3" onClick={() => navigate("/clinic-profile")}>
+              <Settings className="h-4 w-4 md:ml-2" /><span className="hidden md:inline">الملف الشخصي</span>
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/queue-settings")}>
+            <Button variant="ghost" size="icon" className="h-10 w-10 md:h-auto md:w-auto md:px-3 hidden md:inline-flex" onClick={() => navigate("/queue-settings")}>
               إعدادات قائمة الانتظار
             </Button>
-            <Button variant="ghost" size="sm" onClick={signOut}>
-              <LogOut className="ml-2 h-4 w-4" />تسجيل الخروج
+            <Button variant="ghost" size="icon" className="h-10 w-10 md:h-auto md:w-auto md:px-3" onClick={signOut}>
+              <LogOut className="h-4 w-4 md:ml-2" /><span className="hidden md:inline">تسجيل الخروج</span>
             </Button>
           </div>
         </div>
       </header>
+
+      <ScrollFabs />
 
       <main className="container mx-auto p-4 space-y-4">
         {!clinicId && !loading ? (
@@ -154,24 +157,24 @@ const Console = () => {
           </div>
         ) : (
           <>
-            <div className="rounded-lg border border-border bg-card p-4 flex flex-col gap-3">
-              <div className="flex items-center justify-between">
+              <div className="rounded-lg border border-border bg-card p-4 flex flex-col gap-3">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">لوحة اليوم</h2>
                   <p className="text-sm text-muted-foreground">
                     {getClinicToday(clinicTimezone)} ({clinicTimezone})
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {clinicId && <CreateTicketDialog clinicId={clinicId} clinicName={clinicName} onCreated={refresh} />}
                   {isOwnerOrAdmin && (
-                    <Button variant="outline" size="sm" onClick={handleSeed} disabled={seeding}>
+                    <Button variant="outline" size="sm" className="min-h-[44px] md:min-h-0" onClick={handleSeed} disabled={seeding}>
                       <Database className="ml-2 h-4 w-4" />
-                      {seeding ? "جاري الإضافة…" : "بيانات تجريبية"}
+                      {seeding ? "جاري…" : "تجريبي"}
                     </Button>
                   )}
                   {isOwnerOrAdmin && (
-                    <Button variant="destructive" size="sm" onClick={() => {
+                    <Button variant="destructive" size="sm" className="min-h-[44px] md:min-h-0" onClick={() => {
                       if (window.confirm("هل تريد إغلاق جميع التذاكر المتبقية لليوم؟ لا يمكن التراجع.")) {
                         actions.closeOutDay();
                       }
@@ -181,7 +184,7 @@ const Console = () => {
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-6 border-t border-border pt-3">
+              <div className="flex flex-wrap items-center gap-4 border-t border-border pt-3">
                 <div className="flex items-center gap-2">
                   <Switch
                     id="pause-toggle"
