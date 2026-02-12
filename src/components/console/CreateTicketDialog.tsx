@@ -173,9 +173,9 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
               <Select value={type} onValueChange={setType}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="NORMAL">عادي</SelectItem>
                   <SelectItem value="SCHEDULED">ميعاد</SelectItem>
-                  <SelectItem value="URGENT">عاجل</SelectItem>
+                  <SelectItem value="NORMAL">عادي</SelectItem>
+                  <SelectItem value="URGENT">مستعجل</SelectItem>
                 </SelectContent>
               </Select>
             </div>
