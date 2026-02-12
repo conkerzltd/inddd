@@ -83,6 +83,8 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
       return;
     }
     setSubmitting(true);
+    // For walk-in, capture current time as arrival
+    const nowHHMM = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
     // Open popup immediately to avoid popup blocker
     const popup = window.open("about:blank", "_blank");
     try {
@@ -93,7 +95,7 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
         p_visit_type: visitType as any,
         p_patient_phone: toEgE164Digits(phone10),
         p_patient_name: name.trim(),
-        p_appt_hhmm: type === "SCHEDULED" ? apptTime : null,
+        p_appt_hhmm: type === "SCHEDULED" ? apptTime : (source === "WALK_IN" ? nowHHMM : null),
         p_external_booking_app_id: source === "EXTERNAL" && extAppId ? extAppId : null,
         p_external_booking_app_other: source === "EXTERNAL" && selectedAppCode === "OTHER" ? extAppOther : null,
       });
@@ -159,7 +161,12 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label>المصدر</Label>
-              <Select value={source} onValueChange={(v) => { setSource(v); if (v !== "EXTERNAL") { setExtAppId(""); setExtAppOther(""); } }}>
+              <Select value={source} onValueChange={(v) => {
+                setSource(v);
+                if (v !== "EXTERNAL") { setExtAppId(""); setExtAppOther(""); }
+                // Walk-in can't be SCHEDULED
+                if (v === "WALK_IN" && type === "SCHEDULED") { setType("NORMAL"); setApptTime(""); }
+              }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="WALK_IN">حضور مباشر</SelectItem>
@@ -173,7 +180,7 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
               <Select value={type} onValueChange={setType}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="SCHEDULED">ميعاد</SelectItem>
+                  {source !== "WALK_IN" && <SelectItem value="SCHEDULED">ميعاد</SelectItem>}
                   <SelectItem value="NORMAL">عادي</SelectItem>
                   <SelectItem value="URGENT">مستعجل</SelectItem>
                 </SelectContent>
