@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Diagnose Codespace Connection",
+      "type": "shell",
+      "command": "bash scripts/diagnose-codespace.sh",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Check Codespace Health",
+      "type": "shell",
+      "command": "echo '=== Codespace Health Check ===' && echo 'Codespace Name:' $CODESPACE_NAME && echo 'Node Version:' $(node --version) && echo 'Package Manager:' $(which bun || which npm) && echo 'Dependencies:' && ([ -d node_modules ] && echo '✓ Installed' || echo '✗ Not installed') && echo 'Port 5173:' && (nc -z localhost 5173 2>/dev/null && echo '✓ Open' || echo '⚠ Not listening')",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "View Codespace Environment",
+      "type": "shell",
+      "command": "env | grep -i codespace",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    }
+  ]
+}
