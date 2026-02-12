@@ -48,7 +48,7 @@ export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, 
               <TableHead>اسم المريض</TableHead>
               <TableHead>نوع الزيارة</TableHead>
               <TableHead>الوصول</TableHead>
-              <TableHead className="text-left">الإجراءات</TableHead>
+              <TableHead className="text-left w-[180px]">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -62,7 +62,7 @@ export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, 
                 <TableCell>
                   {t.arrival_confirmed_at ? fmtTime(t.arrival_confirmed_at, clinicTimezone) : "—"}
                 </TableCell>
-                <TableCell className="text-left space-x-1 space-x-reverse">
+                <TableCell className="text-left w-[180px] space-x-1 space-x-reverse">
                   <Button size="sm" variant="outline" onClick={() => setUrgentTicketId(t.id)}>
                     <Zap className="h-3 w-3 ml-1" />عاجل
                   </Button>

@@ -44,7 +44,7 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
             <TableHead>المصدر</TableHead>
             <TableHead>نوع الزيارة</TableHead>
             <TableHead>الموعد</TableHead>
-            <TableHead className="text-left">الإجراءات</TableHead>
+            <TableHead className="text-left w-[220px]">الإجراءات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -66,7 +66,7 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
               <TableCell>
                 {t.appointment_time ? fmtTime(t.appointment_time, clinicTimezone) : "—"}
               </TableCell>
-              <TableCell className="text-left space-x-1 space-x-reverse">
+              <TableCell className="text-left w-[220px] space-x-1 space-x-reverse">
                 <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => onSendLink(t.id)} title="إعادة الإرسال">
                   <Send className="h-3 w-3" />
                 </Button>
