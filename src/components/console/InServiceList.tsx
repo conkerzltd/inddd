@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState } from "react";
 import { TicketRow } from "@/hooks/useClinicTickets";
 import { TicketSection } from "./TicketSection";
 import {
@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Phone } from "lucide-react";
+import { playQueueChime } from "@/utils/chimeSound";
 
 interface Props {
   tickets: TicketRow[];
@@ -19,22 +20,8 @@ const fmtTime = (iso: string, tz: string) =>
     timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
   }).format(new Date(iso));
 
-const CHIME_URL = "https://cdn.freesound.org/previews/536/536420_4921277-lq.mp3";
-
 export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext }: Props) {
   const [completedId, setCompletedId] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const playChime = useCallback(() => {
-    try {
-      if (!audioRef.current) {
-        audioRef.current = new Audio(CHIME_URL);
-        audioRef.current.volume = 0.5;
-      }
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => {});
-    } catch {}
-  }, []);
 
   const handleComplete = async (id: string) => {
     await onComplete(id);
@@ -42,7 +29,7 @@ export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext 
   };
 
   const handleCallNext = async () => {
-    playChime();
+    playQueueChime();
     setCompletedId(null);
     await onCallNext();
   };
