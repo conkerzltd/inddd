@@ -21,12 +21,10 @@ const fmtTime = (iso: string, tz: string) =>
     timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
   }).format(new Date(iso));
 
-const laneLabel = (rk: number | null) => {
-  if (rk === null) return "—";
-  if (rk >= 3_000_000_000) return "عادي";
-  if (rk >= 2_000_000_000) return "مجدول";
-  if (rk >= 1_000_000_000) return "عاجل";
-  return "—";
+const visitTypeLabel = (v: string) => {
+  if (v === "NEW") return "كشف جديد";
+  if (v === "CONSULTATION") return "استشارة";
+  return v;
 };
 
 export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, onCancel }: Props) {
@@ -48,9 +46,8 @@ export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, 
             <TableRow>
               <TableHead className="w-12">الرقم</TableHead>
               <TableHead>اسم المريض</TableHead>
-              <TableHead>كشف</TableHead>
+              <TableHead>نوع الزيارة</TableHead>
               <TableHead>الوصول</TableHead>
-              <TableHead>المسار</TableHead>
               <TableHead className="text-left">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
@@ -58,12 +55,13 @@ export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, 
             {tickets.map((t, i) => (
               <TableRow key={t.id}>
                 <TableCell className="font-mono">{i + 1}</TableCell>
-                <TableCell className="font-medium">{t.patient_name || "—"}</TableCell>
-                <TableCell>{t.type === "NORMAL" ? "عادي" : t.type === "SCHEDULED" ? "مجدول" : t.type === "URGENT" ? "عاجل" : t.type}</TableCell>
+                <TableCell>
+                  <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
+                </TableCell>
+                <TableCell>{visitTypeLabel(t.visit_type)}</TableCell>
                 <TableCell>
                   {t.arrival_confirmed_at ? fmtTime(t.arrival_confirmed_at, clinicTimezone) : "—"}
                 </TableCell>
-                <TableCell>{laneLabel(t.rank_key)}</TableCell>
                 <TableCell className="text-left space-x-1 space-x-reverse">
                   <Button size="sm" variant="outline" onClick={() => setUrgentTicketId(t.id)}>
                     <Zap className="h-3 w-3 ml-1" />عاجل
