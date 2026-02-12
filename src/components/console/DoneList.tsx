@@ -1,18 +1,42 @@
 import { TicketRow } from "@/hooks/useClinicTickets";
 import { TicketSection } from "./TicketSection";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 
 interface Props {
   tickets: TicketRow[];
 }
 
+const visitTypeLabel = (v: string) => {
+  if (v === "NEW") return "كشف جديد";
+  if (v === "CONSULTATION") return "استشارة";
+  return v;
+};
+
 export function DoneList({ tickets }: Props) {
   return (
     <TicketSection title="مكتمل" count={tickets.length} collapsible defaultOpen={false}>
-      <ul className="space-y-1 text-sm text-muted-foreground">
-        {tickets.map((t) => (
-          <li key={t.id}>{t.patient_name || "غير معروف"} — {t.type === "NORMAL" ? "عادي" : t.type === "SCHEDULED" ? "مجدول" : t.type === "URGENT" ? "عاجل" : t.type}</li>
-        ))}
-      </ul>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-12">الرقم</TableHead>
+            <TableHead>اسم المريض</TableHead>
+            <TableHead>نوع الزيارة</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {tickets.map((t, i) => (
+            <TableRow key={t.id}>
+              <TableCell className="font-mono">{i + 1}</TableCell>
+              <TableCell>
+                <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "غير معروف"}</span>
+              </TableCell>
+              <TableCell>{visitTypeLabel(t.visit_type)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </TicketSection>
   );
 }

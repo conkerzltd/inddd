@@ -14,6 +14,12 @@ interface Props {
   onSetUrgent: (id: string, pos: string, n: number | null, note: string | null) => Promise<any>;
 }
 
+const visitTypeLabel = (v: string) => {
+  if (v === "NEW") return "كشف جديد";
+  if (v === "CONSULTATION") return "استشارة";
+  return v;
+};
+
 export function ReturnedList({ tickets, onReinsert, onSetUrgent }: Props) {
   const [dialogTicketId, setDialogTicketId] = useState<string | null>(null);
   const [dialogMode, setDialogMode] = useState<"reinsert" | "urgent">("reinsert");
@@ -24,17 +30,21 @@ export function ReturnedList({ tickets, onReinsert, onSetUrgent }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12">الرقم</TableHead>
               <TableHead>اسم المريض</TableHead>
-              <TableHead>النوع</TableHead>
-              <TableHead className="text-left">الإجراءات</TableHead>
+              <TableHead>نوع الزيارة</TableHead>
+              <TableHead className="text-left w-[180px]">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tickets.map((t) => (
+            {tickets.map((t, i) => (
               <TableRow key={t.id}>
-                <TableCell className="font-medium">{t.patient_name || "—"}</TableCell>
-                <TableCell>{t.type === "NORMAL" ? "عادي" : t.type === "SCHEDULED" ? "مجدول" : t.type === "URGENT" ? "عاجل" : t.type}</TableCell>
-                <TableCell className="text-left space-x-1 space-x-reverse">
+                <TableCell className="font-mono">{i + 1}</TableCell>
+                <TableCell>
+                  <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
+                </TableCell>
+                <TableCell>{visitTypeLabel(t.visit_type)}</TableCell>
+                <TableCell className="text-left w-[180px] space-x-1 space-x-reverse">
                   <Button size="sm" variant="outline" onClick={() => { setDialogTicketId(t.id); setDialogMode("reinsert"); }}>
                     <RotateCcw className="h-3 w-3 ml-1" />إعادة إدراج
                   </Button>

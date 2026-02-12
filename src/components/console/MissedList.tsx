@@ -17,17 +17,21 @@ export function MissedList({ tickets, onMarkReturned }: Props) {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-12">الرقم</TableHead>
             <TableHead>اسم المريض</TableHead>
             <TableHead>عدد مرات الغياب</TableHead>
-            <TableHead className="text-left">الإجراءات</TableHead>
+            <TableHead className="text-left w-[140px]">الإجراءات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tickets.map((t) => (
+          {tickets.map((t, i) => (
             <TableRow key={t.id}>
-              <TableCell className="font-medium">{t.patient_name || "—"}</TableCell>
+              <TableCell className="font-mono">{i + 1}</TableCell>
+              <TableCell>
+                <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
+              </TableCell>
               <TableCell>{t.miss_count}</TableCell>
-              <TableCell className="text-left">
+              <TableCell className="text-left w-[140px]">
                 <Button size="sm" variant="outline" onClick={() => onMarkReturned(t.id)}>
                   <RotateCcw className="h-3 w-3 ml-1" />تسجيل عودة
                 </Button>
