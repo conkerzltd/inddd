@@ -50,6 +50,12 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+**Troubleshooting Codespaces**
+
+If you encounter connection issues:
+- Run the diagnostic tool: `npm run diagnose`
+- See the complete troubleshooting guide: [docs/CODESPACE_TROUBLESHOOTING.md](docs/CODESPACE_TROUBLESHOOTING.md)
+
 ## What technologies are used for this project?
 
 This project is built with:

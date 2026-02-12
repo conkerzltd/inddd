@@ -2,6 +2,46 @@
 
 This guide helps resolve common issues when opening GitHub Codespaces for this repository.
 
+> 🚀 **Quick Fix?** See the [Quick Reference Guide](./CODESPACE_QUICK_FIX.md) for fast solutions.
+
+## Quick Diagnostic Tool
+
+Run our diagnostic script to automatically check your codespace health:
+```bash
+bash scripts/diagnose-codespace.sh
+# or
+npm run diagnose
+```
+
+This will check your environment, dependencies, ports, and provide specific recommendations.
+
+## Common Error: "Failed to connect to codespace. Codespace..."
+
+If you see the error **"Failed to connect to codespace. Codespace '<name>'"** (or similar truncated message):
+
+### What This Means
+This error typically occurs when:
+1. The codespace container is still initializing (most common)
+2. The connection timed out during container startup
+3. VS Code lost connection to the remote environment
+4. Network issues interrupted the connection
+
+### Immediate Solutions
+1. **Wait and Retry** (works 80% of the time):
+   - Wait 30-60 seconds
+   - Click "Reload Window" in VS Code or refresh your browser
+   - The container is likely still starting up
+
+2. **Check Creation Progress**:
+   - Go to GitHub.com → Your Codespaces
+   - Click "..." menu on your codespace → "View creation log"
+   - Look for the postCreateCommand status
+   - Wait until you see "Finished configuring codespace"
+
+3. **Force Reconnect**:
+   - In VS Code: Command Palette (F1) → "Codespaces: Reconnect"
+   - In Browser: Refresh the page
+
 ## Quick Fixes
 
 ### Phase 1: Check for Platform Incidents
@@ -39,12 +79,19 @@ Try rebuilding with "Full Rebuild":
 The development server (Vite) runs on port 5173. Ensure:
 1. The port is forwarded in your Codespace
 2. Check the "Ports" tab in VS Code for port 5173
+3. Run `npm run dev` to start the development server
 
 ### Issue: VS Code extensions not loading
 1. Check the Extensions view (Ctrl+Shift+X)
 2. Manually install if missing:
    - ESLint (`dbaeumer.vscode-eslint`)
    - Prettier (`esbenp.prettier-vscode`)
+
+### Issue: Dependencies not installing
+If the postCreateCommand fails:
+1. Manually run: `bun install` or `npm install`
+2. Check creation logs for specific error messages
+3. Try `npm ci` for a clean install
 
 ## Browser-Specific Issues
 
