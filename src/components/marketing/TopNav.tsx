@@ -19,12 +19,12 @@ type TopNavProps = {
   onToggleLanguage: () => void;
 };
 
-const TopNav = ({ labels, language, onToggleLanguage }: TopNavProps) => (
-  <header className="border-b border-border/60 bg-background/80 backdrop-blur">
+const TopNav = ({ labels, language, onToggleLanguage }: TopNavProps) =>
+<header className="border-b border-border/60 bg-background/80 backdrop-blur">
     <div className="container mx-auto flex items-center justify-between px-4 py-4">
       <div className="flex items-center gap-8">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logoWordmark} alt="inddd.com" className="h-8" />
+          
         </Link>
         <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
           <Link to="/doctors" className="hover:text-foreground">
@@ -52,16 +52,16 @@ const TopNav = ({ labels, language, onToggleLanguage }: TopNavProps) => (
           <Link to="/login">{labels.ctaPrimary}</Link>
         </Button>
         <button
-          type="button"
-          onClick={onToggleLanguage}
-          className="ml-2 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground"
-          aria-label={labels.language}
-        >
+        type="button"
+        onClick={onToggleLanguage}
+        className="ml-2 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground"
+        aria-label={labels.language}>
+
           {language === "en" ? "AR" : "EN"}
         </button>
       </div>
     </div>
-  </header>
-);
+  </header>;
+
 
 export default TopNav;
