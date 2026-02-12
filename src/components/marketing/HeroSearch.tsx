@@ -26,7 +26,8 @@ type HeroSearchProps = {
 
 const HeroSearch = ({ specialties, cities, labels }: HeroSearchProps) => {
   const navigate = useNavigate();
-  const { localePath } = useLocale();
+  const { locale, localePath } = useLocale();
+  const isAr = locale === "ar";
   const [specialty, setSpecialty] = useState("");
   const [city, setCity] = useState("");
   const [area, setArea] = useState("");
@@ -72,7 +73,7 @@ const HeroSearch = ({ specialties, cities, labels }: HeroSearchProps) => {
       <div className="container mx-auto grid gap-10 px-4 py-16 lg:grid-cols-[1.2fr_1fr] lg:items-center">
         <div className="space-y-6">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            Patients-first queue clarity
+            {isAr ? "وضوح الطابور للمرضى أولاً" : "Patients-first queue clarity"}
           </p>
           <h1 className="text-4xl font-bold text-foreground md:text-5xl">
             {labels.title}
@@ -103,10 +104,10 @@ const HeroSearch = ({ specialties, cities, labels }: HeroSearchProps) => {
                     setArea("");
                   }}
                 >
-                  <option value="">Select specialty</option>
+                  <option value="">{isAr ? "اختر التخصص" : "Select specialty"}</option>
                   {specialties.map((item) => (
                     <option key={item.slug} value={item.slug}>
-                      {item.name}
+                      {isAr ? item.nameAr : item.name}
                     </option>
                   ))}
                 </select>
@@ -122,10 +123,10 @@ const HeroSearch = ({ specialties, cities, labels }: HeroSearchProps) => {
                   }}
                   disabled={!specialty}
                 >
-                  <option value="">Select city</option>
+                  <option value="">{isAr ? "اختر المدينة" : "Select city"}</option>
                   {cities.map((item) => (
                     <option key={item.slug} value={item.slug}>
-                      {item.name}
+                      {isAr ? item.nameAr : item.name}
                     </option>
                   ))}
                 </select>
@@ -138,10 +139,10 @@ const HeroSearch = ({ specialties, cities, labels }: HeroSearchProps) => {
                   onChange={(event) => setArea(event.target.value)}
                   disabled={!city}
                 >
-                  <option value="">Select area</option>
+                  <option value="">{isAr ? "اختر المنطقة" : "Select area"}</option>
                   {areaOptions.map((item) => (
                     <option key={item.slug} value={item.slug}>
-                      {item.name}
+                      {isAr ? item.nameAr : item.name}
                     </option>
                   ))}
                 </select>
@@ -152,7 +153,7 @@ const HeroSearch = ({ specialties, cities, labels }: HeroSearchProps) => {
                   className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
                   value={doctor}
                   onChange={(event) => setDoctor(event.target.value)}
-                  placeholder="Optional"
+                  placeholder={isAr ? "اختياري" : "Optional"}
                 />
               </label>
             </div>

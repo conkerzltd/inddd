@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { useLocale } from "@/i18n/useLocale";
 
 const Footer = () => {
-  const { localePath } = useLocale();
+  const { locale, localePath } = useLocale();
+  const isAr = locale === "ar";
 
   return (
     <footer className="border-t border-border bg-card">
@@ -10,18 +11,18 @@ const Footer = () => {
         <div className="space-y-2">
           <p className="text-sm font-semibold text-foreground">inddd</p>
           <p className="text-xs text-muted-foreground">
-            Patients-first queue clarity for clinics.
+            {isAr ? "وضوح الطابور للعيادات، المريض أولاً." : "Patients-first queue clarity for clinics."}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           <Link to={localePath("/privacy")} className="hover:text-foreground">
-            Privacy
+            {isAr ? "الخصوصية" : "Privacy"}
           </Link>
           <Link to={localePath("/terms")} className="hover:text-foreground">
-            Terms
+            {isAr ? "الشروط" : "Terms"}
           </Link>
           <Link to={localePath("/contact")} className="hover:text-foreground">
-            Contact
+            {isAr ? "تواصل معنا" : "Contact"}
           </Link>
         </div>
       </div>

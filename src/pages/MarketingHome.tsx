@@ -17,7 +17,7 @@ const MarketingHome = () => {
   const { locale } = useLocale();
   // If on /en, force English; otherwise allow toggle (default ar)
   const [languageOverride, setLanguageOverride] = useState<"en" | "ar" | null>(null);
-  const language = locale === "en" ? "en" : (languageOverride ?? "en");
+  const language = locale === "en" ? "en" : (languageOverride ?? "ar");
   const baseUrl = PUBLIC_BASE_URL;
 
   const copy = useMemo(
