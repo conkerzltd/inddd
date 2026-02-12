@@ -51,9 +51,9 @@ export function InsertPositionDialog({ open, onOpenChange, title, onSubmit }: Pr
             <Select value={position} onValueChange={setPosition}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="AFTER_CURRENT">بعد الحالي</SelectItem>
-                <SelectItem value="AFTER_N">بعد الموضع N</SelectItem>
-                <SelectItem value="END">نهاية قائمة الانتظار</SelectItem>
+                <SelectItem value="AFTER_CURRENT">بعد الحالي مباشرة</SelectItem>
+                <SelectItem value="AFTER_N">بعد عدد محدد</SelectItem>
+                <SelectItem value="END">نهاية القائمة</SelectItem>
               </SelectContent>
             </Select>
           </div>
