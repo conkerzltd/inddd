@@ -169,7 +169,7 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
               </Select>
             </div>
             <div className="space-y-1">
-              <Label>النوع</Label>
+              <Label>نوع الكشف</Label>
               <Select value={type} onValueChange={setType}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
