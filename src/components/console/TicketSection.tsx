@@ -29,9 +29,9 @@ export function TicketSection({
   if (count === 0 && !alwaysShow) return null;
 
   return (
-    <Card>
+    <Card className="animate-fade-in">
       <CardHeader
-        className="flex flex-row items-center justify-between py-3 px-4 cursor-pointer"
+        className="flex flex-row items-center justify-between py-3 px-4 cursor-pointer sticky top-0 z-10 bg-card rounded-t-lg border-b border-border/50"
         onClick={() => collapsible && setOpen(!open)}
       >
         <div className="flex items-center gap-2">
@@ -42,7 +42,7 @@ export function TicketSection({
         </div>
         {action && <div onClick={(e) => e.stopPropagation()}>{action}</div>}
       </CardHeader>
-      {open && <CardContent className="px-4 pb-4 pt-0">{children}</CardContent>}
+      {open && <CardContent className="px-3 pb-3 pt-2 md:px-4 md:pb-4 md:pt-0">{children}</CardContent>}
     </Card>
   );
 }

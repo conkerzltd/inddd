@@ -1,5 +1,7 @@
 import { TicketRow } from "@/hooks/useClinicTickets";
 import { TicketSection } from "./TicketSection";
+import { MobileTicketCard } from "./MobileTicketCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -20,40 +22,71 @@ const fmtTime = (iso: string, tz: string) =>
   }).format(new Date(iso));
 
 export function CalledList({ tickets, clinicTimezone, onStartService, onMarkMissed, onCancel }: Props) {
+  const isMobile = useIsMobile();
+
   return (
     <TicketSection title="تم النداء" count={tickets.length}>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-12">الرقم</TableHead>
-            <TableHead>اسم المريض</TableHead>
-            <TableHead>وقت النداء</TableHead>
-            <TableHead className="text-left w-[240px]">الإجراءات</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+      {isMobile ? (
+        <div className="space-y-2">
           {tickets.map((t, i) => (
-            <TableRow key={t.id}>
-              <TableCell className="font-mono">{i + 1}</TableCell>
-              <TableCell>
-                <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
-              </TableCell>
-              <TableCell>{t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—"}</TableCell>
-              <TableCell className="text-left w-[240px] space-x-1 space-x-reverse">
-                <Button size="sm" onClick={() => onStartService(t.id)}>
-                  <Play className="h-3 w-3 ml-1" />بدء الخدمة
-                </Button>
-                <Button size="sm" variant="destructive" onClick={() => onMarkMissed(t.id)}>
-                  <XCircle className="h-3 w-3 ml-1" />لم يحضر
-                </Button>
-                <Button size="sm" variant="destructive" onClick={() => onCancel(t.id)}>
-                  <Ban className="h-3 w-3 ml-1" />إلغاء
-                </Button>
-              </TableCell>
-            </TableRow>
+            <MobileTicketCard
+              key={t.id}
+              index={i + 1}
+              highlight
+              fields={[
+                { label: "الاسم", value: t.patient_name || "—" },
+                { label: "وقت النداء", value: t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—" },
+              ]}
+              actions={
+                <>
+                  <Button size="sm" className="min-h-[44px] flex-1" onClick={() => onStartService(t.id)}>
+                    <Play className="h-3.5 w-3.5 ml-1" />بدء الخدمة
+                  </Button>
+                  <Button size="sm" variant="destructive" className="min-h-[44px] flex-1" onClick={() => onMarkMissed(t.id)}>
+                    <XCircle className="h-3.5 w-3.5 ml-1" />لم يحضر
+                  </Button>
+                  <Button size="sm" variant="destructive" className="min-h-[44px]" onClick={() => onCancel(t.id)}>
+                    <Ban className="h-3.5 w-3.5" />
+                  </Button>
+                </>
+              }
+            />
           ))}
-        </TableBody>
-      </Table>
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-12">الرقم</TableHead>
+              <TableHead>اسم المريض</TableHead>
+              <TableHead>وقت النداء</TableHead>
+              <TableHead className="text-left w-[240px]">الإجراءات</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tickets.map((t, i) => (
+              <TableRow key={t.id}>
+                <TableCell className="font-mono">{i + 1}</TableCell>
+                <TableCell>
+                  <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
+                </TableCell>
+                <TableCell>{t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—"}</TableCell>
+                <TableCell className="text-left w-[240px] space-x-1 space-x-reverse">
+                  <Button size="sm" onClick={() => onStartService(t.id)}>
+                    <Play className="h-3 w-3 ml-1" />بدء الخدمة
+                  </Button>
+                  <Button size="sm" variant="destructive" onClick={() => onMarkMissed(t.id)}>
+                    <XCircle className="h-3 w-3 ml-1" />لم يحضر
+                  </Button>
+                  <Button size="sm" variant="destructive" onClick={() => onCancel(t.id)}>
+                    <Ban className="h-3 w-3 ml-1" />إلغاء
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
     </TicketSection>
   );
 }

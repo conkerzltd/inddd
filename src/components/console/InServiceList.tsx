@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { TicketRow } from "@/hooks/useClinicTickets";
 import { TicketSection } from "./TicketSection";
+import { MobileTicketCard } from "./MobileTicketCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -22,6 +24,7 @@ const fmtTime = (iso: string, tz: string) =>
 
 export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext }: Props) {
   const [completedId, setCompletedId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   const handleComplete = async (id: string) => {
     await onComplete(id);
@@ -40,51 +43,81 @@ export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext 
       count={tickets.length}
       alwaysShow
       action={
-        <Button size="sm" onClick={handleCallNext}>
+        <Button size="sm" className="min-h-[44px] md:min-h-0" onClick={handleCallNext}>
           <Phone className="h-3 w-3 ml-1" />نداء التالي
         </Button>
       }
     >
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-12">الرقم</TableHead>
-            <TableHead>اسم المريض</TableHead>
-            <TableHead>وقت البدء</TableHead>
-            <TableHead className="text-left w-[140px]">الإجراءات</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+      {isMobile ? (
+        <div className="space-y-2">
           {tickets.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
-                (فارغ)
-              </TableCell>
-            </TableRow>
+            <p className="text-center text-muted-foreground py-6">(فارغ)</p>
           ) : (
             tickets.map((t, i) => (
-              <TableRow key={t.id} className="animate-fade-in">
-                <TableCell className="font-mono">{i + 1}</TableCell>
-                <TableCell>
-                  <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
-                </TableCell>
-                <TableCell>{t.service_started_at ? fmtTime(t.service_started_at, clinicTimezone) : "—"}</TableCell>
-                <TableCell className="text-left w-[140px]">
-                  {completedId === t.id ? (
-                    <Button size="sm" variant="outline" onClick={handleCallNext} className="animate-scale-in">
-                      <Phone className="h-3 w-3 ml-1" />نداء التالي
+              <MobileTicketCard
+                key={t.id}
+                index={i + 1}
+                fields={[
+                  { label: "الاسم", value: t.patient_name || "—" },
+                  { label: "وقت البدء", value: t.service_started_at ? fmtTime(t.service_started_at, clinicTimezone) : "—" },
+                ]}
+                actions={
+                  completedId === t.id ? (
+                    <Button size="sm" variant="outline" className="min-h-[44px] flex-1 animate-scale-in" onClick={handleCallNext}>
+                      <Phone className="h-3.5 w-3.5 ml-1" />نداء التالي
                     </Button>
                   ) : (
-                    <Button size="sm" onClick={() => handleComplete(t.id)}>
-                      <CheckCircle className="h-3 w-3 ml-1" />إتمام
+                    <Button size="sm" className="min-h-[44px] flex-1" onClick={() => handleComplete(t.id)}>
+                      <CheckCircle className="h-3.5 w-3.5 ml-1" />إتمام
                     </Button>
-                  )}
-                </TableCell>
-              </TableRow>
+                  )
+                }
+              />
             ))
           )}
-        </TableBody>
-      </Table>
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-12">الرقم</TableHead>
+              <TableHead>اسم المريض</TableHead>
+              <TableHead>وقت البدء</TableHead>
+              <TableHead className="text-left w-[140px]">الإجراءات</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tickets.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
+                  (فارغ)
+                </TableCell>
+              </TableRow>
+            ) : (
+              tickets.map((t, i) => (
+                <TableRow key={t.id} className="animate-fade-in">
+                  <TableCell className="font-mono">{i + 1}</TableCell>
+                  <TableCell>
+                    <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
+                  </TableCell>
+                  <TableCell>{t.service_started_at ? fmtTime(t.service_started_at, clinicTimezone) : "—"}</TableCell>
+                  <TableCell className="text-left w-[140px]">
+                    {completedId === t.id ? (
+                      <Button size="sm" variant="outline" onClick={handleCallNext} className="animate-scale-in">
+                        <Phone className="h-3 w-3 ml-1" />نداء التالي
+                      </Button>
+                    ) : (
+                      <Button size="sm" onClick={() => handleComplete(t.id)}>
+                        <CheckCircle className="h-3 w-3 ml-1" />إتمام
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      )}
     </TicketSection>
   );
 }

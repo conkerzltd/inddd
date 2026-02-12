@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { TicketRow } from "@/hooks/useClinicTickets";
 import { TicketSection } from "./TicketSection";
+import { MobileTicketCard } from "./MobileTicketCard";
 import { InsertPositionDialog } from "./InsertPositionDialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -29,6 +31,7 @@ const visitTypeLabel = (v: string) => {
 
 export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, onCancel }: Props) {
   const [urgentTicketId, setUrgentTicketId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   return (
     <>
@@ -36,44 +39,70 @@ export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, 
         title="قائمة الانتظار"
         count={tickets.length}
         action={
-          <Button size="sm" onClick={onCallNext} disabled={tickets.length === 0}>
+          <Button size="sm" className="min-h-[44px] md:min-h-0" onClick={onCallNext} disabled={tickets.length === 0}>
             <Phone className="h-3 w-3 ml-1" />نداء التالي
           </Button>
         }
       >
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">الرقم</TableHead>
-              <TableHead>اسم المريض</TableHead>
-              <TableHead>نوع الزيارة</TableHead>
-              <TableHead>الوصول</TableHead>
-              <TableHead className="text-left w-[180px]">الإجراءات</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        {isMobile ? (
+          <div className="space-y-2">
             {tickets.map((t, i) => (
-              <TableRow key={t.id}>
-                <TableCell className="font-mono">{i + 1}</TableCell>
-                <TableCell>
-                  <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
-                </TableCell>
-                <TableCell>{visitTypeLabel(t.visit_type)}</TableCell>
-                <TableCell>
-                  {t.arrival_confirmed_at ? fmtTime(t.arrival_confirmed_at, clinicTimezone) : "—"}
-                </TableCell>
-                <TableCell className="text-left w-[180px] space-x-1 space-x-reverse">
-                  <Button size="sm" variant="outline" onClick={() => setUrgentTicketId(t.id)}>
-                    <Zap className="h-3 w-3 ml-1" />عاجل
-                  </Button>
-                  <Button size="sm" variant="destructive" onClick={() => onCancel(t.id)}>
-                    <Ban className="h-3 w-3 ml-1" />إلغاء
-                  </Button>
-                </TableCell>
-              </TableRow>
+              <MobileTicketCard
+                key={t.id}
+                index={i + 1}
+                fields={[
+                  { label: "الاسم", value: t.patient_name || "—" },
+                  { label: "نوع الزيارة", value: visitTypeLabel(t.visit_type) },
+                  { label: "الوصول", value: t.arrival_confirmed_at ? fmtTime(t.arrival_confirmed_at, clinicTimezone) : "—" },
+                ]}
+                actions={
+                  <>
+                    <Button size="sm" variant="outline" className="min-h-[44px] flex-1" onClick={() => setUrgentTicketId(t.id)}>
+                      <Zap className="h-3.5 w-3.5 ml-1" />عاجل
+                    </Button>
+                    <Button size="sm" variant="destructive" className="min-h-[44px]" onClick={() => onCancel(t.id)}>
+                      <Ban className="h-3.5 w-3.5 ml-1" />إلغاء
+                    </Button>
+                  </>
+                }
+              />
             ))}
-          </TableBody>
-        </Table>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">الرقم</TableHead>
+                <TableHead>اسم المريض</TableHead>
+                <TableHead>نوع الزيارة</TableHead>
+                <TableHead>الوصول</TableHead>
+                <TableHead className="text-left w-[180px]">الإجراءات</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tickets.map((t, i) => (
+                <TableRow key={t.id}>
+                  <TableCell className="font-mono">{i + 1}</TableCell>
+                  <TableCell>
+                    <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
+                  </TableCell>
+                  <TableCell>{visitTypeLabel(t.visit_type)}</TableCell>
+                  <TableCell>
+                    {t.arrival_confirmed_at ? fmtTime(t.arrival_confirmed_at, clinicTimezone) : "—"}
+                  </TableCell>
+                  <TableCell className="text-left w-[180px] space-x-1 space-x-reverse">
+                    <Button size="sm" variant="outline" onClick={() => setUrgentTicketId(t.id)}>
+                      <Zap className="h-3 w-3 ml-1" />عاجل
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => onCancel(t.id)}>
+                      <Ban className="h-3 w-3 ml-1" />إلغاء
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </TicketSection>
 
       <InsertPositionDialog
