@@ -23,7 +23,7 @@ export function InServiceList({ tickets, clinicTimezone, onComplete }: Props) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>المريض</TableHead>
+            <TableHead>اسم المريض</TableHead>
             <TableHead>وقت البدء</TableHead>
             <TableHead className="text-left">الإجراءات</TableHead>
           </TableRow>

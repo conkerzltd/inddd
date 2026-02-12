@@ -17,7 +17,7 @@ export function MissedList({ tickets, onMarkReturned }: Props) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>المريض</TableHead>
+            <TableHead>اسم المريض</TableHead>
             <TableHead>عدد مرات الغياب</TableHead>
             <TableHead className="text-left">الإجراءات</TableHead>
           </TableRow>

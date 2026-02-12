@@ -25,7 +25,7 @@ export function CalledList({ tickets, clinicTimezone, onStartService, onMarkMiss
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>المريض</TableHead>
+            <TableHead>اسم المريض</TableHead>
             <TableHead>وقت النداء</TableHead>
             <TableHead className="text-left">الإجراءات</TableHead>
           </TableRow>
