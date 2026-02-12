@@ -25,17 +25,21 @@ export function CalledList({ tickets, clinicTimezone, onStartService, onMarkMiss
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-12">الرقم</TableHead>
             <TableHead>اسم المريض</TableHead>
             <TableHead>وقت النداء</TableHead>
-            <TableHead className="text-left">الإجراءات</TableHead>
+            <TableHead className="text-left w-[240px]">الإجراءات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tickets.map((t) => (
+          {tickets.map((t, i) => (
             <TableRow key={t.id}>
-              <TableCell className="font-medium">{t.patient_name || "—"}</TableCell>
+              <TableCell className="font-mono">{i + 1}</TableCell>
+              <TableCell>
+                <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
+              </TableCell>
               <TableCell>{t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—"}</TableCell>
-              <TableCell className="text-left space-x-1 space-x-reverse">
+              <TableCell className="text-left w-[240px] space-x-1 space-x-reverse">
                 <Button size="sm" onClick={() => onStartService(t.id)}>
                   <Play className="h-3 w-3 ml-1" />بدء الخدمة
                 </Button>
