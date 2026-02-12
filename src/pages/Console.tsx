@@ -186,10 +186,11 @@ const Console = () => {
                 <div className="flex items-center gap-2">
                   <Switch
                     id="pause-toggle"
-                    checked={sessionPaused}
+                    checked={!sessionPaused}
                     onCheckedChange={async (checked) => {
-                      setSessionPaused(checked);
-                      await actions.setSessionPaused(checked);
+                      const paused = !checked;
+                      setSessionPaused(paused);
+                      await actions.setSessionPaused(paused);
                     }}
                   />
                   <Label htmlFor="pause-toggle" className="text-sm">
