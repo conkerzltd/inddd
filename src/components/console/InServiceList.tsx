@@ -38,6 +38,7 @@ export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext 
     <TicketSection
       title="داخل الكشف"
       count={tickets.length}
+      alwaysShow
       action={
         <Button size="sm" onClick={handleCallNext}>
           <Phone className="h-3 w-3 ml-1" />نداء التالي
@@ -54,26 +55,34 @@ export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext 
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tickets.map((t, i) => (
-            <TableRow key={t.id} className="animate-fade-in">
-              <TableCell className="font-mono">{i + 1}</TableCell>
-              <TableCell>
-                <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
-              </TableCell>
-              <TableCell>{t.service_started_at ? fmtTime(t.service_started_at, clinicTimezone) : "—"}</TableCell>
-              <TableCell className="text-left w-[140px]">
-                {completedId === t.id ? (
-                  <Button size="sm" variant="outline" onClick={handleCallNext} className="animate-scale-in">
-                    <Phone className="h-3 w-3 ml-1" />نداء التالي
-                  </Button>
-                ) : (
-                  <Button size="sm" onClick={() => handleComplete(t.id)}>
-                    <CheckCircle className="h-3 w-3 ml-1" />إتمام
-                  </Button>
-                )}
+          {tickets.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
+                (فارغ)
               </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            tickets.map((t, i) => (
+              <TableRow key={t.id} className="animate-fade-in">
+                <TableCell className="font-mono">{i + 1}</TableCell>
+                <TableCell>
+                  <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
+                </TableCell>
+                <TableCell>{t.service_started_at ? fmtTime(t.service_started_at, clinicTimezone) : "—"}</TableCell>
+                <TableCell className="text-left w-[140px]">
+                  {completedId === t.id ? (
+                    <Button size="sm" variant="outline" onClick={handleCallNext} className="animate-scale-in">
+                      <Phone className="h-3 w-3 ml-1" />نداء التالي
+                    </Button>
+                  ) : (
+                    <Button size="sm" onClick={() => handleComplete(t.id)}>
+                      <CheckCircle className="h-3 w-3 ml-1" />إتمام
+                    </Button>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </TicketSection>
