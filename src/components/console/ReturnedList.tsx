@@ -24,7 +24,7 @@ export function ReturnedList({ tickets, onReinsert, onSetUrgent }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>المريض</TableHead>
+              <TableHead>اسم المريض</TableHead>
               <TableHead>النوع</TableHead>
               <TableHead className="text-left">الإجراءات</TableHead>
             </TableRow>
