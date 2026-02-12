@@ -27,11 +27,10 @@ const sourceLabel = (s: string) => {
   return s;
 };
 
-const typeLabel = (t: string) => {
-  if (t === "NORMAL") return "عادي";
-  if (t === "SCHEDULED") return "ميعاد";
-  if (t === "URGENT") return "مستعجل";
-  return t;
+const visitTypeLabel = (v: string) => {
+  if (v === "NEW") return "كشف جديد";
+  if (v === "CONSULTATION") return "استشارة";
+  return v;
 };
 
 export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmArrival, onCancel }: Props) {
@@ -40,19 +39,20 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-12">الرقم</TableHead>
             <TableHead>اسم المريض</TableHead>
             <TableHead>المصدر</TableHead>
-            <TableHead>كشف</TableHead>
+            <TableHead>نوع الزيارة</TableHead>
             <TableHead>الموعد</TableHead>
-            <TableHead>الحالة</TableHead>
             <TableHead className="text-left">الإجراءات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tickets.map((t) => (
+          {tickets.map((t, i) => (
             <TableRow key={t.id}>
+              <TableCell className="font-mono">{i + 1}</TableCell>
               <TableCell>
-                <span className="font-medium">{t.patient_name || "—"}</span>
+                <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
                 {t.source === "EXTERNAL" && t.external_booking_app_label && (
                   <span className="block text-xs text-muted-foreground">
                     خارجي · {t.external_booking_app_code === "OTHER" && t.external_booking_app_other
@@ -62,11 +62,10 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
                 )}
               </TableCell>
               <TableCell>{sourceLabel(t.source)}</TableCell>
-              <TableCell>{typeLabel(t.type)}</TableCell>
+              <TableCell>{visitTypeLabel(t.visit_type)}</TableCell>
               <TableCell>
                 {t.appointment_time ? fmtTime(t.appointment_time, clinicTimezone) : "—"}
               </TableCell>
-              <TableCell>{t.status}</TableCell>
               <TableCell className="text-left space-x-1 space-x-reverse">
                 <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => onSendLink(t.id)} title="إعادة الإرسال">
                   <Send className="h-3 w-3" />
