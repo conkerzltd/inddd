@@ -266,6 +266,95 @@ export type Database = {
         }
         Relationships: []
       }
+      marketer_attendance: {
+        Row: {
+          attendance_date: string
+          created_at: string
+          id: string
+          marketer_id: string
+          notes: string | null
+          recorded_by: string | null
+          status: Database["public"]["Enums"]["attendance_status"]
+        }
+        Insert: {
+          attendance_date: string
+          created_at?: string
+          id?: string
+          marketer_id: string
+          notes?: string | null
+          recorded_by?: string | null
+          status?: Database["public"]["Enums"]["attendance_status"]
+        }
+        Update: {
+          attendance_date?: string
+          created_at?: string
+          id?: string
+          marketer_id?: string
+          notes?: string | null
+          recorded_by?: string | null
+          status?: Database["public"]["Enums"]["attendance_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketer_attendance_marketer_id_fkey"
+            columns: ["marketer_id"]
+            isOneToOne: false
+            referencedRelation: "marketers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketer_ledger: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          marketer_id: string
+          recorded_by: string | null
+          reference_clinic_id: string | null
+          tx_date: string
+          tx_type: Database["public"]["Enums"]["ledger_tx_type"]
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          marketer_id: string
+          recorded_by?: string | null
+          reference_clinic_id?: string | null
+          tx_date?: string
+          tx_type: Database["public"]["Enums"]["ledger_tx_type"]
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          marketer_id?: string
+          recorded_by?: string | null
+          reference_clinic_id?: string | null
+          tx_date?: string
+          tx_type?: Database["public"]["Enums"]["ledger_tx_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketer_ledger_marketer_id_fkey"
+            columns: ["marketer_id"]
+            isOneToOne: false
+            referencedRelation: "marketers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketer_ledger_reference_clinic_id_fkey"
+            columns: ["reference_clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketer_target_areas: {
         Row: {
           created_at: string
@@ -662,6 +751,7 @@ export type Database = {
     }
     Enums: {
       app_role: "owner" | "admin" | "secretary" | "doctor" | "superadmin"
+      attendance_status: "present" | "absent" | "sick_leave"
       audit_action:
         | "TICKET_CREATED"
         | "LINK_SENT"
@@ -680,6 +770,13 @@ export type Database = {
         | "CANCELLED"
       entity_status: "draft" | "pending" | "active" | "blocked"
       insert_position: "AFTER_CURRENT" | "AFTER_N" | "END"
+      ledger_tx_type:
+        | "commission"
+        | "bonus"
+        | "salary"
+        | "deduction"
+        | "penalty"
+        | "payout"
       ticket_source: "EXTERNAL" | "PHONE_CALL" | "WALK_IN"
       ticket_status:
         | "REMOTE_BOOKED"
@@ -837,6 +934,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["owner", "admin", "secretary", "doctor", "superadmin"],
+      attendance_status: ["present", "absent", "sick_leave"],
       audit_action: [
         "TICKET_CREATED",
         "LINK_SENT",
@@ -856,6 +954,14 @@ export const Constants = {
       ],
       entity_status: ["draft", "pending", "active", "blocked"],
       insert_position: ["AFTER_CURRENT", "AFTER_N", "END"],
+      ledger_tx_type: [
+        "commission",
+        "bonus",
+        "salary",
+        "deduction",
+        "penalty",
+        "payout",
+      ],
       ticket_source: ["EXTERNAL", "PHONE_CALL", "WALK_IN"],
       ticket_status: [
         "REMOTE_BOOKED",

@@ -24,6 +24,7 @@ import QueueSettings from "./pages/QueueSettings";
 import OwnerLogin from "./pages/OwnerPortal/OwnerLogin";
 import OwnerDashboard from "./pages/OwnerPortal/OwnerDashboard";
 import MarketerManagement from "./pages/OwnerPortal/MarketerManagement";
+import MarketerProfile from "./pages/OwnerPortal/MarketerProfile";
 import ClinicApprovals from "./pages/OwnerPortal/ClinicApprovals";
 import OwnerAnalytics from "./pages/OwnerPortal/OwnerAnalytics";
 import UserManagement from "./pages/OwnerPortal/UserManagement";
@@ -96,6 +97,14 @@ const App = () => (
               element={
                 <SuperAdminRoute>
                   <MarketerManagement />
+                </SuperAdminRoute>
+              }
+            />
+            <Route
+              path="ad/marketers/:id"
+              element={
+                <SuperAdminRoute>
+                  <MarketerProfile />
                 </SuperAdminRoute>
               }
             />

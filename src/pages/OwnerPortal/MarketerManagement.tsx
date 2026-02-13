@@ -423,7 +423,10 @@ const MarketerManagement = () => {
                     {/* Top row */}
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div>
-                        <h3 className="font-semibold text-foreground">
+                        <h3
+                          className="font-semibold text-foreground hover:text-primary cursor-pointer transition-colors"
+                          onClick={() => navigate(localePath(`/ad/marketers/${m.id}`))}
+                        >
                           {m.name}
                         </h3>
                         <div className="flex items-center gap-2 mt-1">
