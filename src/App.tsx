@@ -23,6 +23,7 @@ import ClinicProfile from "./pages/ClinicProfile";
 import QueueSettings from "./pages/QueueSettings";
 import OwnerLogin from "./pages/OwnerPortal/OwnerLogin";
 import OwnerDashboard from "./pages/OwnerPortal/OwnerDashboard";
+import MarketerManagement from "./pages/OwnerPortal/MarketerManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -74,6 +75,15 @@ const appRoutes = (
         </SuperAdminRoute>
       }
     />
+    <Route
+      path="owner-portal/marketers"
+      element={
+        <SuperAdminRoute>
+          <MarketerManagement />
+        </SuperAdminRoute>
+      }
+    />
+    <Route path="*" element={<NotFound />} />
     <Route path="*" element={<NotFound />} />
   </>
 );
