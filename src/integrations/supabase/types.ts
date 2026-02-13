@@ -68,16 +68,62 @@ export type Database = {
           },
         ]
       }
+      clinic_payments: {
+        Row: {
+          amount: number
+          clinic_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          paid_at: string
+          period_end: string
+          period_start: string
+        }
+        Insert: {
+          amount: number
+          clinic_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          paid_at?: string
+          period_end: string
+          period_start: string
+        }
+        Update: {
+          amount?: number
+          clinic_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          paid_at?: string
+          period_end?: string
+          period_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinic_payments_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clinics: {
         Row: {
           address_text: string | null
           allow_pause_intake: boolean | null
           allow_urgent_insert: boolean | null
+          approved_at: string | null
           avg_service_minutes: number
           avg_service_time_seed_minutes: number | null
           clinic_whatsapp_phone: string | null
           close_time: string
           created_at: string
+          financial_status: Database["public"]["Enums"]["financial_status"]
           governorate_ar: string | null
           grace_minutes: number
           id: string
@@ -92,6 +138,7 @@ export type Database = {
           marketer_id: string | null
           name: string
           name_ar: string | null
+          next_billing_date: string | null
           open_time: string
           phone: string | null
           primary_specialty_id: string | null
@@ -99,7 +146,10 @@ export type Database = {
           serial_id: string | null
           session_paused: boolean
           status: Database["public"]["Enums"]["entity_status"]
+          subscription_fee: number
+          suspended_at: string | null
           timezone: string
+          trial_ends_at: string | null
           wa_message_template: string
           whatsapp_e164_1: string | null
           whatsapp_e164_2: string | null
@@ -111,11 +161,13 @@ export type Database = {
           address_text?: string | null
           allow_pause_intake?: boolean | null
           allow_urgent_insert?: boolean | null
+          approved_at?: string | null
           avg_service_minutes?: number
           avg_service_time_seed_minutes?: number | null
           clinic_whatsapp_phone?: string | null
           close_time?: string
           created_at?: string
+          financial_status?: Database["public"]["Enums"]["financial_status"]
           governorate_ar?: string | null
           grace_minutes?: number
           id?: string
@@ -130,6 +182,7 @@ export type Database = {
           marketer_id?: string | null
           name: string
           name_ar?: string | null
+          next_billing_date?: string | null
           open_time?: string
           phone?: string | null
           primary_specialty_id?: string | null
@@ -137,7 +190,10 @@ export type Database = {
           serial_id?: string | null
           session_paused?: boolean
           status?: Database["public"]["Enums"]["entity_status"]
+          subscription_fee?: number
+          suspended_at?: string | null
           timezone?: string
+          trial_ends_at?: string | null
           wa_message_template?: string
           whatsapp_e164_1?: string | null
           whatsapp_e164_2?: string | null
@@ -149,11 +205,13 @@ export type Database = {
           address_text?: string | null
           allow_pause_intake?: boolean | null
           allow_urgent_insert?: boolean | null
+          approved_at?: string | null
           avg_service_minutes?: number
           avg_service_time_seed_minutes?: number | null
           clinic_whatsapp_phone?: string | null
           close_time?: string
           created_at?: string
+          financial_status?: Database["public"]["Enums"]["financial_status"]
           governorate_ar?: string | null
           grace_minutes?: number
           id?: string
@@ -168,6 +226,7 @@ export type Database = {
           marketer_id?: string | null
           name?: string
           name_ar?: string | null
+          next_billing_date?: string | null
           open_time?: string
           phone?: string | null
           primary_specialty_id?: string | null
@@ -175,7 +234,10 @@ export type Database = {
           serial_id?: string | null
           session_paused?: boolean
           status?: Database["public"]["Enums"]["entity_status"]
+          subscription_fee?: number
+          suspended_at?: string | null
           timezone?: string
+          trial_ends_at?: string | null
           wa_message_template?: string
           whatsapp_e164_1?: string | null
           whatsapp_e164_2?: string | null
@@ -196,6 +258,54 @@ export type Database = {
             columns: ["primary_specialty_id"]
             isOneToOne: false
             referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commissions: {
+        Row: {
+          amount: number
+          clinic_id: string
+          created_at: string
+          earned_date: string | null
+          id: string
+          marketer_id: string
+          paid_at: string | null
+          status: string
+        }
+        Insert: {
+          amount?: number
+          clinic_id: string
+          created_at?: string
+          earned_date?: string | null
+          id?: string
+          marketer_id: string
+          paid_at?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          clinic_id?: string
+          created_at?: string
+          earned_date?: string | null
+          id?: string
+          marketer_id?: string
+          paid_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commissions_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: true
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_marketer_id_fkey"
+            columns: ["marketer_id"]
+            isOneToOne: false
+            referencedRelation: "marketers"
             referencedColumns: ["id"]
           },
         ]
@@ -392,12 +502,16 @@ export type Database = {
       }
       marketers: {
         Row: {
+          absence_penalty_multiplier: number
+          base_salary: number
           city_ar: string | null
+          commission_per_clinic: number
           created_at: string
           created_by: string | null
           detailed_address: string | null
           governorate_ar: string | null
           id: string
+          monthly_target_clinics: number
           name: string
           primary_phone: string
           referral_code: string
@@ -406,14 +520,19 @@ export type Database = {
           target_areas: string[] | null
           updated_at: string
           whatsapp_link: string | null
+          working_days_per_month: number
         }
         Insert: {
+          absence_penalty_multiplier?: number
+          base_salary?: number
           city_ar?: string | null
+          commission_per_clinic?: number
           created_at?: string
           created_by?: string | null
           detailed_address?: string | null
           governorate_ar?: string | null
           id?: string
+          monthly_target_clinics?: number
           name: string
           primary_phone: string
           referral_code: string
@@ -422,14 +541,19 @@ export type Database = {
           target_areas?: string[] | null
           updated_at?: string
           whatsapp_link?: string | null
+          working_days_per_month?: number
         }
         Update: {
+          absence_penalty_multiplier?: number
+          base_salary?: number
           city_ar?: string | null
+          commission_per_clinic?: number
           created_at?: string
           created_by?: string | null
           detailed_address?: string | null
           governorate_ar?: string | null
           id?: string
+          monthly_target_clinics?: number
           name?: string
           primary_phone?: string
           referral_code?: string
@@ -438,6 +562,7 @@ export type Database = {
           target_areas?: string[] | null
           updated_at?: string
           whatsapp_link?: string | null
+          working_days_per_month?: number
         }
         Relationships: []
       }
@@ -640,6 +765,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_clinic: { Args: { p_clinic_id: string }; Returns: Json }
       bootstrap_demo_clinic: { Args: never; Returns: string }
       call_next: { Args: { p_clinic_id: string }; Returns: Json }
       cancel_ticket: { Args: { p_ticket_id: string }; Returns: Json }
@@ -702,7 +828,12 @@ export type Database = {
         Returns: boolean
       }
       is_superadmin: { Args: { _user_id: string }; Returns: boolean }
+      log_clinic_payment: {
+        Args: { p_amount?: number; p_clinic_id: string; p_note?: string }
+        Returns: Json
+      }
       mark_missed: { Args: { p_ticket_id: string }; Returns: Json }
+      mark_overdue_clinics: { Args: never; Returns: Json }
       mark_returned: { Args: { p_ticket_id: string }; Returns: Json }
       onboard_clinic: {
         Args: {
@@ -746,6 +877,7 @@ export type Database = {
         Returns: Json
       }
       start_service: { Args: { p_ticket_id: string }; Returns: Json }
+      suspend_clinic: { Args: { p_clinic_id: string }; Returns: Json }
       urlencode: { Args: { "": string }; Returns: string }
       validate_referral_code: { Args: { p_code: string }; Returns: Json }
     }
@@ -768,7 +900,13 @@ export type Database = {
         | "INTAKE_CLOSED"
         | "INTAKE_OPENED"
         | "CANCELLED"
+        | "CLINIC_APPROVED"
+        | "CLINIC_SUSPENDED"
+        | "PAYMENT_LOGGED"
+        | "COMMISSION_EARNED"
+        | "OVERDUE_FLAGGED"
       entity_status: "draft" | "pending" | "active" | "blocked"
+      financial_status: "trial" | "paid" | "overdue"
       insert_position: "AFTER_CURRENT" | "AFTER_N" | "END"
       ledger_tx_type:
         | "commission"
@@ -951,8 +1089,14 @@ export const Constants = {
         "INTAKE_CLOSED",
         "INTAKE_OPENED",
         "CANCELLED",
+        "CLINIC_APPROVED",
+        "CLINIC_SUSPENDED",
+        "PAYMENT_LOGGED",
+        "COMMISSION_EARNED",
+        "OVERDUE_FLAGGED",
       ],
       entity_status: ["draft", "pending", "active", "blocked"],
+      financial_status: ["trial", "paid", "overdue"],
       insert_position: ["AFTER_CURRENT", "AFTER_N", "END"],
       ledger_tx_type: [
         "commission",

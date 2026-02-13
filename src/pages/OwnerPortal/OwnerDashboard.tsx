@@ -8,7 +8,6 @@ import {
   Users,
   Building2,
   BarChart3,
-  CheckCircle,
   LogOut,
   KeyRound,
 } from "lucide-react";
@@ -32,9 +31,9 @@ const OwnerDashboard = () => {
       available: true,
     },
     {
-      title: "الموافقات",
-      description: "مراجعة العيادات الجديدة والموافقة عليها",
-      icon: CheckCircle,
+      title: "إدارة العيادات",
+      description: "الموافقات والاشتراكات وإدارة العيادات",
+      icon: Building2,
       path: "/ad/approvals",
       available: true,
     },
@@ -44,13 +43,6 @@ const OwnerDashboard = () => {
       icon: KeyRound,
       path: "/ad/users",
       available: true,
-    },
-    {
-      title: "إدارة العيادات",
-      description: "عرض وإدارة كل العيادات والأطباء",
-      icon: Building2,
-      path: "/ad/clinics",
-      available: false,
     },
     {
       title: "التحليلات",
