@@ -26,6 +26,7 @@ import OwnerLogin from "./pages/OwnerPortal/OwnerLogin";
 import OwnerDashboard from "./pages/OwnerPortal/OwnerDashboard";
 import MarketerManagement from "./pages/OwnerPortal/MarketerManagement";
 import ClinicApprovals from "./pages/OwnerPortal/ClinicApprovals";
+import OwnerAnalytics from "./pages/OwnerPortal/OwnerAnalytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -101,7 +102,14 @@ const appRoutes = (
         </SuperAdminRoute>
       }
     />
-    <Route path="*" element={<NotFound />} />
+    <Route
+      path="owner-portal/analytics"
+      element={
+        <SuperAdminRoute>
+          <OwnerAnalytics />
+        </SuperAdminRoute>
+      }
+    />
     <Route path="*" element={<NotFound />} />
   </>
 );

@@ -49,7 +49,7 @@ const OwnerDashboard = () => {
       description: "إحصائيات الأداء ولوحة المتابعة",
       icon: BarChart3,
       path: "/owner-portal/analytics",
-      available: false,
+      available: true,
     },
   ];
 
