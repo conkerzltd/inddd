@@ -35,7 +35,7 @@ const OwnerDashboard = () => {
       description: "مراجعة العيادات الجديدة والموافقة عليها",
       icon: CheckCircle,
       path: "/owner-portal/approvals",
-      available: false,
+      available: true,
     },
     {
       title: "إدارة العيادات",
