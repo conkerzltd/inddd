@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save, Check } from "lucide-react";
+import { ArrowLeft, Save, Check, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import logoSymbol from "@/assets/logo-symbol.png";
+import { PasswordInput } from "@/components/inputs/PasswordInput";
 
 const QueueSettings = () => {
   const { clinicId, loading: authLoading } = useAuth();
@@ -133,7 +134,7 @@ const QueueSettings = () => {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end pb-8">
+        <div className="flex justify-end">
           <Button onClick={handleSave} disabled={saving} className="min-w-32">
             {saving ? "جاري الحفظ..." : saved ? (
               <><Check className="ml-2 h-4 w-4" />تم الحفظ</>
@@ -142,8 +143,95 @@ const QueueSettings = () => {
             )}
           </Button>
         </div>
+
+        <ChangePasswordCard />
       </main>
     </div>
+  );
+};
+
+/* ─── Change Password Card ─── */
+const ChangePasswordCard = () => {
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [changingPw, setChangingPw] = useState(false);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPw.length < 8) {
+      toast.error("كلمة المرور الجديدة يجب أن تكون ٨ أحرف على الأقل");
+      return;
+    }
+    if (newPw !== confirmPw) {
+      toast.error("كلمة المرور الجديدة وتأكيدها غير متطابقتين");
+      return;
+    }
+
+    setChangingPw(true);
+
+    // Verify current password by re-signing in
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) {
+      toast.error("تعذر التحقق من المستخدم الحالي");
+      setChangingPw(false);
+      return;
+    }
+
+    const { error: signInErr } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPw,
+    });
+
+    if (signInErr) {
+      toast.error("كلمة المرور الحالية غير صحيحة");
+      setChangingPw(false);
+      return;
+    }
+
+    const { error: updateErr } = await supabase.auth.updateUser({ password: newPw });
+    setChangingPw(false);
+
+    if (updateErr) {
+      toast.error("فشل تحديث كلمة المرور: " + updateErr.message);
+    } else {
+      toast.success("تم تغيير كلمة المرور بنجاح");
+      setCurrentPw("");
+      setNewPw("");
+      setConfirmPw("");
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <ShieldCheck className="h-4 w-4" />
+          الأمان — تغيير كلمة المرور
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleChangePassword} className="space-y-4">
+          <div className="space-y-2">
+            <Label>كلمة المرور الحالية</Label>
+            <PasswordInput value={currentPw} onChange={(e) => setCurrentPw(e.target.value)} required dir="ltr" />
+          </div>
+          <div className="space-y-2">
+            <Label>كلمة المرور الجديدة</Label>
+            <PasswordInput value={newPw} onChange={(e) => setNewPw(e.target.value)} required minLength={8} placeholder="٨ أحرف على الأقل" dir="ltr" />
+          </div>
+          <div className="space-y-2">
+            <Label>تأكيد كلمة المرور الجديدة</Label>
+            <PasswordInput value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} required minLength={8} dir="ltr" />
+          </div>
+          <div className="flex justify-end pb-2">
+            <Button type="submit" disabled={changingPw} className="min-w-32">
+              {changingPw ? "جاري التحديث..." : "تغيير كلمة المرور"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 
