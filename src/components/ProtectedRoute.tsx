@@ -5,7 +5,7 @@ import { withLocalePath } from "@/i18n/paths";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRoles?: Array<"owner" | "admin" | "secretary" | "doctor">;
+  requiredRoles?: Array<"doctor">;
   skipOnboardingCheck?: boolean;
   skipProfileCheck?: boolean;
 }
