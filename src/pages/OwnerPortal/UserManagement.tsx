@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, ArrowRight, Search, KeyRound, Loader2 } from "lucide-react";
+import { PasswordInput } from "@/components/inputs/PasswordInput";
 
 interface FoundUser {
   id: string;
@@ -216,8 +217,7 @@ const UserManagement = () => {
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label>كلمة المرور الجديدة</Label>
-              <Input
-                type="password"
+              <PasswordInput
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 dir="ltr"
@@ -226,8 +226,7 @@ const UserManagement = () => {
             </div>
             <div className="space-y-2">
               <Label>تأكيد كلمة المرور</Label>
-              <Input
-                type="password"
+              <PasswordInput
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 dir="ltr"

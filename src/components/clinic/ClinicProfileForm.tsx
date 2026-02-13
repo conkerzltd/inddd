@@ -6,10 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { MapPin, Copy, CopyCheck, Save, Check } from "lucide-react";
 import { toast } from "sonner";
 import { EgyptPhoneInput } from "@/components/inputs/EgyptPhoneInput";
+import { GeoDropdown, type GeoValue } from "@/components/inputs/GeoDropdown";
 import { toEgE164Digits, storedToInput10 } from "@/utils/phoneEG";
 
 const DAYS = [
@@ -26,15 +26,13 @@ type WorkingHours = Record<string, { open: string; close: string } | null>;
 
 interface ClinicProfileFormProps {
   clinicId: string;
-  /** Called after a successful save (submit / full save) */
   onSaved?: () => void;
-  /** Called after a draft save (no validation required) */
   onDraftSave?: () => void;
-  /** Label for the submit button */
   submitLabel?: string;
-  /** Show draft-save button */
   showDraftSave?: boolean;
 }
+
+const EMPTY_GEO: GeoValue = { governorate_ar: "", level2_ar: "", level2_type: "", level3_ar: "" };
 
 const ClinicProfileForm = ({ clinicId, onSaved, onDraftSave, submitLabel, showDraftSave }: ClinicProfileFormProps) => {
   const [saving, setSaving] = useState(false);
@@ -54,29 +52,16 @@ const ClinicProfileForm = ({ clinicId, onSaved, onDraftSave, submitLabel, showDr
   const [specialties, setSpecialties] = useState<{ id: string; specialty_ar: string }[]>([]);
   const [selectedSpecialtyId, setSelectedSpecialtyId] = useState<string>("");
 
-  const [governorates, setGovernorates] = useState<string[]>([]);
-  const [selectedGov, setSelectedGov] = useState("");
-  const [level2Options, setLevel2Options] = useState<{ level2_ar: string; level2_type: string }[]>([]);
-  const [selectedLevel2, setSelectedLevel2] = useState("");
-  const [selectedLevel2Type, setSelectedLevel2Type] = useState("");
-  const [villageOptions, setVillageOptions] = useState<string[]>([]);
-  const [selectedVillage, setSelectedVillage] = useState("");
-  const [villageOther, setVillageOther] = useState("");
-  const [showVillageOther, setShowVillageOther] = useState(false);
+  // Use GeoDropdown shared component state
+  const [geo, setGeo] = useState<GeoValue>({ ...EMPTY_GEO });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [geoLoading, setGeoLoading] = useState(false);
 
-  // Load specialties + governorates
+  // Load specialties
   useEffect(() => {
     supabase.from("specialties").select("id, specialty_ar").order("sort_order").then(({ data }) => {
       if (data) setSpecialties(data);
-    });
-    supabase.from("geo_localities").select("governorate_ar").then(({ data }) => {
-      if (data) {
-        const unique = [...new Set(data.map((r) => r.governorate_ar))].sort();
-        setGovernorates(unique);
-      }
     });
   }, []);
 
@@ -100,84 +85,14 @@ const ClinicProfileForm = ({ clinicId, onSaved, onDraftSave, submitLabel, showDr
         setLng((data as any).lng || null);
         setWorkingHours((data.working_hours_json as WorkingHours) || {});
         if (data.primary_specialty_id) setSelectedSpecialtyId(data.primary_specialty_id);
-        if (data.governorate_ar) setSelectedGov(data.governorate_ar);
-        if (data.locality_level2_ar) setSelectedLevel2(data.locality_level2_ar);
-        if (data.locality_level2_type) setSelectedLevel2Type(data.locality_level2_type);
-        if (data.locality_level3_ar) setSelectedVillage(data.locality_level3_ar);
+        setGeo({
+          governorate_ar: data.governorate_ar || "",
+          level2_ar: data.locality_level2_ar || "",
+          level2_type: data.locality_level2_type || "",
+          level3_ar: data.locality_level3_ar || "",
+        });
       });
   }, [clinicId]);
-
-  // Load level2 options when governorate changes
-  useEffect(() => {
-    if (!selectedGov) { setLevel2Options([]); return; }
-    supabase
-      .from("geo_localities")
-      .select("level2_ar, level2_type")
-      .eq("governorate_ar", selectedGov)
-      .is("level3_ar", null)
-      .then(({ data }) => {
-        if (data) {
-          const seen = new Set<string>();
-          const unique = data.filter((r) => {
-            const key = `${r.level2_ar}|${r.level2_type}`;
-            if (seen.has(key)) return false;
-            seen.add(key);
-            return true;
-          });
-          setLevel2Options(unique.sort((a, b) => a.level2_ar.localeCompare(b.level2_ar, "ar")));
-        }
-      });
-  }, [selectedGov]);
-
-  // Load village options when level2 changes
-  useEffect(() => {
-    if (!selectedGov || !selectedLevel2 || selectedLevel2Type !== "MARKAZ") {
-      setVillageOptions([]);
-      return;
-    }
-    supabase
-      .from("geo_localities")
-      .select("level3_ar")
-      .eq("governorate_ar", selectedGov)
-      .eq("level2_ar", selectedLevel2)
-      .not("level3_ar", "is", null)
-      .then(({ data }) => {
-        if (data) {
-          const villages = data.map((r) => r.level3_ar!).filter(Boolean).sort((a, b) => a.localeCompare(b, "ar"));
-          setVillageOptions(villages);
-          if (villages.length === 0) setShowVillageOther(true);
-        }
-      });
-  }, [selectedGov, selectedLevel2, selectedLevel2Type]);
-
-  const handleGovChange = (gov: string) => {
-    setSelectedGov(gov);
-    setSelectedLevel2("");
-    setSelectedLevel2Type("");
-    setSelectedVillage("");
-    setVillageOther("");
-    setShowVillageOther(false);
-  };
-
-  const handleLevel2Change = (val: string) => {
-    const [l2, type] = val.split("|");
-    setSelectedLevel2(l2);
-    setSelectedLevel2Type(type);
-    setSelectedVillage("");
-    setVillageOther("");
-    setShowVillageOther(false);
-  };
-
-  const handleVillageChange = (val: string) => {
-    if (val === "__other__") {
-      setSelectedVillage("");
-      setShowVillageOther(true);
-    } else {
-      setSelectedVillage(val);
-      setShowVillageOther(false);
-      setVillageOther("");
-    }
-  };
 
   const updateWorkingHour = (day: string, field: "open" | "close", value: string) => {
     setWorkingHours((prev) => ({
@@ -221,13 +136,9 @@ const ClinicProfileForm = ({ clinicId, onSaved, onDraftSave, submitLabel, showDr
     if (!whatsappLocal1 || whatsappLocal1.length !== 10 || !/^\d{10}$/.test(whatsappLocal1)) errs.whatsappLocal1 = "يجب أن يكون ١٠ أرقام";
     if (whatsappLocal2 && (whatsappLocal2.length !== 10 || !/^\d{10}$/.test(whatsappLocal2))) errs.whatsappLocal2 = "يجب أن يكون ١٠ أرقام";
     if (!selectedSpecialtyId) errs.specialty = "التخصص مطلوب";
-    if (!selectedGov) errs.gov = "المحافظة مطلوبة";
-    if (!selectedLevel2) errs.level2 = "المدينة / المركز مطلوب";
+    if (!geo.governorate_ar) errs.gov = "المحافظة مطلوبة";
+    if (!geo.level2_ar) errs.level2 = "المدينة / المركز مطلوب";
     if (!addressText.trim()) errs.address = "العنوان التفصيلي مطلوب";
-    if (selectedLevel2Type === "MARKAZ" && showVillageOther && !villageOther.trim()) {
-      errs.villageOther = "يرجى إدخال اسم القرية";
-    }
-    // Must have at least one working day
     const hasWorkingDay = DAYS.some((d) => workingHours[d.key]);
     if (!hasWorkingDay) errs.workingHours = "يرجى تحديد يوم عمل واحد على الأقل";
     setErrors(errs);
@@ -235,7 +146,6 @@ const ClinicProfileForm = ({ clinicId, onSaved, onDraftSave, submitLabel, showDr
   };
 
   const buildPayload = () => {
-    const finalVillage = showVillageOther ? villageOther : selectedVillage;
     return {
       name: clinicName,
       name_ar: clinicNameAr,
@@ -250,10 +160,10 @@ const ClinicProfileForm = ({ clinicId, onSaved, onDraftSave, submitLabel, showDr
       lng: lng,
       working_hours_json: workingHours,
       primary_specialty_id: selectedSpecialtyId || null,
-      governorate_ar: selectedGov || null,
-      locality_level2_ar: selectedLevel2 || null,
-      locality_level2_type: selectedLevel2Type || null,
-      locality_level3_ar: (selectedLevel2Type === "MARKAZ" && finalVillage) ? finalVillage : null,
+      governorate_ar: geo.governorate_ar || null,
+      locality_level2_ar: geo.level2_ar || null,
+      locality_level2_type: geo.level2_type || null,
+      locality_level3_ar: (geo.level2_type === "MARKAZ" && geo.level3_ar) ? geo.level3_ar : null,
     };
   };
 
@@ -294,8 +204,6 @@ const ClinicProfileForm = ({ clinicId, onSaved, onDraftSave, submitLabel, showDr
     }
   };
 
-  const typeLabel = (t: string) => t === "MARKAZ" ? "مركز" : t === "CITY" ? "مدينة" : "حي";
-
   return (
     <div className="space-y-6">
       <Card>
@@ -334,66 +242,16 @@ const ClinicProfileForm = ({ clinicId, onSaved, onDraftSave, submitLabel, showDr
       <Card>
         <CardHeader><CardTitle className="text-base">الموقع</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>المحافظة</Label>
-            <Select value={selectedGov} onValueChange={handleGovChange}>
-              <SelectTrigger dir="rtl"><SelectValue placeholder="اختر المحافظة" /></SelectTrigger>
-              <SelectContent dir="rtl">
-                {governorates.map((g) => (
-                  <SelectItem key={g} value={g}>{g}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.gov && <p className="text-sm text-destructive">{errors.gov}</p>}
-          </div>
-
-          {selectedGov && (
-            <div className="space-y-2">
-              <Label>المدينة / المركز / الحي</Label>
-              <Select
-                value={selectedLevel2 ? `${selectedLevel2}|${selectedLevel2Type}` : ""}
-                onValueChange={handleLevel2Change}
-              >
-                <SelectTrigger dir="rtl"><SelectValue placeholder="اختر" /></SelectTrigger>
-                <SelectContent dir="rtl">
-                  {level2Options.map((opt) => (
-                    <SelectItem key={`${opt.level2_ar}|${opt.level2_type}`} value={`${opt.level2_ar}|${opt.level2_type}`}>
-                      <span className="flex items-center gap-2">
-                        {opt.level2_ar}
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                          {typeLabel(opt.level2_type)}
-                        </Badge>
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.level2 && <p className="text-sm text-destructive">{errors.level2}</p>}
-            </div>
-          )}
-
-          {selectedLevel2 && selectedLevel2Type === "MARKAZ" && (
-            <div className="space-y-2">
-              <Label>القرية (اختياري)</Label>
-              {villageOptions.length > 0 ? (
-                <Select value={showVillageOther ? "__other__" : selectedVillage} onValueChange={handleVillageChange}>
-                  <SelectTrigger dir="rtl"><SelectValue placeholder="اختر القرية (اختياري)" /></SelectTrigger>
-                  <SelectContent dir="rtl">
-                    {villageOptions.map((v) => (
-                      <SelectItem key={v} value={v}>{v}</SelectItem>
-                    ))}
-                    <SelectItem value="__other__">أخرى / غير مدرجة</SelectItem>
-                  </SelectContent>
-                </Select>
-              ) : (
-                <p className="text-sm text-muted-foreground">لا توجد قرى. أدخل يدوياً:</p>
-              )}
-              {(showVillageOther || villageOptions.length === 0) && (
-                <Input value={villageOther} onChange={(e) => setVillageOther(e.target.value)} placeholder="أدخل اسم القرية" dir="rtl" className="mt-2" />
-              )}
-              {errors.villageOther && <p className="text-sm text-destructive">{errors.villageOther}</p>}
-            </div>
-          )}
+          {/* Reusable GeoDropdown component */}
+          <GeoDropdown
+            value={geo}
+            onChange={setGeo}
+            showVillage={true}
+            errors={{
+              governorate_ar: errors.gov,
+              level2_ar: errors.level2,
+            }}
+          />
 
           <div className="space-y-2">
             <Label>العنوان التفصيلي</Label>
