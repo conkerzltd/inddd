@@ -28,7 +28,7 @@ const OwnerDashboard = () => {
       description: "إضافة وتعديل وتعطيل المسوقين وأكواد الإحالة",
       icon: Users,
       path: "/owner-portal/marketers",
-      available: false,
+      available: true,
     },
     {
       title: "الموافقات",
