@@ -1,7 +1,5 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { getLocaleFromPathname } from "@/i18n/locale";
-import { withLocalePath } from "@/i18n/paths";
 
 interface SuperAdminRouteProps {
   children: React.ReactNode;
@@ -9,8 +7,6 @@ interface SuperAdminRouteProps {
 
 const SuperAdminRoute = ({ children }: SuperAdminRouteProps) => {
   const { user, userRoles, loading } = useAuth();
-  const { pathname } = useLocation();
-  const locale = getLocaleFromPathname(pathname);
 
   if (loading) {
     return (
@@ -20,15 +16,13 @@ const SuperAdminRoute = ({ children }: SuperAdminRouteProps) => {
     );
   }
 
-  // Not logged in → redirect to owner portal login
   if (!user) {
-    return <Navigate to={withLocalePath(locale, "/owner-portal/login")} replace />;
+    return <Navigate to="/owner-portal/login" replace />;
   }
 
-  // Logged in but not superadmin → redirect to 404
   const isSuperAdmin = userRoles.some((ur) => (ur.role as string) === "superadmin");
   if (!isSuperAdmin) {
-    return <Navigate to={withLocalePath(locale, "/404")} replace />;
+    return <Navigate to="/404" replace />;
   }
 
   return <>{children}</>;

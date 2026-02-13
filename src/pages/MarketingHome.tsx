@@ -15,7 +15,7 @@ import { useLocale } from "@/i18n/useLocale";
 
 const MarketingHome = () => {
   const { locale } = useLocale();
-  const language = locale === "en" ? "en" : "ar";
+  const language = "ar";
   const baseUrl = PUBLIC_BASE_URL;
 
   const copy = useMemo(

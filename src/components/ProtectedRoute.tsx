@@ -1,7 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { getLocaleFromPathname } from "@/i18n/locale";
-import { withLocalePath } from "@/i18n/paths";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,10 +8,8 @@ interface ProtectedRouteProps {
   skipProfileCheck?: boolean;
 }
 
-const ProtectedRoute = ({ children, requiredRoles, skipOnboardingCheck, skipProfileCheck }: ProtectedRouteProps) => {
-  const { user, userRoles, clinicId, profileComplete, loading } = useAuth();
-  const { pathname } = useLocation();
-  const locale = getLocaleFromPathname(pathname);
+const ProtectedRoute = ({ children, skipOnboardingCheck, skipProfileCheck }: ProtectedRouteProps) => {
+  const { user, userRoles, clinicId, clinicStatus, profileComplete, loading } = useAuth();
 
   if (loading) {
     return (
@@ -24,35 +20,22 @@ const ProtectedRoute = ({ children, requiredRoles, skipOnboardingCheck, skipProf
   }
 
   if (!user) {
-    return <Navigate to={withLocalePath(locale, "/login")} replace />;
+    return <Navigate to="/login" replace />;
   }
 
-  // Redirect to onboarding if user has no clinic (unless we're already on onboarding)
+  // No clinic yet → go to onboarding to create one
   if (!skipOnboardingCheck && !clinicId && userRoles.length === 0) {
-    return <Navigate to={withLocalePath(locale, "/onboarding")} replace />;
+    return <Navigate to="/onboarding" replace />;
   }
 
-  // Redirect to clinic-profile if profile is not complete
-  if (!skipProfileCheck && clinicId && !profileComplete) {
-    return <Navigate to={withLocalePath(locale, "/clinic-profile")} replace />;
+  // Clinic exists but not approved → go to onboarding (shows pending/rejected)
+  if (!skipOnboardingCheck && clinicId && clinicStatus !== "active") {
+    return <Navigate to="/onboarding" replace />;
   }
 
-  if (requiredRoles && requiredRoles.length > 0) {
-    const hasRequiredRole = userRoles.some((ur) =>
-      requiredRoles.includes(ur.role as any)
-    );
-    if (!hasRequiredRole) {
-      return (
-        <div className="flex min-h-screen items-center justify-center bg-background">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground">Access Denied</h1>
-            <p className="mt-2 text-muted-foreground">
-              You don't have permission to access this page.
-            </p>
-          </div>
-        </div>
-      );
-    }
+  // Clinic approved but profile not complete → go to clinic-profile
+  if (!skipProfileCheck && clinicId && clinicStatus === "active" && !profileComplete) {
+    return <Navigate to="/clinic-profile" replace />;
   }
 
   return <>{children}</>;
