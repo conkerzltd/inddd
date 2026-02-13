@@ -1,35 +1,31 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { Building2, Loader2, Clock, XCircle } from "lucide-react";
+import { Loader2, Clock, XCircle } from "lucide-react";
+import { toast } from "sonner";
 import logoSymbol from "@/assets/logo-symbol.png";
 import ClinicProfileForm from "@/components/clinic/ClinicProfileForm";
 
-type OnboardingStep = "create" | "profile" | "pending" | "rejected";
+type OnboardingStep = "profile" | "pending" | "rejected";
 
 const ClinicOnboarding = () => {
   const { user, clinicId, clinicStatus, loading: authLoading, refreshRoles } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const autoCreating = useRef(false);
+  const [localClinicId, setLocalClinicId] = useState<string | null>(null);
+
+  const effectiveClinicId = clinicId || localClinicId;
 
   const getStep = (): OnboardingStep => {
-    if (!clinicId) return "create";
-    if (clinicStatus === "active") return "profile"; // fallback, redirect should catch
     if (clinicStatus === "blocked") return "rejected";
     if (clinicStatus === "pending") return "pending";
-    return "create";
+    return "profile";
   };
 
   const [step, setStep] = useState<OnboardingStep>(getStep);
-  const [clinicName, setClinicName] = useState("");
-  const [phone, setPhone] = useState("");
 
   useEffect(() => {
     setStep(getStep());
@@ -42,50 +38,42 @@ const ClinicOnboarding = () => {
     }
   }, [authLoading, clinicId, clinicStatus, navigate]);
 
-  const onboardMutation = useMutation({
-    mutationFn: async () => {
+  // Auto-create a minimal clinic record so the full form can load
+  useEffect(() => {
+    if (authLoading || effectiveClinicId || autoCreating.current) return;
+    autoCreating.current = true;
+    const create = async () => {
       const marketerId = localStorage.getItem("pending_marketer_id");
-      // Create a minimal clinic record — profile form will fill the rest
       const { data, error } = await supabase.rpc("onboard_clinic", {
-        p_name_ar: clinicName.trim(),
-        p_primary_specialty_id: "00000000-0000-0000-0000-000000000000", // placeholder, profile form sets real one
+        p_name_ar: "عيادة جديدة",
+        p_primary_specialty_id: "00000000-0000-0000-0000-000000000000",
         p_governorate_ar: "placeholder",
         p_locality_level2_ar: "placeholder",
-        p_phone: phone.trim() || null,
+        p_phone: null,
         p_marketer_id: marketerId || null,
       });
-      if (error) throw error;
+      if (error) {
+        toast.error("فشل إنشاء العيادة: " + error.message);
+        autoCreating.current = false;
+        return;
+      }
       localStorage.removeItem("pending_marketer_id");
-      return data;
-    },
-    onSuccess: async () => {
-      toast({ title: "تم إنشاء العيادة", description: "أكمل بيانات العيادة…" });
+      setLocalClinicId(data as string);
       await refreshRoles();
-    },
-    onError: (err: any) => {
-      toast({ title: "فشل إنشاء العيادة", description: err.message, variant: "destructive" });
-    },
-  });
-
-  const handleCreateSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!clinicName.trim()) {
-      toast({ title: "بيانات ناقصة", description: "يرجى إدخال اسم العيادة", variant: "destructive" });
-      return;
-    }
-    onboardMutation.mutate();
-  };
+    };
+    create();
+  }, [authLoading, effectiveClinicId]);
 
   const handleProfileSaved = async () => {
-    // After saving profile, clinic goes to pending status
-    if (clinicId) {
-      await supabase.from("clinics").update({ status: "pending" } as any).eq("id", clinicId);
+    const cid = effectiveClinicId;
+    if (cid) {
+      await supabase.from("clinics").update({ status: "pending" } as any).eq("id", cid);
     }
     await refreshRoles();
     setStep("pending");
   };
 
-  if (authLoading) {
+  if (authLoading || (!effectiveClinicId && step === "profile")) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -93,40 +81,8 @@ const ClinicOnboarding = () => {
     );
   }
 
-  // Step 1: Create clinic (no clinic yet)
-  if (step === "create" && !clinicId) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-4" dir="rtl">
-        <Card className="w-full max-w-lg">
-          <CardHeader className="text-center space-y-3">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-              <Building2 className="h-7 w-7 text-primary" />
-            </div>
-            <CardTitle className="text-xl">إعداد العيادة</CardTitle>
-            <CardDescription>أدخل اسم العيادة لبدء التسجيل</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleCreateSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="clinic-name">اسم العيادة *</Label>
-                <Input id="clinic-name" placeholder="مثال: عيادة د. أحمد للباطنة" value={clinicName} onChange={(e) => setClinicName(e.target.value)} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="clinic-phone">رقم الهاتف (اختياري)</Label>
-                <Input id="clinic-phone" type="tel" placeholder="01XXXXXXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} dir="ltr" />
-              </div>
-              <Button type="submit" className="w-full" disabled={onboardMutation.isPending || !clinicName.trim()}>
-                {onboardMutation.isPending ? (<><Loader2 className="h-4 w-4 animate-spin me-2" />جاري الإنشاء…</>) : "إنشاء العيادة والمتابعة"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Step 2: Fill profile using the SAME ClinicProfileForm used in /clinic-profile
-  if ((step === "create" && clinicId) || step === "rejected") {
+  // Full profile form — same ClinicProfileForm used in /clinic-profile
+  if (step === "profile" || step === "rejected") {
     return (
       <div className="min-h-screen bg-background" dir="rtl">
         <header className="border-b border-border bg-card px-4 py-3">
@@ -140,7 +96,7 @@ const ClinicOnboarding = () => {
                 <p className="text-sm text-muted-foreground">
                   {step === "rejected"
                     ? "يرجى مراجعة البيانات وتعديلها ثم إعادة الإرسال"
-                    : "أكمل بيانات العيادة للمراجعة والموافقة"}
+                    : "أكمل بيانات العيادة بالكامل للمراجعة والموافقة"}
                 </p>
               </div>
             </div>
@@ -158,9 +114,9 @@ const ClinicOnboarding = () => {
           </div>
         </header>
         <main className="container mx-auto p-4 max-w-2xl">
-          {clinicId && (
+          {effectiveClinicId && (
             <ClinicProfileForm
-              clinicId={clinicId}
+              clinicId={effectiveClinicId}
               onSaved={handleProfileSaved}
               submitLabel={step === "rejected" ? "إعادة الإرسال للمراجعة" : "حفظ وإرسال للمراجعة"}
             />
