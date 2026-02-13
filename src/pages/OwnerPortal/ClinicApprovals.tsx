@@ -31,6 +31,7 @@ type PendingClinic = {
   id: string;
   name_ar: string | null;
   name: string;
+  serial_id: string | null;
   governorate_ar: string | null;
   locality_level2_ar: string | null;
   locality_level3_ar: string | null;
@@ -60,7 +61,7 @@ const ClinicApprovals = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("clinics")
-        .select("*, specialty:specialties!clinics_primary_specialty_id_fkey(specialty_ar), marketer:marketers!clinics_marketer_id_fkey(name, referral_code, primary_phone)")
+        .select("*, specialty:specialties!clinics_primary_specialty_id_fkey(specialty_ar), marketer:marketers!clinics_marketer_id_fkey(name, referral_code, primary_phone), serial_id")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as unknown as PendingClinic[];
@@ -106,6 +107,9 @@ const ClinicApprovals = () => {
             <h3 className="font-semibold text-foreground">
               {clinic.name_ar || clinic.name}
             </h3>
+            {clinic.serial_id && (
+              <p className="text-xs font-mono text-muted-foreground mt-0.5">{clinic.serial_id}</p>
+            )}
             <div className="flex items-center gap-2 mt-1">
               <Badge
                 variant={
