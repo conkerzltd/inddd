@@ -17,6 +17,7 @@ import Privacy from "./pages/Legal/Privacy";
 import Terms from "./pages/Legal/Terms";
 import Contact from "./pages/Legal/Contact";
 import Login from "./pages/Login";
+import ClinicOnboarding from "./pages/ClinicOnboarding";
 import Console from "./pages/Console";
 import PatientQueue from "./pages/PatientQueue";
 import ClinicProfile from "./pages/ClinicProfile";
@@ -34,6 +35,14 @@ const appRoutes = (
     <Route index element={<MarketingHome />} />
     <Route path="app" element={<Index />} />
     <Route path="login" element={<Login />} />
+    <Route
+      path="onboarding"
+      element={
+        <ProtectedRoute skipOnboardingCheck>
+          <ClinicOnboarding />
+        </ProtectedRoute>
+      }
+    />
     <Route path="doctors" element={<DoctorsIndex />} />
     <Route path="doctors/:specialty" element={<DoctorsSpecialty />} />
     <Route path="doctors/:specialty/:city" element={<DoctorsCity />} />
