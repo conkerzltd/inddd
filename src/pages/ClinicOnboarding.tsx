@@ -49,6 +49,7 @@ const ClinicOnboarding = () => {
         p_primary_specialty_id: "00000000-0000-0000-0000-000000000000",
         p_governorate_ar: "placeholder",
         p_locality_level2_ar: "placeholder",
+        p_locality_level2_type: "CITY",
         p_phone: null,
         p_marketer_id: marketerId || null,
       });
