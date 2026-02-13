@@ -82,9 +82,9 @@ const App = () => (
               }
             />
             <Route path="q/:token" element={<PatientQueue />} />
-            <Route path="owner-portal/login" element={<OwnerLogin />} />
+            <Route path="ad/login" element={<OwnerLogin />} />
             <Route
-              path="owner-portal"
+              path="ad"
               element={
                 <SuperAdminRoute>
                   <OwnerDashboard />
@@ -92,7 +92,7 @@ const App = () => (
               }
             />
             <Route
-              path="owner-portal/marketers"
+              path="ad/marketers"
               element={
                 <SuperAdminRoute>
                   <MarketerManagement />
@@ -100,7 +100,7 @@ const App = () => (
               }
             />
             <Route
-              path="owner-portal/approvals"
+              path="ad/approvals"
               element={
                 <SuperAdminRoute>
                   <ClinicApprovals />
@@ -108,7 +108,7 @@ const App = () => (
               }
             />
             <Route
-              path="owner-portal/analytics"
+              path="ad/analytics"
               element={
                 <SuperAdminRoute>
                   <OwnerAnalytics />
@@ -116,7 +116,7 @@ const App = () => (
               }
             />
             <Route
-              path="owner-portal/users"
+              path="ad/users"
               element={
                 <SuperAdminRoute>
                   <UserManagement />

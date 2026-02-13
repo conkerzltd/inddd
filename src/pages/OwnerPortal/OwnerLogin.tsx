@@ -22,7 +22,7 @@ const OwnerLogin = () => {
   // If already logged in as superadmin, redirect to portal
   const isSuperAdmin = userRoles.some((ur) => (ur.role as string) === "superadmin");
   if (user && isSuperAdmin) {
-    navigate(localePath("/owner-portal"), { replace: true });
+    navigate(localePath("/ad"), { replace: true });
     return null;
   }
 
@@ -69,7 +69,7 @@ const OwnerLogin = () => {
         return;
       }
 
-      navigate(localePath("/owner-portal"));
+      navigate(localePath("/ad"));
       setIsLoading(false);
     }, 500);
   };
