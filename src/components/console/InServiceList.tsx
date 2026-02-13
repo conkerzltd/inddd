@@ -44,7 +44,7 @@ export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext 
       alwaysShow
       action={
         <Button size="sm" className="min-h-[44px] md:min-h-0" onClick={handleCallNext}>
-          <Phone className="h-3 w-3 ml-1" />نداء التالي
+          <Phone className="h-3 w-3 me-1" />نداء التالي
         </Button>
       }
     >
@@ -64,11 +64,11 @@ export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext 
                 actions={
                   completedId === t.id ? (
                     <Button size="sm" variant="outline" className="min-h-[44px] flex-1 animate-scale-in" onClick={handleCallNext}>
-                      <Phone className="h-3.5 w-3.5 ml-1" />نداء التالي
+                      <Phone className="h-3.5 w-3.5 me-1" />نداء التالي
                     </Button>
                   ) : (
                     <Button size="sm" className="min-h-[44px] flex-1" onClick={() => handleComplete(t.id)}>
-                      <CheckCircle className="h-3.5 w-3.5 ml-1" />إتمام
+                      <CheckCircle className="h-3.5 w-3.5 me-1" />إتمام
                     </Button>
                   )
                 }
@@ -83,7 +83,7 @@ export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext 
               <TableHead className="w-12">الرقم</TableHead>
               <TableHead>اسم المريض</TableHead>
               <TableHead>وقت البدء</TableHead>
-              <TableHead className="text-left w-[140px]">الإجراءات</TableHead>
+              <TableHead className="text-start w-[140px]">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -101,14 +101,14 @@ export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext 
                     <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
                   </TableCell>
                   <TableCell>{t.service_started_at ? fmtTime(t.service_started_at, clinicTimezone) : "—"}</TableCell>
-                  <TableCell className="text-left w-[140px]">
+                  <TableCell className="text-start w-[140px]">
                     {completedId === t.id ? (
                       <Button size="sm" variant="outline" onClick={handleCallNext} className="animate-scale-in">
-                        <Phone className="h-3 w-3 ml-1" />نداء التالي
+                        <Phone className="h-3 w-3 me-1" />نداء التالي
                       </Button>
                     ) : (
                       <Button size="sm" onClick={() => handleComplete(t.id)}>
-                        <CheckCircle className="h-3 w-3 ml-1" />إتمام
+                        <CheckCircle className="h-3 w-3 me-1" />إتمام
                       </Button>
                     )}
                   </TableCell>

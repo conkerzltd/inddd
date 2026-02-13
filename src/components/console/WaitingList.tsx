@@ -40,7 +40,7 @@ export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, 
         count={tickets.length}
         action={
           <Button size="sm" className="min-h-[44px] md:min-h-0" onClick={onCallNext} disabled={tickets.length === 0}>
-            <Phone className="h-3 w-3 ml-1" />نداء التالي
+            <Phone className="h-3 w-3 me-1" />نداء التالي
           </Button>
         }
       >
@@ -58,10 +58,10 @@ export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, 
                 actions={
                   <>
                     <Button size="sm" variant="outline" className="min-h-[44px] flex-1" onClick={() => setUrgentTicketId(t.id)}>
-                      <Zap className="h-3.5 w-3.5 ml-1" />عاجل
+                      <Zap className="h-3.5 w-3.5 me-1" />عاجل
                     </Button>
                     <Button size="sm" variant="destructive" className="min-h-[44px]" onClick={() => onCancel(t.id)}>
-                      <Ban className="h-3.5 w-3.5 ml-1" />إلغاء
+                      <Ban className="h-3.5 w-3.5 me-1" />إلغاء
                     </Button>
                   </>
                 }
@@ -76,7 +76,7 @@ export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, 
                 <TableHead>اسم المريض</TableHead>
                 <TableHead>نوع الزيارة</TableHead>
                 <TableHead>الوصول</TableHead>
-                <TableHead className="text-left w-[180px]">الإجراءات</TableHead>
+                <TableHead className="text-start w-[180px]">الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -90,12 +90,12 @@ export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, 
                   <TableCell>
                     {t.arrival_confirmed_at ? fmtTime(t.arrival_confirmed_at, clinicTimezone) : "—"}
                   </TableCell>
-                  <TableCell className="text-left w-[180px] space-x-1 space-x-reverse">
+                  <TableCell className="text-start w-[180px] space-x-1 space-x-reverse">
                     <Button size="sm" variant="outline" onClick={() => setUrgentTicketId(t.id)}>
-                      <Zap className="h-3 w-3 ml-1" />عاجل
+                      <Zap className="h-3 w-3 me-1" />عاجل
                     </Button>
                     <Button size="sm" variant="destructive" onClick={() => onCancel(t.id)}>
-                      <Ban className="h-3 w-3 ml-1" />إلغاء
+                      <Ban className="h-3 w-3 me-1" />إلغاء
                     </Button>
                   </TableCell>
                 </TableRow>

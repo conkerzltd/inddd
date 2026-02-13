@@ -267,7 +267,7 @@ const ClinicProfileForm = ({ clinicId, onSaved, onDraftSave, submitLabel, showDr
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <Button type="button" variant="outline" size="sm" onClick={handleGetLocation} disabled={geoLoading}>
-                <MapPin className="ml-2 h-4 w-4" />
+                <MapPin className="me-2 h-4 w-4" />
                 {geoLoading ? "جاري تحديد الموقع..." : "استخدم موقعي الحالي"}
               </Button>
               {lat !== null && lng !== null && (
@@ -313,7 +313,7 @@ const ClinicProfileForm = ({ clinicId, onSaved, onDraftSave, submitLabel, showDr
                 toast.success(`تم تطبيق ساعات ${firstEnabled.label} على كل الأيام`);
               }}
             >
-              <CopyCheck className="ml-1.5 h-3.5 w-3.5" />تطبيق على الكل
+              <CopyCheck className="me-1.5 h-3.5 w-3.5" />تطبيق على الكل
             </Button>
           </div>
         </CardHeader>
@@ -348,7 +348,7 @@ const ClinicProfileForm = ({ clinicId, onSaved, onDraftSave, submitLabel, showDr
                           toast.success(`تم النسخ إلى ${nextDay.label}`);
                         }}
                       >
-                        <Copy className="ml-1 h-3 w-3" />← {DAYS[idx + 1].label}
+                        <Copy className="me-1 h-3 w-3" />← {DAYS[idx + 1].label}
                       </Button>
                     )}
                   </div>
@@ -362,14 +362,14 @@ const ClinicProfileForm = ({ clinicId, onSaved, onDraftSave, submitLabel, showDr
       <div className="flex flex-wrap items-center justify-end gap-3 pb-8">
         {showDraftSave && (
           <Button type="button" variant="outline" onClick={handleDraftSave} disabled={savingDraft || saving}>
-            {savingDraft ? "جاري الحفظ..." : <><Save className="ml-2 h-4 w-4" />حفظ ومتابعة لاحقاً</>}
+            {savingDraft ? "جاري الحفظ..." : <><Save className="me-2 h-4 w-4" />حفظ ومتابعة لاحقاً</>}
           </Button>
         )}
         <Button onClick={handleSave} disabled={saving || savingDraft} className="min-w-32">
           {saving ? "جاري الحفظ..." : saved ? (
-            <><Check className="ml-2 h-4 w-4" />تم الحفظ</>
+            <><Check className="me-2 h-4 w-4" />تم الحفظ</>
           ) : (
-            submitLabel || <><Save className="ml-2 h-4 w-4" />حفظ</>
+            submitLabel || <><Save className="me-2 h-4 w-4" />حفظ</>
           )}
         </Button>
       </div>

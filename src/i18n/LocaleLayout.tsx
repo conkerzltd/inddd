@@ -1,14 +1,15 @@
 /**
  * Locale layout — Arabic only. Sets dir=rtl and lang=ar.
- * Kept for compatibility but no longer handles /en prefix.
+ * Runtime enforcer so future changes don't break RTL.
  */
 import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 
 const LocaleLayout = () => {
   useEffect(() => {
-    document.documentElement.lang = "ar";
-    document.documentElement.dir = "rtl";
+    const html = document.documentElement;
+    html.lang = "ar";
+    html.dir = "rtl";
   }, []);
 
   return <Outlet />;

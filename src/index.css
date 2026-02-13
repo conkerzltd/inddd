@@ -156,5 +156,23 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    text-align: start;
   }
+}
+
+/* LTR exception — apply to emails, phones, serial IDs, URLs */
+.ltr {
+  direction: ltr;
+  unicode-bidi: plaintext;
+  text-align: left;
+}
+
+/* RTL-safe icon positioning for absolute-positioned icons inside inputs */
+.icon-inline-start {
+  inset-inline-start: 0.75rem;
+  inset-inline-end: auto;
+}
+.icon-inline-end {
+  inset-inline-end: 0.75rem;
+  inset-inline-start: auto;
 }
