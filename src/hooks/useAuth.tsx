@@ -10,7 +10,9 @@ interface AuthContextType {
   user: User | null;
   userRoles: UserRole[];
   clinicId: string | null;
+  profileComplete: boolean;
   loading: boolean;
+  refreshProfile: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -23,7 +25,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [clinicId, setClinicId] = useState<string | null>(null);
+  const [profileComplete, setProfileComplete] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const fetchRolesAndProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("*")
+      .eq("user_id", userId);
+    const roles = data ?? [];
+    setUserRoles(roles);
+    const cId = roles.length > 0 ? roles[0].clinic_id : null;
+    setClinicId(cId);
+
+    if (cId) {
+      const { data: clinic } = await supabase
+        .from("clinics")
+        .select("profile_complete")
+        .eq("id", cId)
+        .single();
+      setProfileComplete(!!(clinic as any)?.profile_complete);
+    } else {
+      setProfileComplete(false);
+    }
+  };
+
+  const refreshProfile = async () => {
+    if (clinicId) {
+      const { data: clinic } = await supabase
+        .from("clinics")
+        .select("profile_complete")
+        .eq("id", clinicId)
+        .single();
+      setProfileComplete(!!(clinic as any)?.profile_complete);
+    }
+  };
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -32,19 +68,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Defer role fetch to avoid blocking auth state
-          setTimeout(async () => {
-            const { data } = await supabase
-              .from("user_roles")
-              .select("*")
-              .eq("user_id", session.user.id);
-            const roles = data ?? [];
-            setUserRoles(roles);
-            setClinicId(roles.length > 0 ? roles[0].clinic_id : null);
-          }, 0);
+          setTimeout(() => fetchRolesAndProfile(session.user.id), 0);
         } else {
           setUserRoles([]);
           setClinicId(null);
+          setProfileComplete(false);
         }
         setLoading(false);
       }
@@ -79,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, user, userRoles, clinicId, loading, signIn, signUp, signOut }}
+      value={{ session, user, userRoles, clinicId, profileComplete, loading, refreshProfile, signIn, signUp, signOut }}
     >
       {children}
     </AuthContext.Provider>

@@ -95,6 +95,7 @@ export type Database = {
           open_time: string
           phone: string | null
           primary_specialty_id: string | null
+          profile_complete: boolean
           session_paused: boolean
           status: Database["public"]["Enums"]["entity_status"]
           timezone: string
@@ -131,6 +132,7 @@ export type Database = {
           open_time?: string
           phone?: string | null
           primary_specialty_id?: string | null
+          profile_complete?: boolean
           session_paused?: boolean
           status?: Database["public"]["Enums"]["entity_status"]
           timezone?: string
@@ -167,6 +169,7 @@ export type Database = {
           open_time?: string
           phone?: string | null
           primary_specialty_id?: string | null
+          profile_complete?: boolean
           session_paused?: boolean
           status?: Database["public"]["Enums"]["entity_status"]
           timezone?: string

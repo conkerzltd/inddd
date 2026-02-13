@@ -28,10 +28,11 @@ const DAYS = [
 type WorkingHours = Record<string, { open: string; close: string } | null>;
 
 const ClinicProfile = () => {
-  const { clinicId, loading: authLoading } = useAuth();
+  const { clinicId, profileComplete, loading: authLoading, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const isFirstTime = !profileComplete;
 
   const [clinicName, setClinicName] = useState("");
   const [clinicNameAr, setClinicNameAr] = useState("");
@@ -258,9 +259,16 @@ const ClinicProfile = () => {
     if (error) {
       toast.error("فشل الحفظ: " + error.message);
     } else {
+      // Mark profile as complete
+      await supabase.from("clinics").update({ profile_complete: true } as any).eq("id", clinicId);
+      await refreshProfile();
       setSaved(true);
       toast.success("تم الحفظ بنجاح!");
-      setTimeout(() => setSaved(false), 3000);
+      if (isFirstTime) {
+        navigate("/console");
+      } else {
+        setTimeout(() => setSaved(false), 3000);
+      }
     }
   };
 
@@ -281,11 +289,20 @@ const ClinicProfile = () => {
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={logoSymbol} alt="inddd" className="h-8 w-8" />
-            <h1 className="text-lg font-bold text-foreground">ملف العيادة</h1>
+            <div>
+              <h1 className="text-lg font-bold text-foreground">
+                {isFirstTime ? "إعداد العيادة" : "ملف العيادة"}
+              </h1>
+              {isFirstTime && (
+                <p className="text-sm text-muted-foreground">أكمل بيانات العيادة للبدء في استخدام النظام</p>
+              )}
+            </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => navigate("/console")}>
-            <ArrowLeft className="ml-2 h-4 w-4" />العودة للوحة التحكم
-          </Button>
+          {!isFirstTime && (
+            <Button variant="ghost" size="sm" onClick={() => navigate("/console")}>
+              <ArrowLeft className="ml-2 h-4 w-4" />العودة للوحة التحكم
+            </Button>
+          )}
         </div>
       </header>
 
@@ -516,6 +533,8 @@ const ClinicProfile = () => {
           <Button onClick={handleSave} disabled={saving} className="min-w-32">
             {saving ? "جاري الحفظ..." : saved ? (
               <><Check className="ml-2 h-4 w-4" />تم الحفظ</>
+            ) : isFirstTime ? (
+              "حفظ والبدء"
             ) : (
               <><Save className="ml-2 h-4 w-4" />حفظ</>
             )}
