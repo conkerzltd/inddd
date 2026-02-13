@@ -11,6 +11,7 @@ import { ArrowLeft, Save, Check, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import logoSymbol from "@/assets/logo-symbol.png";
 import { PasswordInput } from "@/components/inputs/PasswordInput";
+import { cn } from "@/lib/utils";
 
 const QueueSettings = () => {
   const { clinicId, loading: authLoading } = useAuth();
@@ -150,12 +151,28 @@ const QueueSettings = () => {
   );
 };
 
+/* ─── Password Strength ─── */
+const getPasswordStrength = (pw: string): { level: number; label: string; color: string } => {
+  if (!pw) return { level: 0, label: "", color: "" };
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (pw.length >= 12) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+  if (score <= 1) return { level: 1, label: "ضعيفة", color: "bg-destructive" };
+  if (score <= 3) return { level: 2, label: "متوسطة", color: "bg-warning" };
+  return { level: 3, label: "قوية", color: "bg-primary" };
+};
+
 /* ─── Change Password Card ─── */
 const ChangePasswordCard = () => {
   const [currentPw, setCurrentPw] = useState("");
   const [newPw, setNewPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
   const [changingPw, setChangingPw] = useState(false);
+  const strength = getPasswordStrength(newPw);
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,7 +187,6 @@ const ChangePasswordCard = () => {
 
     setChangingPw(true);
 
-    // Verify current password by re-signing in
     const { data: { user } } = await supabase.auth.getUser();
     if (!user?.email) {
       toast.error("تعذر التحقق من المستخدم الحالي");
@@ -219,6 +235,24 @@ const ChangePasswordCard = () => {
           <div className="space-y-2">
             <Label>كلمة المرور الجديدة</Label>
             <PasswordInput value={newPw} onChange={(e) => setNewPw(e.target.value)} required minLength={8} placeholder="٨ أحرف على الأقل" dir="ltr" />
+            {newPw && (
+              <div className="space-y-1">
+                <div className="flex gap-1">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className={cn(
+                        "h-1.5 flex-1 rounded-full transition-colors",
+                        i <= strength.level ? strength.color : "bg-muted"
+                      )}
+                    />
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  قوة كلمة المرور: <span className="font-medium text-foreground">{strength.label}</span>
+                </p>
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <Label>تأكيد كلمة المرور الجديدة</Label>
