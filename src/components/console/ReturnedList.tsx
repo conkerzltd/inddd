@@ -33,7 +33,7 @@ export function ReturnedList({ tickets, onReinsert, onSetUrgent }: Props) {
               <TableHead className="w-12">الرقم</TableHead>
               <TableHead>اسم المريض</TableHead>
               <TableHead>نوع الزيارة</TableHead>
-              <TableHead className="text-left w-[180px]">الإجراءات</TableHead>
+              <TableHead className="text-start w-[180px]">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -44,12 +44,12 @@ export function ReturnedList({ tickets, onReinsert, onSetUrgent }: Props) {
                   <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
                 </TableCell>
                 <TableCell>{visitTypeLabel(t.visit_type)}</TableCell>
-                <TableCell className="text-left w-[180px] space-x-1 space-x-reverse">
+                <TableCell className="text-start w-[180px] space-x-1 space-x-reverse">
                   <Button size="sm" variant="outline" onClick={() => { setDialogTicketId(t.id); setDialogMode("reinsert"); }}>
-                    <RotateCcw className="h-3 w-3 ml-1" />إعادة إدراج
+                    <RotateCcw className="h-3 w-3 me-1" />إعادة إدراج
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => { setDialogTicketId(t.id); setDialogMode("urgent"); }}>
-                    <Zap className="h-3 w-3 ml-1" />عاجل
+                    <Zap className="h-3 w-3 me-1" />عاجل
                   </Button>
                 </TableCell>
               </TableRow>

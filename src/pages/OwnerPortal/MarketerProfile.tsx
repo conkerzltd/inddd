@@ -821,7 +821,7 @@ const MarketerProfile = () => {
               <Label>التاريخ *</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("w-full justify-start text-right font-normal", !attDate && "text-muted-foreground")}>
+                  <Button variant="outline" className={cn("w-full justify-start text-end font-normal", !attDate && "text-muted-foreground")}>
                     <CalendarIcon className="ms-auto h-4 w-4 opacity-50" />
                     {attDate ? format(attDate, "dd/MM/yyyy") : "اختر التاريخ"}
                   </Button>
@@ -882,7 +882,7 @@ const MarketerProfile = () => {
               <Label>التاريخ *</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("w-full justify-start text-right font-normal", !txDate && "text-muted-foreground")}>
+                  <Button variant="outline" className={cn("w-full justify-start text-end font-normal", !txDate && "text-muted-foreground")}>
                     <CalendarIcon className="ms-auto h-4 w-4 opacity-50" />
                     {txDate ? format(txDate, "dd/MM/yyyy") : "اختر التاريخ"}
                   </Button>
