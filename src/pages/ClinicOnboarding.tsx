@@ -46,11 +46,6 @@ const ClinicOnboarding = () => {
       const marketerId = localStorage.getItem("pending_marketer_id");
       const { data, error } = await supabase.rpc("onboard_clinic", {
         p_name_ar: "عيادة جديدة",
-        p_primary_specialty_id: "00000000-0000-0000-0000-000000000000",
-        p_governorate_ar: "placeholder",
-        p_locality_level2_ar: "placeholder",
-        p_locality_level2_type: "CITY",
-        p_phone: null,
         p_marketer_id: marketerId || null,
       });
       if (error) {
