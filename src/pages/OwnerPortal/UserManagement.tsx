@@ -85,6 +85,8 @@ const UserManagement = () => {
   };
 
   const openPasswordDialog = () => {
+    if (!searchEmail.trim()) return;
+    setFoundUser({ id: "", email: searchEmail.trim().toLowerCase() });
     setNewPassword("");
     setConfirmPassword("");
     setDialogOpen(true);
