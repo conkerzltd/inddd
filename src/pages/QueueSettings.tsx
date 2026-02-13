@@ -84,7 +84,7 @@ const QueueSettings = () => {
             <h1 className="text-lg font-bold text-foreground">إعدادات قائمة الانتظار</h1>
           </div>
           <Button variant="ghost" size="sm" onClick={() => navigate("/console")}>
-            <ArrowLeft className="ml-2 h-4 w-4" />العودة للوحة التحكم
+            <ArrowLeft className="me-2 h-4 w-4 rtl:-scale-x-100" />العودة للوحة التحكم
           </Button>
         </div>
       </header>
@@ -152,9 +152,9 @@ const QueueSettings = () => {
         <div className="flex justify-end">
           <Button onClick={handleSave} disabled={saving} className="min-w-32">
             {saving ? "جاري الحفظ..." : saved ? (
-              <><Check className="ml-2 h-4 w-4" />تم الحفظ</>
+              <><Check className="me-2 h-4 w-4" />تم الحفظ</>
             ) : (
-              <><Save className="ml-2 h-4 w-4" />حفظ</>
+              <><Save className="me-2 h-4 w-4" />حفظ</>
             )}
           </Button>
         </div>

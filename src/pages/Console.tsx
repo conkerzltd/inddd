@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { LogOut, Plus, Database, Power, Settings } from "lucide-react";
+import { LogOut, Plus, Database, Power, Menu } from "lucide-react";
 import { ScrollFabs } from "@/components/console/ScrollFabs";
 import logoSymbol from "@/assets/logo-symbol.png";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +19,10 @@ import { InServiceList } from "@/components/console/InServiceList";
 import { NotPresentList } from "@/components/console/NotPresentList";
 import { DoneList } from "@/components/console/DoneList";
 import { CreateTicketDialog } from "@/components/console/CreateTicketDialog";
+import { consoleNavItems } from "@/config/navItems";
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+} from "@/components/ui/sheet";
 
 const Console = () => {
   const { user, userRoles, clinicId, loading, signOut } = useAuth();
@@ -130,15 +134,39 @@ const Console = () => {
             </div>
           </div>
           <div className="flex items-center gap-1 shrink-0">
-            <Button variant="ghost" size="icon" className="h-10 w-10 md:h-auto md:w-auto md:px-3" onClick={() => navigate("/clinic-profile")}>
-              <Settings className="h-4 w-4 md:me-2" /><span className="hidden md:inline">الملف الشخصي</span>
+            {/* Desktop nav links */}
+            {consoleNavItems.map((item) => (
+              <Button key={item.path} variant="ghost" size="sm" className="hidden md:inline-flex" onClick={() => navigate(item.path)}>
+                <item.icon className="h-4 w-4 me-2" />{item.label}
+              </Button>
+            ))}
+            <Button variant="ghost" size="sm" className="hidden md:inline-flex" onClick={signOut}>
+              <LogOut className="h-4 w-4 me-2" />تسجيل الخروج
             </Button>
-            <Button variant="ghost" size="icon" className="h-10 w-10 md:h-auto md:w-auto md:px-3 hidden md:inline-flex" onClick={() => navigate("/queue-settings")}>
-              إعدادات قائمة الانتظار
-            </Button>
-            <Button variant="ghost" size="icon" className="h-10 w-10 md:h-auto md:w-auto md:px-3" onClick={signOut}>
-              <LogOut className="h-4 w-4 md:me-2" /><span className="hidden md:inline">تسجيل الخروج</span>
-            </Button>
+
+            {/* Mobile hamburger menu */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-10 w-10 md:hidden">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72">
+                <SheetHeader>
+                  <SheetTitle>القائمة</SheetTitle>
+                </SheetHeader>
+                <nav className="mt-4 space-y-1">
+                  {consoleNavItems.map((item) => (
+                    <Button key={item.path} variant="ghost" className="w-full justify-start min-h-[44px]" onClick={() => navigate(item.path)}>
+                      <item.icon className="h-4 w-4 me-2" />{item.label}
+                    </Button>
+                  ))}
+                  <Button variant="ghost" className="w-full justify-start min-h-[44px] text-destructive" onClick={signOut}>
+                    <LogOut className="h-4 w-4 me-2" />تسجيل الخروج
+                  </Button>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
