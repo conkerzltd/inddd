@@ -109,19 +109,23 @@ const OwnerAnalytics = () => {
     },
   });
 
-  // Unique governorates & cities for filters
+  const BLOCKED_GEO = new Set(["placeholder", "test", "testing", "temp", "tmp", "n/a", "na", "none", "null", ""]);
+  const isValidGeo = (v: string | null): v is string =>
+    !!v && !BLOCKED_GEO.has(v.toLowerCase().trim());
+
+  // Unique governorates & cities for filters (only those with real clinics)
   const governorates = useMemo(() => {
     const set = new Set<string>();
-    clinics.forEach((c) => c.governorate_ar && set.add(c.governorate_ar));
-    return Array.from(set).sort();
+    clinics.forEach((c) => isValidGeo(c.governorate_ar) && set.add(c.governorate_ar));
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "ar"));
   }, [clinics]);
 
   const cities = useMemo(() => {
     const set = new Set<string>();
     clinics
       .filter((c) => govFilter === "all" || c.governorate_ar === govFilter)
-      .forEach((c) => c.locality_level2_ar && set.add(c.locality_level2_ar));
-    return Array.from(set).sort();
+      .forEach((c) => isValidGeo(c.locality_level2_ar) && set.add(c.locality_level2_ar));
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "ar"));
   }, [clinics, govFilter]);
 
   // Filtered clinics
@@ -241,37 +245,55 @@ const OwnerAnalytics = () => {
         {/* Filters */}
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <MapPin className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-foreground">فلتر حسب الموقع</span>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-foreground">فلتر حسب الموقع</span>
+              </div>
+              {(govFilter !== "all" || cityFilter !== "all") && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => { setGovFilter("all"); setCityFilter("all"); }}
+                >
+                  مسح الفلاتر
+                </Button>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <Select value={govFilter} onValueChange={handleGovChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="المحافظة" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">كل المحافظات</SelectItem>
-                  {governorates.map((g) => (
-                    <SelectItem key={g} value={g}>
-                      {g}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={cityFilter} onValueChange={setCityFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="المدينة" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">كل المدن</SelectItem>
-                  {cities.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <label className="text-sm text-muted-foreground">المحافظة</label>
+                <Select value={govFilter} onValueChange={handleGovChange}>
+                  <SelectTrigger dir="rtl">
+                    <SelectValue placeholder="اختر المحافظة" />
+                  </SelectTrigger>
+                  <SelectContent dir="rtl">
+                    <SelectItem value="all">كل المحافظات</SelectItem>
+                    {governorates.map((g) => (
+                      <SelectItem key={g} value={g}>
+                        {g}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-muted-foreground">المدينة / المركز</label>
+                <Select value={cityFilter} onValueChange={setCityFilter}>
+                  <SelectTrigger dir="rtl">
+                    <SelectValue placeholder="اختر المدينة" />
+                  </SelectTrigger>
+                  <SelectContent dir="rtl">
+                    <SelectItem value="all">كل المدن</SelectItem>
+                    {cities.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardContent>
         </Card>
