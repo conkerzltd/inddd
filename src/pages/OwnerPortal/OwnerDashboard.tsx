@@ -20,7 +20,7 @@ const OwnerDashboard = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate(localePath("/owner-portal/login"));
+    navigate(localePath("/ad/login"));
   };
 
   const menuItems = [
@@ -28,35 +28,35 @@ const OwnerDashboard = () => {
       title: "إدارة المسوقين",
       description: "إضافة وتعديل وتعطيل المسوقين وأكواد الإحالة",
       icon: Users,
-      path: "/owner-portal/marketers",
+      path: "/ad/marketers",
       available: true,
     },
     {
       title: "الموافقات",
       description: "مراجعة العيادات الجديدة والموافقة عليها",
       icon: CheckCircle,
-      path: "/owner-portal/approvals",
+      path: "/ad/approvals",
       available: true,
     },
     {
       title: "إدارة المستخدمين",
       description: "تغيير كلمات المرور وإدارة حسابات المستخدمين",
       icon: KeyRound,
-      path: "/owner-portal/users",
+      path: "/ad/users",
       available: true,
     },
     {
       title: "إدارة العيادات",
       description: "عرض وإدارة كل العيادات والأطباء",
       icon: Building2,
-      path: "/owner-portal/clinics",
+      path: "/ad/clinics",
       available: false,
     },
     {
       title: "التحليلات",
       description: "إحصائيات الأداء ولوحة المتابعة",
       icon: BarChart3,
-      path: "/owner-portal/analytics",
+      path: "/ad/analytics",
       available: true,
     },
   ];

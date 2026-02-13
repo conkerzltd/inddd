@@ -17,7 +17,7 @@ const SuperAdminRoute = ({ children }: SuperAdminRouteProps) => {
   }
 
   if (!user) {
-    return <Navigate to="/owner-portal/login" replace />;
+    return <Navigate to="/ad/login" replace />;
   }
 
   const isSuperAdmin = userRoles.some((ur) => (ur.role as string) === "superadmin");

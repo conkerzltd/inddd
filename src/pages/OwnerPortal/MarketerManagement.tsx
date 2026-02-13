@@ -157,7 +157,7 @@ const MarketerManagement = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate(localePath("/owner-portal"))}
+              onClick={() => navigate(localePath("/ad"))}
             >
               <ArrowRight className="h-5 w-5" />
             </Button>

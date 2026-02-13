@@ -157,7 +157,7 @@ const UserManagement = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(localePath("/owner-portal"))}
+            onClick={() => navigate(localePath("/ad"))}
           >
             <ArrowRight className="h-4 w-4 me-1" />
             العودة
