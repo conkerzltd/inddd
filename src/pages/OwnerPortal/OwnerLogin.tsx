@@ -20,7 +20,7 @@ const OwnerLogin = () => {
   const { toast } = useToast();
 
   // If already logged in as superadmin, redirect to portal
-  const isSuperAdmin = userRoles.some((ur) => ur.role === "superadmin");
+  const isSuperAdmin = userRoles.some((ur) => (ur.role as string) === "superadmin");
   if (user && isSuperAdmin) {
     navigate(localePath("/owner-portal"), { replace: true });
     return null;

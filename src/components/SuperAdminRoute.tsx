@@ -26,7 +26,7 @@ const SuperAdminRoute = ({ children }: SuperAdminRouteProps) => {
   }
 
   // Logged in but not superadmin → redirect to 404
-  const isSuperAdmin = userRoles.some((ur) => ur.role === "superadmin");
+  const isSuperAdmin = userRoles.some((ur) => (ur.role as string) === "superadmin");
   if (!isSuperAdmin) {
     return <Navigate to={withLocalePath(locale, "/404")} replace />;
   }
