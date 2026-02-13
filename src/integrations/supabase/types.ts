@@ -559,6 +559,19 @@ export type Database = {
       is_superadmin: { Args: { _user_id: string }; Returns: boolean }
       mark_missed: { Args: { p_ticket_id: string }; Returns: Json }
       mark_returned: { Args: { p_ticket_id: string }; Returns: Json }
+      onboard_clinic: {
+        Args: {
+          p_governorate_ar: string
+          p_locality_level2_ar: string
+          p_locality_level2_type?: string
+          p_locality_level3_ar?: string
+          p_marketer_id?: string
+          p_name_ar: string
+          p_phone?: string
+          p_primary_specialty_id: string
+        }
+        Returns: string
+      }
       reinsert_returned: {
         Args: {
           p_insert_n?: number

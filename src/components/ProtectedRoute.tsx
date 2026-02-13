@@ -6,10 +6,11 @@ import { withLocalePath } from "@/i18n/paths";
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRoles?: Array<"owner" | "admin" | "secretary" | "doctor">;
+  skipOnboardingCheck?: boolean;
 }
 
-const ProtectedRoute = ({ children, requiredRoles }: ProtectedRouteProps) => {
-  const { user, userRoles, loading } = useAuth();
+const ProtectedRoute = ({ children, requiredRoles, skipOnboardingCheck }: ProtectedRouteProps) => {
+  const { user, userRoles, clinicId, loading } = useAuth();
   const { pathname } = useLocation();
   const locale = getLocaleFromPathname(pathname);
 
@@ -23,6 +24,11 @@ const ProtectedRoute = ({ children, requiredRoles }: ProtectedRouteProps) => {
 
   if (!user) {
     return <Navigate to={withLocalePath(locale, "/login")} replace />;
+  }
+
+  // Redirect to onboarding if user has no clinic (unless we're already on onboarding)
+  if (!skipOnboardingCheck && !clinicId && userRoles.length === 0) {
+    return <Navigate to={withLocalePath(locale, "/onboarding")} replace />;
   }
 
   if (requiredRoles && requiredRoles.length > 0) {
