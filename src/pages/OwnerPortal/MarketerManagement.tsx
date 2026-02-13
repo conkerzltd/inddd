@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -26,7 +26,11 @@ import {
   Copy,
   Users,
   Search,
+  Trash2,
 } from "lucide-react";
+import { EgyptPhoneInput } from "@/components/inputs/EgyptPhoneInput";
+import { GeoDropdown, type GeoValue } from "@/components/inputs/GeoDropdown";
+import { storedToInput10, toEgE164Digits, isValidEg10 } from "@/utils/phoneEG";
 
 type Marketer = {
   id: string;
@@ -43,21 +47,27 @@ type Marketer = {
   created_at: string;
 };
 
-const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+type TargetArea = {
+  id?: string;
+  governorate_ar: string;
+  level2_ar: string;
+  level2_type: string;
+};
+
+const statusMap: Record<
+  string,
+  { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
+> = {
   active: { label: "مفعّل", variant: "default" },
   pending: { label: "قيد المراجعة", variant: "secondary" },
   blocked: { label: "محظور", variant: "destructive" },
 };
 
-const emptyForm = {
-  name: "",
-  primary_phone: "",
-  whatsapp_link: "",
-  secondary_phone: "",
+const EMPTY_GEO: GeoValue = {
   governorate_ar: "",
-  city_ar: "",
-  detailed_address: "",
-  target_areas: "",
+  level2_ar: "",
+  level2_type: "",
+  level3_ar: "",
 };
 
 const MarketerManagement = () => {
@@ -67,10 +77,29 @@ const MarketerManagement = () => {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [form, setForm] = useState(emptyForm);
-  const [submitting, setSubmitting] = useState(false);
 
-  // Fetch marketers
+  // Form state
+  const [name, setName] = useState("");
+  const [primaryPhone, setPrimaryPhone] = useState("");
+  const [whatsappPhone, setWhatsappPhone] = useState("");
+  const [secondaryPhone, setSecondaryPhone] = useState("");
+  const [personalGeo, setPersonalGeo] = useState<GeoValue>({ ...EMPTY_GEO });
+  const [detailedAddress, setDetailedAddress] = useState("");
+  const [targetAreas, setTargetAreas] = useState<TargetArea[]>([
+    { governorate_ar: "", level2_ar: "", level2_type: "" },
+  ]);
+
+  const resetForm = () => {
+    setName("");
+    setPrimaryPhone("");
+    setWhatsappPhone("");
+    setSecondaryPhone("");
+    setPersonalGeo({ ...EMPTY_GEO });
+    setDetailedAddress("");
+    setTargetAreas([{ governorate_ar: "", level2_ar: "", level2_type: "" }]);
+  };
+
+  // Fetch marketers with target areas
   const { data: marketers = [], isLoading } = useQuery({
     queryKey: ["marketers"],
     queryFn: async () => {
@@ -86,25 +115,48 @@ const MarketerManagement = () => {
   // Add marketer mutation
   const addMarketer = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("marketers").insert({
-        name: form.name.trim(),
-        primary_phone: form.primary_phone.trim(),
-        whatsapp_link: form.whatsapp_link.trim() || null,
-        secondary_phone: form.secondary_phone.trim() || null,
-        governorate_ar: form.governorate_ar.trim() || null,
-        city_ar: form.city_ar.trim() || null,
-        detailed_address: form.detailed_address.trim() || null,
-        target_areas: form.target_areas
-          ? form.target_areas.split("،").map((a) => a.trim()).filter(Boolean)
-          : null,
-        referral_code: "", // trigger will auto-generate
-      });
+      if (!name.trim()) throw new Error("الاسم مطلوب");
+      if (!isValidEg10(primaryPhone)) throw new Error("رقم الهاتف الأساسي غير صحيح");
+
+      const { data, error } = await supabase
+        .from("marketers")
+        .insert({
+          name: name.trim(),
+          primary_phone: "0" + primaryPhone,
+          whatsapp_link: whatsappPhone
+            ? `https://wa.me/20${whatsappPhone}`
+            : null,
+          secondary_phone: secondaryPhone ? "0" + secondaryPhone : null,
+          governorate_ar: personalGeo.governorate_ar || null,
+          city_ar: personalGeo.level2_ar || null,
+          detailed_address: detailedAddress.trim() || null,
+          target_areas: null, // We use the normalized table now
+          referral_code: "", // trigger auto-generates
+        })
+        .select("id")
+        .single();
       if (error) throw error;
+
+      // Insert target areas
+      const validAreas = targetAreas.filter((a) => a.governorate_ar);
+      if (validAreas.length > 0 && data) {
+        const { error: taError } = await supabase
+          .from("marketer_target_areas")
+          .insert(
+            validAreas.map((a) => ({
+              marketer_id: data.id,
+              governorate_ar: a.governorate_ar,
+              level2_ar: a.level2_ar || null,
+              level2_type: a.level2_type || null,
+            }))
+          );
+        if (taError) throw taError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["marketers"] });
       setDialogOpen(false);
-      setForm(emptyForm);
+      resetForm();
       toast({ title: "تم إضافة المسوق بنجاح" });
     },
     onError: (err: Error) => {
@@ -132,13 +184,37 @@ const MarketerManagement = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.primary_phone.trim()) return;
     addMarketer.mutate();
   };
 
   const copyCode = (code: string) => {
     navigator.clipboard.writeText(code);
     toast({ title: "تم نسخ الكود", description: code });
+  };
+
+  const addTargetArea = () => {
+    setTargetAreas((prev) => [
+      ...prev,
+      { governorate_ar: "", level2_ar: "", level2_type: "" },
+    ]);
+  };
+
+  const removeTargetArea = (idx: number) => {
+    setTargetAreas((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const updateTargetArea = (idx: number, geo: GeoValue) => {
+    setTargetAreas((prev) =>
+      prev.map((a, i) =>
+        i === idx
+          ? {
+              governorate_ar: geo.governorate_ar,
+              level2_ar: geo.level2_ar,
+              level2_type: geo.level2_type,
+            }
+          : a
+      )
+    );
   };
 
   const filtered = marketers.filter(
@@ -176,78 +252,106 @@ const MarketerManagement = () => {
                 <DialogTitle>إضافة مسوق جديد</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+                {/* Name */}
                 <div className="space-y-2">
                   <Label>الاسم *</Label>
                   <Input
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     placeholder="اسم المسوق"
                     required
                   />
                 </div>
+
+                {/* Phone inputs using reusable component */}
+                <EgyptPhoneInput
+                  label="رقم الهاتف الأساسي *"
+                  value10={primaryPhone}
+                  onChange10={setPrimaryPhone}
+                  required
+                />
+
+                <EgyptPhoneInput
+                  label="رقم واتساب"
+                  value10={whatsappPhone}
+                  onChange10={setWhatsappPhone}
+                  helperText="سيتم إنشاء رابط واتساب تلقائياً"
+                />
+
+                <EgyptPhoneInput
+                  label="رقم هاتف ثانوي"
+                  value10={secondaryPhone}
+                  onChange10={setSecondaryPhone}
+                />
+
+                {/* Personal Address - Geo Dropdown */}
                 <div className="space-y-2">
-                  <Label>رقم الهاتف الأساسي *</Label>
+                  <Label className="text-sm font-semibold">العنوان الشخصي</Label>
+                  <GeoDropdown
+                    value={personalGeo}
+                    onChange={setPersonalGeo}
+                    showVillage={false}
+                  />
                   <Input
-                    value={form.primary_phone}
-                    onChange={(e) => setForm({ ...form, primary_phone: e.target.value })}
-                    placeholder="01xxxxxxxxx"
-                    dir="ltr"
-                    required
+                    value={detailedAddress}
+                    onChange={(e) => setDetailedAddress(e.target.value)}
+                    placeholder="العنوان التفصيلي (شارع، مبنى...)"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>رابط واتساب</Label>
-                  <Input
-                    value={form.whatsapp_link}
-                    onChange={(e) => setForm({ ...form, whatsapp_link: e.target.value })}
-                    placeholder="wa.me/201xxxxxxxxx"
-                    dir="ltr"
-                  />
+
+                {/* Dynamic Target Areas */}
+                <div className="space-y-3">
+                  <Label className="text-sm font-semibold">
+                    المناطق المستهدفة
+                  </Label>
+                  {targetAreas.map((area, idx) => (
+                    <div
+                      key={idx}
+                      className="relative rounded-lg border border-border p-3 space-y-2"
+                    >
+                      {targetAreas.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="absolute top-1 start-1 h-7 w-7 text-destructive"
+                          onClick={() => removeTargetArea(idx)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        منطقة {idx + 1}
+                      </p>
+                      <GeoDropdown
+                        value={{
+                          governorate_ar: area.governorate_ar,
+                          level2_ar: area.level2_ar,
+                          level2_type: area.level2_type,
+                          level3_ar: "",
+                        }}
+                        onChange={(geo) => updateTargetArea(idx, geo)}
+                        showVillage={false}
+                      />
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addTargetArea}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 me-1" />
+                    إضافة منطقة جديدة
+                  </Button>
                 </div>
-                <div className="space-y-2">
-                  <Label>رقم هاتف ثانوي</Label>
-                  <Input
-                    value={form.secondary_phone}
-                    onChange={(e) => setForm({ ...form, secondary_phone: e.target.value })}
-                    placeholder="01xxxxxxxxx"
-                    dir="ltr"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>المحافظة</Label>
-                    <Input
-                      value={form.governorate_ar}
-                      onChange={(e) => setForm({ ...form, governorate_ar: e.target.value })}
-                      placeholder="القاهرة"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>المدينة</Label>
-                    <Input
-                      value={form.city_ar}
-                      onChange={(e) => setForm({ ...form, city_ar: e.target.value })}
-                      placeholder="مدينة نصر"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>العنوان التفصيلي</Label>
-                  <Input
-                    value={form.detailed_address}
-                    onChange={(e) => setForm({ ...form, detailed_address: e.target.value })}
-                    placeholder="شارع، مبنى..."
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>المناطق المستهدفة (مفصولة بفاصلة ،)</Label>
-                  <Input
-                    value={form.target_areas}
-                    onChange={(e) => setForm({ ...form, target_areas: e.target.value })}
-                    placeholder="مدينة نصر، الشروق، العبور"
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={addMarketer.isPending}>
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={addMarketer.isPending}
+                >
                   {addMarketer.isPending ? "جاري الإضافة…" : "إضافة المسوق"}
                 </Button>
               </form>
@@ -273,7 +377,9 @@ const MarketerManagement = () => {
         <div className="mb-4 grid grid-cols-3 gap-3">
           <Card>
             <CardContent className="p-3 text-center">
-              <p className="text-2xl font-bold text-foreground">{marketers.length}</p>
+              <p className="text-2xl font-bold text-foreground">
+                {marketers.length}
+              </p>
               <p className="text-xs text-muted-foreground">الإجمالي</p>
             </CardContent>
           </Card>
@@ -297,7 +403,9 @@ const MarketerManagement = () => {
 
         {/* List */}
         {isLoading ? (
-          <div className="text-center py-10 text-muted-foreground">جاري التحميل…</div>
+          <div className="text-center py-10 text-muted-foreground">
+            جاري التحميل…
+          </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-10">
             <Users className="mx-auto h-10 w-10 text-muted-foreground/40" />
@@ -312,10 +420,12 @@ const MarketerManagement = () => {
               return (
                 <Card key={m.id} className="transition-shadow hover:shadow-md">
                   <CardContent className="p-4">
-                    {/* Top row: name + status */}
+                    {/* Top row */}
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div>
-                        <h3 className="font-semibold text-foreground">{m.name}</h3>
+                        <h3 className="font-semibold text-foreground">
+                          {m.name}
+                        </h3>
                         <div className="flex items-center gap-2 mt-1">
                           <button
                             onClick={() => copyCode(m.referral_code)}
@@ -349,7 +459,10 @@ const MarketerManagement = () => {
                         <Phone className="h-3.5 w-3.5 shrink-0" />
                         <span dir="ltr">{m.primary_phone}</span>
                         {m.secondary_phone && (
-                          <span dir="ltr" className="text-muted-foreground/60">
+                          <span
+                            dir="ltr"
+                            className="text-muted-foreground/60"
+                          >
                             | {m.secondary_phone}
                           </span>
                         )}
@@ -358,14 +471,20 @@ const MarketerManagement = () => {
                         <div className="flex items-center gap-2">
                           <MapPin className="h-3.5 w-3.5 shrink-0" />
                           <span>
-                            {[m.governorate_ar, m.city_ar].filter(Boolean).join("، ")}
+                            {[m.governorate_ar, m.city_ar]
+                              .filter(Boolean)
+                              .join("، ")}
                           </span>
                         </div>
                       )}
                       {m.target_areas && m.target_areas.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-1">
                           {m.target_areas.map((area, i) => (
-                            <Badge key={i} variant="outline" className="text-xs">
+                            <Badge
+                              key={i}
+                              variant="outline"
+                              className="text-xs"
+                            >
                               {area}
                             </Badge>
                           ))}

@@ -96,6 +96,7 @@ export type Database = {
           phone: string | null
           primary_specialty_id: string | null
           profile_complete: boolean
+          serial_id: string | null
           session_paused: boolean
           status: Database["public"]["Enums"]["entity_status"]
           timezone: string
@@ -133,6 +134,7 @@ export type Database = {
           phone?: string | null
           primary_specialty_id?: string | null
           profile_complete?: boolean
+          serial_id?: string | null
           session_paused?: boolean
           status?: Database["public"]["Enums"]["entity_status"]
           timezone?: string
@@ -170,6 +172,7 @@ export type Database = {
           phone?: string | null
           primary_specialty_id?: string | null
           profile_complete?: boolean
+          serial_id?: string | null
           session_paused?: boolean
           status?: Database["public"]["Enums"]["entity_status"]
           timezone?: string
@@ -247,6 +250,56 @@ export type Database = {
           level3_ar?: string | null
         }
         Relationships: []
+      }
+      gov_codes: {
+        Row: {
+          code: string
+          governorate_ar: string
+        }
+        Insert: {
+          code: string
+          governorate_ar: string
+        }
+        Update: {
+          code?: string
+          governorate_ar?: string
+        }
+        Relationships: []
+      }
+      marketer_target_areas: {
+        Row: {
+          created_at: string
+          governorate_ar: string
+          id: string
+          level2_ar: string | null
+          level2_type: string | null
+          marketer_id: string
+        }
+        Insert: {
+          created_at?: string
+          governorate_ar: string
+          id?: string
+          level2_ar?: string | null
+          level2_type?: string | null
+          marketer_id: string
+        }
+        Update: {
+          created_at?: string
+          governorate_ar?: string
+          id?: string
+          level2_ar?: string | null
+          level2_type?: string | null
+          marketer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketer_target_areas_marketer_id_fkey"
+            columns: ["marketer_id"]
+            isOneToOne: false
+            referencedRelation: "marketers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       marketers: {
         Row: {

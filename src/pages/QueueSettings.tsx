@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Save, Check, ShieldCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import logoSymbol from "@/assets/logo-symbol.png";
 import { PasswordInput } from "@/components/inputs/PasswordInput";
@@ -18,6 +19,7 @@ const QueueSettings = () => {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [serialId, setSerialId] = useState<string | null>(null);
 
   const [avgServiceMinutes, setAvgServiceMinutes] = useState(10);
   const [lateThreshold, setLateThreshold] = useState(10);
@@ -28,7 +30,7 @@ const QueueSettings = () => {
     if (!clinicId) return;
     supabase
       .from("clinics")
-      .select("avg_service_time_seed_minutes, late_threshold_minutes, allow_urgent_insert, allow_pause_intake")
+      .select("avg_service_time_seed_minutes, late_threshold_minutes, allow_urgent_insert, allow_pause_intake, serial_id")
       .eq("id", clinicId)
       .single()
       .then(({ data }) => {
@@ -37,6 +39,7 @@ const QueueSettings = () => {
         setLateThreshold(data.late_threshold_minutes ?? 10);
         setAllowUrgent((data as any).allow_urgent_insert ?? true);
         setAllowPauseIntake((data as any).allow_pause_intake ?? true);
+        setSerialId((data as any).serial_id ?? null);
       });
   }, [clinicId]);
 
@@ -87,6 +90,17 @@ const QueueSettings = () => {
       </header>
 
       <main className="container mx-auto p-4 max-w-2xl space-y-6">
+        {serialId && (
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">رقم العيادة</p>
+                <p className="text-lg font-mono font-bold text-foreground">{serialId}</p>
+              </div>
+              <Badge variant="outline" className="text-xs">للقراءة فقط</Badge>
+            </CardContent>
+          </Card>
+        )}
         <Card>
           <CardHeader><CardTitle className="text-base">التوقيت</CardTitle></CardHeader>
           <CardContent className="space-y-4">
