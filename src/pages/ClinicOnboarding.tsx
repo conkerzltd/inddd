@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, Clock, XCircle } from "lucide-react";
+import { Loader2, Clock, XCircle, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import logoSymbol from "@/assets/logo-symbol.png";
 import ClinicProfileForm from "@/components/clinic/ClinicProfileForm";
@@ -12,10 +12,11 @@ import ClinicProfileForm from "@/components/clinic/ClinicProfileForm";
 type OnboardingStep = "profile" | "pending" | "rejected" | "draft";
 
 const ClinicOnboarding = () => {
-  const { user, clinicId, clinicStatus, loading: authLoading, refreshRoles } = useAuth();
+  const { user, clinicId, clinicStatus, loading: authLoading, refreshRoles, signOut } = useAuth();
   const navigate = useNavigate();
   const autoCreating = useRef(false);
   const [localClinicId, setLocalClinicId] = useState<string | null>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const effectiveClinicId = clinicId || localClinicId;
 
@@ -70,6 +71,12 @@ const ClinicOnboarding = () => {
     setStep("pending");
   };
 
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    await signOut();
+    navigate("/login", { replace: true });
+  };
+
   if (authLoading || (!effectiveClinicId && (step === "profile" || step === "draft"))) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -84,18 +91,24 @@ const ClinicOnboarding = () => {
       <div className="min-h-screen bg-background" dir="rtl">
         <header className="border-b border-border bg-card px-4 py-3">
           <div className="container mx-auto">
-            <div className="flex items-center gap-3 mb-3">
-              <img src={logoSymbol} alt="inddd" className="h-8 w-8" />
-              <div>
-                <h1 className="text-lg font-bold text-foreground">
-                  {step === "rejected" ? "تعديل بيانات العيادة" : "إعداد العيادة"}
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  {step === "rejected"
-                    ? "يرجى مراجعة البيانات وتعديلها ثم إعادة الإرسال"
-                    : "أكمل بيانات العيادة بالكامل ثم أرسلها للمراجعة والموافقة"}
-                </p>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <img src={logoSymbol} alt="inddd" className="h-8 w-8" />
+                <div>
+                  <h1 className="text-lg font-bold text-foreground">
+                    {step === "rejected" ? "تعديل بيانات العيادة" : "إعداد العيادة"}
+                  </h1>
+                  <p className="text-sm text-muted-foreground">
+                    {step === "rejected"
+                      ? "يرجى مراجعة البيانات وتعديلها ثم إعادة الإرسال"
+                      : "أكمل بيانات العيادة بالكامل ثم أرسلها للمراجعة والموافقة"}
+                  </p>
+                </div>
               </div>
+              <Button variant="ghost" size="sm" onClick={handleLogout} disabled={loggingOut}>
+                <LogOut className="ml-2 h-4 w-4" />
+                {loggingOut ? "جاري..." : "تسجيل خروج"}
+              </Button>
             </div>
             {step === "rejected" && (
               <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3">
@@ -115,7 +128,9 @@ const ClinicOnboarding = () => {
             <ClinicProfileForm
               clinicId={effectiveClinicId}
               onSaved={handleProfileSaved}
+              onDraftSave={() => toast.success("تم حفظ المسودة — يمكنك المتابعة لاحقاً")}
               submitLabel={step === "rejected" ? "إعادة الإرسال للمراجعة" : "إرسال للمراجعة والموافقة"}
+              showDraftSave
             />
           )}
         </main>
@@ -123,7 +138,7 @@ const ClinicOnboarding = () => {
     );
   }
 
-  // Step 3: Pending approval
+  // Pending approval
   if (step === "pending") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-4" dir="rtl">
@@ -137,12 +152,16 @@ const ClinicOnboarding = () => {
               تم إرسال بيانات العيادة للمراجعة. سيتم تفعيل حسابك بعد موافقة الإدارة.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">
               عادةً ما تتم المراجعة خلال ٢٤ ساعة. يمكنك إعادة تحميل الصفحة للتحقق من حالة الطلب.
             </div>
             <Button variant="outline" onClick={() => window.location.reload()} className="w-full">
               تحديث الحالة
+            </Button>
+            <Button variant="ghost" onClick={handleLogout} disabled={loggingOut} className="w-full">
+              <LogOut className="ml-2 h-4 w-4" />
+              {loggingOut ? "جاري..." : "تسجيل خروج"}
             </Button>
           </CardContent>
         </Card>

@@ -26,14 +26,19 @@ type WorkingHours = Record<string, { open: string; close: string } | null>;
 
 interface ClinicProfileFormProps {
   clinicId: string;
-  /** Called after a successful save */
+  /** Called after a successful save (submit / full save) */
   onSaved?: () => void;
+  /** Called after a draft save (no validation required) */
+  onDraftSave?: () => void;
   /** Label for the submit button */
   submitLabel?: string;
+  /** Show draft-save button */
+  showDraftSave?: boolean;
 }
 
-const ClinicProfileForm = ({ clinicId, onSaved, submitLabel }: ClinicProfileFormProps) => {
+const ClinicProfileForm = ({ clinicId, onSaved, onDraftSave, submitLabel, showDraftSave }: ClinicProfileFormProps) => {
   const [saving, setSaving] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const [clinicName, setClinicName] = useState("");
@@ -229,6 +234,44 @@ const ClinicProfileForm = ({ clinicId, onSaved, submitLabel }: ClinicProfileForm
     return Object.keys(errs).length === 0;
   };
 
+  const buildPayload = () => {
+    const finalVillage = showVillageOther ? villageOther : selectedVillage;
+    return {
+      name: clinicName,
+      name_ar: clinicNameAr,
+      whatsapp_local_1: whatsappLocal1 ? "0" + whatsappLocal1 : null,
+      whatsapp_e164_1: whatsappLocal1 ? toEgE164Digits(whatsappLocal1) : null,
+      whatsapp_local_2: whatsappLocal2 ? "0" + whatsappLocal2 : null,
+      whatsapp_e164_2: whatsappLocal2 ? toEgE164Digits(whatsappLocal2) : null,
+      clinic_whatsapp_phone: whatsappLocal1 ? toEgE164Digits(whatsappLocal1) : null,
+      address_text: addressText || null,
+      maps_url: mapsUrl || null,
+      lat: lat,
+      lng: lng,
+      working_hours_json: workingHours,
+      primary_specialty_id: selectedSpecialtyId || null,
+      governorate_ar: selectedGov || null,
+      locality_level2_ar: selectedLevel2 || null,
+      locality_level2_type: selectedLevel2Type || null,
+      locality_level3_ar: (selectedLevel2Type === "MARKAZ" && finalVillage) ? finalVillage : null,
+    };
+  };
+
+  const handleDraftSave = async () => {
+    setSavingDraft(true);
+    const { error } = await supabase
+      .from("clinics")
+      .update(buildPayload() as any)
+      .eq("id", clinicId);
+    setSavingDraft(false);
+    if (error) {
+      toast.error("فشل الحفظ: " + error.message);
+    } else {
+      toast.success("تم حفظ المسودة");
+      onDraftSave?.();
+    }
+  };
+
   const handleSave = async () => {
     if (!validate()) {
       toast.error("يرجى تصحيح الأخطاء قبل الحفظ");
@@ -236,29 +279,9 @@ const ClinicProfileForm = ({ clinicId, onSaved, submitLabel }: ClinicProfileForm
     }
     setSaving(true);
     setSaved(false);
-    const finalVillage = showVillageOther ? villageOther : selectedVillage;
     const { error } = await supabase
       .from("clinics")
-      .update({
-        name: clinicName,
-        name_ar: clinicNameAr,
-        whatsapp_local_1: whatsappLocal1 ? "0" + whatsappLocal1 : null,
-        whatsapp_e164_1: whatsappLocal1 ? toEgE164Digits(whatsappLocal1) : null,
-        whatsapp_local_2: whatsappLocal2 ? "0" + whatsappLocal2 : null,
-        whatsapp_e164_2: whatsappLocal2 ? toEgE164Digits(whatsappLocal2) : null,
-        clinic_whatsapp_phone: whatsappLocal1 ? toEgE164Digits(whatsappLocal1) : null,
-        address_text: addressText || null,
-        maps_url: mapsUrl || null,
-        lat: lat,
-        lng: lng,
-        working_hours_json: workingHours,
-        primary_specialty_id: selectedSpecialtyId || null,
-        governorate_ar: selectedGov || null,
-        locality_level2_ar: selectedLevel2 || null,
-        locality_level2_type: selectedLevel2Type || null,
-        locality_level3_ar: (selectedLevel2Type === "MARKAZ" && finalVillage) ? finalVillage : null,
-        profile_complete: true,
-      } as any)
+      .update({ ...buildPayload(), profile_complete: true } as any)
       .eq("id", clinicId);
     setSaving(false);
     if (error) {
@@ -478,8 +501,13 @@ const ClinicProfileForm = ({ clinicId, onSaved, submitLabel }: ClinicProfileForm
         </CardContent>
       </Card>
 
-      <div className="flex justify-end pb-8">
-        <Button onClick={handleSave} disabled={saving} className="min-w-32">
+      <div className="flex flex-wrap items-center justify-end gap-3 pb-8">
+        {showDraftSave && (
+          <Button type="button" variant="outline" onClick={handleDraftSave} disabled={savingDraft || saving}>
+            {savingDraft ? "جاري الحفظ..." : <><Save className="ml-2 h-4 w-4" />حفظ ومتابعة لاحقاً</>}
+          </Button>
+        )}
+        <Button onClick={handleSave} disabled={saving || savingDraft} className="min-w-32">
           {saving ? "جاري الحفظ..." : saved ? (
             <><Check className="ml-2 h-4 w-4" />تم الحفظ</>
           ) : (
