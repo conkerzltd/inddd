@@ -2,14 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocale } from "@/i18n/useLocale";
-import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 
@@ -21,7 +19,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { localePath } = useLocale();
   const { toast } = useToast();
-  const [appleLoading, setAppleLoading] = useState(false);
+  
 
   // Referral code state
   const [referralCode, setReferralCode] = useState("");
@@ -64,17 +62,6 @@ const Login = () => {
   };
 
 
-  const handleAppleSignIn = async () => {
-    setAppleLoading(true);
-    const result = await lovable.auth.signInWithOAuth("apple", {
-      redirect_uri: window.location.origin,
-    });
-    if (result?.error) {
-      toast({ title: "فشل تسجيل الدخول بـ Apple", description: String(result.error), variant: "destructive" });
-      setAppleLoading(false);
-    }
-  };
-
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -112,24 +99,6 @@ const Login = () => {
           <CardDescription>نظام إدارة قائمة الانتظار</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button
-            variant="outline"
-            className="w-full gap-2 min-h-[44px] mt-2"
-            onClick={handleAppleSignIn}
-            disabled={appleLoading}
-          >
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-            </svg>
-            {appleLoading ? "جاري الدخول…" : "تسجيل الدخول بـ Apple"}
-          </Button>
-
-          <div className="flex items-center gap-3 my-2">
-            <Separator className="flex-1" />
-            <span className="text-xs text-muted-foreground">أو</span>
-            <Separator className="flex-1" />
-          </div>
-
           <Tabs defaultValue="signin">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">تسجيل الدخول</TabsTrigger>
