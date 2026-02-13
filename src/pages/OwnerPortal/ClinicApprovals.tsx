@@ -85,9 +85,11 @@ const ClinicApprovals = () => {
     },
   });
 
+  // Filter out "draft" clinics — only show submitted ones
   const pending = clinics.filter((c) => c.status === "pending");
   const approved = clinics.filter((c) => c.status === "active");
   const rejected = clinics.filter((c) => c.status === "blocked");
+  const visibleClinics = clinics.filter((c) => c.status !== "draft");
 
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("ar-EG", {
@@ -274,7 +276,7 @@ const ClinicApprovals = () => {
 
         {isLoading ? (
           <div className="text-center py-10 text-muted-foreground">جاري التحميل…</div>
-        ) : clinics.length === 0 ? (
+        ) : visibleClinics.length === 0 ? (
           <div className="text-center py-10">
             <Building2 className="mx-auto h-10 w-10 text-muted-foreground/40" />
             <p className="mt-2 text-muted-foreground">لا توجد عيادات مسجلة بعد</p>

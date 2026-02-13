@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
 type UserRole = Tables<"user_roles">;
-type EntityStatus = "pending" | "active" | "blocked";
+type EntityStatus = "draft" | "pending" | "active" | "blocked";
 
 interface AuthContextType {
   session: Session | null;

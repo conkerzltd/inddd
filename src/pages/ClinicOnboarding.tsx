@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import logoSymbol from "@/assets/logo-symbol.png";
 import ClinicProfileForm from "@/components/clinic/ClinicProfileForm";
 
-type OnboardingStep = "profile" | "pending" | "rejected";
+type OnboardingStep = "profile" | "pending" | "rejected" | "draft";
 
 const ClinicOnboarding = () => {
   const { user, clinicId, clinicStatus, loading: authLoading, refreshRoles } = useAuth();
@@ -22,6 +22,7 @@ const ClinicOnboarding = () => {
   const getStep = (): OnboardingStep => {
     if (clinicStatus === "blocked") return "rejected";
     if (clinicStatus === "pending") return "pending";
+    if (clinicStatus === "draft" || !clinicStatus) return "draft";
     return "profile";
   };
 
@@ -69,7 +70,7 @@ const ClinicOnboarding = () => {
     setStep("pending");
   };
 
-  if (authLoading || (!effectiveClinicId && step === "profile")) {
+  if (authLoading || (!effectiveClinicId && (step === "profile" || step === "draft"))) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -78,7 +79,7 @@ const ClinicOnboarding = () => {
   }
 
   // Full profile form — same ClinicProfileForm used in /clinic-profile
-  if (step === "profile" || step === "rejected") {
+  if (step === "draft" || step === "profile" || step === "rejected") {
     return (
       <div className="min-h-screen bg-background" dir="rtl">
         <header className="border-b border-border bg-card px-4 py-3">
@@ -92,7 +93,7 @@ const ClinicOnboarding = () => {
                 <p className="text-sm text-muted-foreground">
                   {step === "rejected"
                     ? "يرجى مراجعة البيانات وتعديلها ثم إعادة الإرسال"
-                    : "أكمل بيانات العيادة بالكامل للمراجعة والموافقة"}
+                    : "أكمل بيانات العيادة بالكامل ثم أرسلها للمراجعة والموافقة"}
                 </p>
               </div>
             </div>
@@ -114,7 +115,7 @@ const ClinicOnboarding = () => {
             <ClinicProfileForm
               clinicId={effectiveClinicId}
               onSaved={handleProfileSaved}
-              submitLabel={step === "rejected" ? "إعادة الإرسال للمراجعة" : "حفظ وإرسال للمراجعة"}
+              submitLabel={step === "rejected" ? "إعادة الإرسال للمراجعة" : "إرسال للمراجعة والموافقة"}
             />
           )}
         </main>
