@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import SuperAdminRoute from "@/components/SuperAdminRoute";
 import LocaleLayout from "@/i18n/LocaleLayout";
 import Index from "./pages/Index";
 import MarketingHome from "./pages/MarketingHome";
@@ -20,6 +21,8 @@ import Console from "./pages/Console";
 import PatientQueue from "./pages/PatientQueue";
 import ClinicProfile from "./pages/ClinicProfile";
 import QueueSettings from "./pages/QueueSettings";
+import OwnerLogin from "./pages/OwnerPortal/OwnerLogin";
+import OwnerDashboard from "./pages/OwnerPortal/OwnerDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +65,15 @@ const appRoutes = (
       }
     />
     <Route path="q/:token" element={<PatientQueue />} />
+    <Route path="owner-portal/login" element={<OwnerLogin />} />
+    <Route
+      path="owner-portal"
+      element={
+        <SuperAdminRoute>
+          <OwnerDashboard />
+        </SuperAdminRoute>
+      }
+    />
     <Route path="*" element={<NotFound />} />
   </>
 );
