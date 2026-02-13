@@ -20,7 +20,7 @@ export function MissedList({ tickets, onMarkReturned }: Props) {
             <TableHead className="w-12">الرقم</TableHead>
             <TableHead>اسم المريض</TableHead>
             <TableHead>عدد مرات الغياب</TableHead>
-            <TableHead className="text-left w-[140px]">الإجراءات</TableHead>
+            <TableHead className="text-start w-[140px]">الإجراءات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -31,9 +31,9 @@ export function MissedList({ tickets, onMarkReturned }: Props) {
                 <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
               </TableCell>
               <TableCell>{t.miss_count}</TableCell>
-              <TableCell className="text-left w-[140px]">
+              <TableCell className="text-start w-[140px]">
                 <Button size="sm" variant="outline" onClick={() => onMarkReturned(t.id)}>
-                  <RotateCcw className="h-3 w-3 ml-1" />تسجيل عودة
+                  <RotateCcw className="h-3 w-3 me-1" />تسجيل عودة
                 </Button>
               </TableCell>
             </TableRow>
