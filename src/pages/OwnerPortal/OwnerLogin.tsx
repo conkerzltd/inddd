@@ -5,6 +5,7 @@ import { useLocale } from "@/i18n/useLocale";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/inputs/PasswordInput";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -100,9 +101,8 @@ const OwnerLogin = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="owner-password">كلمة المرور</Label>
-              <Input
+              <PasswordInput
                 id="owner-password"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required

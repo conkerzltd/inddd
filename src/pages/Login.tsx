@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/inputs/PasswordInput";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -119,7 +120,7 @@ const Login = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">كلمة المرور</Label>
-                  <Input id="signin-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required dir="ltr" />
+                  <PasswordInput id="signin-password" value={password} onChange={(e) => setPassword(e.target.value)} required dir="ltr" />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "جاري الدخول…" : "تسجيل الدخول"}
@@ -152,7 +153,7 @@ const Login = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">كلمة المرور</Label>
-                  <Input id="signup-password" type="password" placeholder="٦ أحرف على الأقل" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} dir="ltr" />
+                  <PasswordInput id="signup-password" placeholder="٦ أحرف على الأقل" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} dir="ltr" />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading || referralStatus !== "valid"}>
                   {isLoading ? "جاري الإنشاء…" : "إنشاء حساب"}
