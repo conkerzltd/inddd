@@ -4,15 +4,18 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
 type UserRole = Tables<"user_roles">;
+type EntityStatus = "pending" | "active" | "blocked";
 
 interface AuthContextType {
   session: Session | null;
   user: User | null;
   userRoles: UserRole[];
   clinicId: string | null;
+  clinicStatus: EntityStatus | null;
   profileComplete: boolean;
   loading: boolean;
   refreshProfile: () => Promise<void>;
+  refreshRoles: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -25,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [clinicId, setClinicId] = useState<string | null>(null);
+  const [clinicStatus, setClinicStatus] = useState<EntityStatus | null>(null);
   const [profileComplete, setProfileComplete] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -41,12 +45,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (cId) {
       const { data: clinic } = await supabase
         .from("clinics")
-        .select("profile_complete")
+        .select("profile_complete, status")
         .eq("id", cId)
         .single();
       setProfileComplete(!!(clinic as any)?.profile_complete);
+      setClinicStatus((clinic as any)?.status as EntityStatus ?? null);
     } else {
       setProfileComplete(false);
+      setClinicStatus(null);
     }
   };
 
@@ -54,10 +60,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (clinicId) {
       const { data: clinic } = await supabase
         .from("clinics")
-        .select("profile_complete")
+        .select("profile_complete, status")
         .eq("id", clinicId)
         .single();
       setProfileComplete(!!(clinic as any)?.profile_complete);
+      setClinicStatus((clinic as any)?.status as EntityStatus ?? null);
+    }
+  };
+
+  const refreshRoles = async () => {
+    if (user) {
+      await fetchRolesAndProfile(user.id);
     }
   };
 
@@ -72,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setUserRoles([]);
           setClinicId(null);
+          setClinicStatus(null);
           setProfileComplete(false);
         }
         setLoading(false);
@@ -107,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, user, userRoles, clinicId, profileComplete, loading, refreshProfile, signIn, signUp, signOut }}
+      value={{ session, user, userRoles, clinicId, clinicStatus, profileComplete, loading, refreshProfile, refreshRoles, signIn, signUp, signOut }}
     >
       {children}
     </AuthContext.Provider>

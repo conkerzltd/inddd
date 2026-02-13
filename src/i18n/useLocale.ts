@@ -1,12 +1,11 @@
-import { useLocation } from "react-router-dom";
-import { getLocaleFromPathname, type Locale } from "./locale";
-import { withLocalePath } from "./paths";
+export type Locale = "ar";
 
+/**
+ * Locale hook — Arabic only (English routes removed).
+ * Kept as a compatibility shim so existing components don't break.
+ */
 export function useLocale() {
-  const { pathname } = useLocation();
-  const locale: Locale = getLocaleFromPathname(pathname);
-
-  const localePath = (path: string) => withLocalePath(locale, path);
-
+  const locale: string = "ar";
+  const localePath = (path: string) => path;
   return { locale, localePath };
 }
