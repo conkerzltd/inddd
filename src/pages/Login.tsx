@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useLocale } from "@/i18n/useLocale";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,17 +14,28 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { user, clinicId, clinicStatus, loading: authLoading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
-  const { localePath } = useLocale();
   const { toast } = useToast();
-  
 
   // Referral code state
   const [referralCode, setReferralCode] = useState("");
   const [referralStatus, setReferralStatus] = useState<"idle" | "checking" | "valid" | "invalid">("idle");
   const [referralMarketerId, setReferralMarketerId] = useState<string | null>(null);
   const [referralError, setReferralError] = useState("");
+
+  // Redirect already-logged-in users based on clinic state
+  useEffect(() => {
+    if (authLoading || !user) return;
+    if (!clinicId) {
+      navigate("/onboarding", { replace: true });
+    } else if (clinicStatus === "active") {
+      navigate("/console", { replace: true });
+    } else {
+      // pending or blocked → onboarding shows the right state
+      navigate("/onboarding", { replace: true });
+    }
+  }, [authLoading, user, clinicId, clinicStatus, navigate]);
 
   const validateReferralCode = async (code: string) => {
     const trimmed = code.trim().toUpperCase();
@@ -61,7 +71,6 @@ const Login = () => {
     }
   };
 
-
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -69,9 +78,8 @@ const Login = () => {
     setIsLoading(false);
     if (error) {
       toast({ title: "فشل تسجيل الدخول", description: error.message, variant: "destructive" });
-    } else {
-      navigate(localePath("/console"));
     }
+    // useEffect above handles redirect after auth state updates
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -86,7 +94,6 @@ const Login = () => {
     if (error) {
       toast({ title: "فشل إنشاء الحساب", description: error.message, variant: "destructive" });
     } else {
-      // Store marketer_id in localStorage for onboarding
       localStorage.setItem("pending_marketer_id", referralMarketerId);
       toast({ title: "تحقق من بريدك الإلكتروني", description: "أرسلنا لك رابط التحقق." });
     }
@@ -108,26 +115,11 @@ const Login = () => {
               <form onSubmit={handleSignIn} className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">البريد الإلكتروني</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder="you@clinic.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    dir="ltr"
-                  />
+                  <Input id="signin-email" type="email" placeholder="you@clinic.com" value={email} onChange={(e) => setEmail(e.target.value)} required dir="ltr" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">كلمة المرور</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    dir="ltr"
-                  />
+                  <Input id="signin-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required dir="ltr" />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "جاري الدخول…" : "تسجيل الدخول"}
@@ -140,18 +132,10 @@ const Login = () => {
                   <Label htmlFor="signup-referral">كود الإحالة *</Label>
                   <div className="relative">
                     <Input
-                      id="signup-referral"
-                      type="text"
-                      placeholder="مثال: IND-XXXX"
+                      id="signup-referral" type="text" placeholder="مثال: IND-XXXX"
                       value={referralCode}
-                      onChange={(e) => {
-                        setReferralCode(e.target.value.toUpperCase());
-                        if (referralStatus !== "idle") setReferralStatus("idle");
-                      }}
-                      onBlur={handleReferralBlur}
-                      required
-                      dir="ltr"
-                      className="pe-10"
+                      onChange={(e) => { setReferralCode(e.target.value.toUpperCase()); if (referralStatus !== "idle") setReferralStatus("idle"); }}
+                      onBlur={handleReferralBlur} required dir="ltr" className="pe-10"
                     />
                     <div className="absolute end-3 top-1/2 -translate-y-1/2">
                       {referralStatus === "checking" && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
@@ -159,43 +143,18 @@ const Login = () => {
                       {referralStatus === "invalid" && <XCircle className="h-4 w-4 text-destructive" />}
                     </div>
                   </div>
-                  {referralStatus === "invalid" && (
-                    <p className="text-xs text-destructive">{referralError}</p>
-                  )}
-                  {referralStatus === "valid" && (
-                    <p className="text-xs text-primary">✓ كود الإحالة صالح</p>
-                  )}
+                  {referralStatus === "invalid" && <p className="text-xs text-destructive">{referralError}</p>}
+                  {referralStatus === "valid" && <p className="text-xs text-primary">✓ كود الإحالة صالح</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">البريد الإلكتروني</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="you@clinic.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    dir="ltr"
-                  />
+                  <Input id="signup-email" type="email" placeholder="you@clinic.com" value={email} onChange={(e) => setEmail(e.target.value)} required dir="ltr" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">كلمة المرور</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="٦ أحرف على الأقل"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    dir="ltr"
-                  />
+                  <Input id="signup-password" type="password" placeholder="٦ أحرف على الأقل" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} dir="ltr" />
                 </div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isLoading || referralStatus !== "valid"}
-                >
+                <Button type="submit" className="w-full" disabled={isLoading || referralStatus !== "valid"}>
                   {isLoading ? "جاري الإنشاء…" : "إنشاء حساب"}
                 </Button>
               </form>
