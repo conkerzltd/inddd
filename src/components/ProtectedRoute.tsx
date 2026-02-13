@@ -27,12 +27,12 @@ const ProtectedRoute = ({ children, skipOnboardingCheck, skipProfileCheck }: Pro
     return <Navigate to="/onboarding" replace />;
   }
 
-  // Clinic exists but not approved → onboarding (shows pending/rejected)
+  // Clinic exists but not active (draft/pending/blocked) → onboarding
   if (!skipOnboardingCheck && clinicId && clinicStatus !== "active") {
     return <Navigate to="/onboarding" replace />;
   }
 
-  // Clinic approved but profile not complete → clinic-profile
+  // Clinic active but profile not complete → clinic-profile
   if (!skipProfileCheck && clinicId && clinicStatus === "active" && !profileComplete) {
     return <Navigate to="/clinic-profile" replace />;
   }

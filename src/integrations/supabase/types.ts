@@ -625,7 +625,7 @@ export type Database = {
         | "INTAKE_CLOSED"
         | "INTAKE_OPENED"
         | "CANCELLED"
-      entity_status: "pending" | "active" | "blocked"
+      entity_status: "draft" | "pending" | "active" | "blocked"
       insert_position: "AFTER_CURRENT" | "AFTER_N" | "END"
       ticket_source: "EXTERNAL" | "PHONE_CALL" | "WALK_IN"
       ticket_status:
@@ -801,7 +801,7 @@ export const Constants = {
         "INTAKE_OPENED",
         "CANCELLED",
       ],
-      entity_status: ["pending", "active", "blocked"],
+      entity_status: ["draft", "pending", "active", "blocked"],
       insert_position: ["AFTER_CURRENT", "AFTER_N", "END"],
       ticket_source: ["EXTERNAL", "PHONE_CALL", "WALK_IN"],
       ticket_status: [
