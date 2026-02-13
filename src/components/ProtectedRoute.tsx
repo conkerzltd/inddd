@@ -7,10 +7,11 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRoles?: Array<"owner" | "admin" | "secretary" | "doctor">;
   skipOnboardingCheck?: boolean;
+  skipProfileCheck?: boolean;
 }
 
-const ProtectedRoute = ({ children, requiredRoles, skipOnboardingCheck }: ProtectedRouteProps) => {
-  const { user, userRoles, clinicId, loading } = useAuth();
+const ProtectedRoute = ({ children, requiredRoles, skipOnboardingCheck, skipProfileCheck }: ProtectedRouteProps) => {
+  const { user, userRoles, clinicId, profileComplete, loading } = useAuth();
   const { pathname } = useLocation();
   const locale = getLocaleFromPathname(pathname);
 
@@ -29,6 +30,11 @@ const ProtectedRoute = ({ children, requiredRoles, skipOnboardingCheck }: Protec
   // Redirect to onboarding if user has no clinic (unless we're already on onboarding)
   if (!skipOnboardingCheck && !clinicId && userRoles.length === 0) {
     return <Navigate to={withLocalePath(locale, "/onboarding")} replace />;
+  }
+
+  // Redirect to clinic-profile if profile is not complete
+  if (!skipProfileCheck && clinicId && !profileComplete) {
+    return <Navigate to={withLocalePath(locale, "/clinic-profile")} replace />;
   }
 
   if (requiredRoles && requiredRoles.length > 0) {

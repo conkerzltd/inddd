@@ -63,7 +63,7 @@ const appRoutes = (
     <Route
       path="clinic-profile"
       element={
-        <ProtectedRoute>
+        <ProtectedRoute skipProfileCheck>
           <ClinicProfile />
         </ProtectedRoute>
       }
