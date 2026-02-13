@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import logoSymbol from "@/assets/logo-symbol.png";
 import ClinicProfileForm from "@/components/clinic/ClinicProfileForm";
 
+/** Clinic profile editing page (post-approval) */
 const ClinicProfile = () => {
   const { clinicId, loading: authLoading } = useAuth();
   const navigate = useNavigate();
