@@ -26,12 +26,22 @@ import {
   ArrowRight,
   Building2,
   Users,
-  Clock,
-  TrendingUp,
   MapPin,
   BarChart3,
   Award,
+  CalendarDays,
 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 type ClinicRow = {
   id: string;
@@ -57,6 +67,7 @@ type MarketerRow = {
 type TicketRow = {
   clinic_id: string;
   status: string;
+  created_at: string;
 };
 
 const OwnerAnalytics = () => {
@@ -92,7 +103,7 @@ const OwnerAnalytics = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tickets")
-        .select("clinic_id, status");
+        .select("clinic_id, status, created_at");
       if (error) throw error;
       return data as TicketRow[];
     },
@@ -161,6 +172,49 @@ const OwnerAnalytics = () => {
     const week = Date.now() - 7 * 24 * 60 * 60 * 1000;
     return filtered.filter((c) => new Date(c.created_at).getTime() > week).length;
   }, [filtered]);
+
+  // Monthly clinic registrations chart data
+  const monthlyClinicData = useMemo(() => {
+    const months: Record<string, number> = {};
+    filtered.forEach((c) => {
+      const d = new Date(c.created_at);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      months[key] = (months[key] || 0) + 1;
+    });
+    return Object.entries(months)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-12)
+      .map(([month, count]) => {
+        const [y, m] = month.split("-");
+        const label = new Date(+y, +m - 1).toLocaleDateString("ar-EG", {
+          month: "short",
+          year: "2-digit",
+        });
+        return { month: label, count };
+      });
+  }, [filtered]);
+
+  // Daily ticket volume chart data (last 30 days)
+  const dailyTicketData = useMemo(() => {
+    const days: Record<string, number> = {};
+    const now = Date.now();
+    const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+    filteredTickets.forEach((t) => {
+      const ts = new Date(t.created_at).getTime();
+      if (now - ts > thirtyDays) return;
+      const key = new Date(t.created_at).toISOString().slice(0, 10);
+      days[key] = (days[key] || 0) + 1;
+    });
+    return Object.entries(days)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([day, count]) => {
+        const label = new Date(day).toLocaleDateString("ar-EG", {
+          month: "short",
+          day: "numeric",
+        });
+        return { day: label, count };
+      });
+  }, [filteredTickets]);
 
   const handleGovChange = (v: string) => {
     setGovFilter(v);
@@ -284,7 +338,70 @@ const OwnerAnalytics = () => {
           </div>
         </div>
 
-        {/* Marketer Stats */}
+        {/* Charts */}
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 text-primary" />
+                العيادات المسجلة شهرياً
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-2">
+              {monthlyClinicData.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground text-xs">لا توجد بيانات</div>
+              ) : (
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={monthlyClinicData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                    <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 8, fontSize: 12 }}
+                      labelStyle={{ fontWeight: 600 }}
+                    />
+                    <Bar dataKey="count" name="عيادات" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-primary" />
+                التذاكر اليومية (٣٠ يوم)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-2">
+              {dailyTicketData.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground text-xs">لا توجد بيانات</div>
+              ) : (
+                <ResponsiveContainer width="100%" height={220}>
+                  <LineChart data={dailyTicketData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                    <XAxis dataKey="day" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 8, fontSize: 12 }}
+                      labelStyle={{ fontWeight: 600 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="count"
+                      name="تذاكر"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      dot={{ r: 3 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Users className="h-4 w-4 text-primary" />
