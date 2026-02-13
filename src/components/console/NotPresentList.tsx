@@ -50,11 +50,11 @@ export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone,
                 actions={
                   t._subStatus === "MISSED" ? (
                     <Button size="sm" variant="outline" className="min-h-[44px] flex-1" onClick={() => onMarkReturned(t.id)}>
-                      <RotateCcw className="h-3.5 w-3.5 ml-1" />تسجيل عودة
+                      <RotateCcw className="h-3.5 w-3.5 me-1" />تسجيل عودة
                     </Button>
                   ) : (
                     <Button size="sm" variant="outline" className="min-h-[44px] flex-1" onClick={() => setDialogTicketId(t.id)}>
-                      <RotateCcw className="h-3.5 w-3.5 ml-1" />إعادة إدراج
+                      <RotateCcw className="h-3.5 w-3.5 me-1" />إعادة إدراج
                     </Button>
                   )
                 }
@@ -68,7 +68,7 @@ export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone,
                 <TableHead className="w-12">الرقم</TableHead>
                 <TableHead>اسم المريض</TableHead>
                 <TableHead>توقيت عدم التواجد</TableHead>
-                <TableHead className="text-left w-[160px]">الإجراءات</TableHead>
+                <TableHead className="text-start w-[160px]">الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -81,14 +81,14 @@ export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone,
                   <TableCell>
                     {t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—"}
                   </TableCell>
-                  <TableCell className="text-left w-[160px]">
+                  <TableCell className="text-start w-[160px]">
                     {t._subStatus === "MISSED" ? (
                       <Button size="sm" variant="outline" onClick={() => onMarkReturned(t.id)}>
-                        <RotateCcw className="h-3 w-3 ml-1" />تسجيل عودة
+                        <RotateCcw className="h-3 w-3 me-1" />تسجيل عودة
                       </Button>
                     ) : (
                       <Button size="sm" variant="outline" onClick={() => setDialogTicketId(t.id)}>
-                        <RotateCcw className="h-3 w-3 ml-1" />إعادة إدراج
+                        <RotateCcw className="h-3 w-3 me-1" />إعادة إدراج
                       </Button>
                     )}
                   </TableCell>

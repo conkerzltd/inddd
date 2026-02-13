@@ -150,7 +150,7 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm">
-          <Plus className="h-4 w-4 ml-1" />إنشاء تذكرة وإرسال رابط المتابعة
+          <Plus className="h-4 w-4 me-1" />إنشاء تذكرة وإرسال رابط المتابعة
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">

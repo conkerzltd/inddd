@@ -40,10 +40,10 @@ export function CalledList({ tickets, clinicTimezone, onStartService, onMarkMiss
               actions={
                 <>
                   <Button size="sm" className="min-h-[44px] flex-1" onClick={() => onStartService(t.id)}>
-                    <Play className="h-3.5 w-3.5 ml-1" />بدء الخدمة
+                    <Play className="h-3.5 w-3.5 me-1" />بدء الخدمة
                   </Button>
                   <Button size="sm" variant="destructive" className="min-h-[44px] flex-1" onClick={() => onMarkMissed(t.id)}>
-                    <XCircle className="h-3.5 w-3.5 ml-1" />لم يحضر
+                    <XCircle className="h-3.5 w-3.5 me-1" />لم يحضر
                   </Button>
                   <Button size="sm" variant="destructive" className="min-h-[44px]" onClick={() => onCancel(t.id)}>
                     <Ban className="h-3.5 w-3.5" />
@@ -60,7 +60,7 @@ export function CalledList({ tickets, clinicTimezone, onStartService, onMarkMiss
               <TableHead className="w-12">الرقم</TableHead>
               <TableHead>اسم المريض</TableHead>
               <TableHead>وقت النداء</TableHead>
-              <TableHead className="text-left w-[240px]">الإجراءات</TableHead>
+              <TableHead className="text-start w-[240px]">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -71,15 +71,15 @@ export function CalledList({ tickets, clinicTimezone, onStartService, onMarkMiss
                   <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
                 </TableCell>
                 <TableCell>{t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—"}</TableCell>
-                <TableCell className="text-left w-[240px] space-x-1 space-x-reverse">
+                <TableCell className="text-start w-[240px] space-x-1 space-x-reverse">
                   <Button size="sm" onClick={() => onStartService(t.id)}>
-                    <Play className="h-3 w-3 ml-1" />بدء الخدمة
+                    <Play className="h-3 w-3 me-1" />بدء الخدمة
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => onMarkMissed(t.id)}>
-                    <XCircle className="h-3 w-3 ml-1" />لم يحضر
+                    <XCircle className="h-3 w-3 me-1" />لم يحضر
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => onCancel(t.id)}>
-                    <Ban className="h-3 w-3 ml-1" />إلغاء
+                    <Ban className="h-3 w-3 me-1" />إلغاء
                   </Button>
                 </TableCell>
               </TableRow>

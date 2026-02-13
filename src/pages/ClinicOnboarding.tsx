@@ -106,7 +106,7 @@ const ClinicOnboarding = () => {
                 </div>
               </div>
               <Button variant="ghost" size="sm" onClick={handleLogout} disabled={loggingOut}>
-                <LogOut className="ml-2 h-4 w-4" />
+                <LogOut className="me-2 h-4 w-4" />
                 {loggingOut ? "جاري..." : "تسجيل خروج"}
               </Button>
             </div>
@@ -160,7 +160,7 @@ const ClinicOnboarding = () => {
               تحديث الحالة
             </Button>
             <Button variant="ghost" onClick={handleLogout} disabled={loggingOut} className="w-full">
-              <LogOut className="ml-2 h-4 w-4" />
+              <LogOut className="me-2 h-4 w-4" />
               {loggingOut ? "جاري..." : "تسجيل خروج"}
             </Button>
           </CardContent>

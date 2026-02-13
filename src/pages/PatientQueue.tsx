@@ -134,7 +134,7 @@ export default function PatientQueue() {
   /* ── guards ── */
   if (!isValidToken) return <Centered><AlertCircle className="h-10 w-10 text-destructive mx-auto" /><p className="text-lg font-bold mt-3">رابط غير صالح</p><p className="text-sm text-muted-foreground">يرجى التواصل مع العيادة للحصول على رابط جديد.</p></Centered>;
   if (loading) return <Centered><Skeleton className="h-8 w-40 mx-auto" /><Skeleton className="h-6 w-64 mx-auto mt-3" /><Skeleton className="h-6 w-48 mx-auto mt-2" /></Centered>;
-  if (error) return <Centered><AlertCircle className="h-10 w-10 text-destructive mx-auto" /><p className="text-muted-foreground mt-3">{error}</p><Button variant="outline" className="mt-3" onClick={() => { setLoading(true); setError(null); fetchQueue(); }}><RefreshCw className="h-4 w-4 ml-1" /> إعادة المحاولة</Button></Centered>;
+  if (error) return <Centered><AlertCircle className="h-10 w-10 text-destructive mx-auto" /><p className="text-muted-foreground mt-3">{error}</p><Button variant="outline" className="mt-3" onClick={() => { setLoading(true); setError(null); fetchQueue(); }}><RefreshCw className="h-4 w-4 me-1" /> إعادة المحاولة</Button></Centered>;
   if (!data) return null;
 
   const badge = data.status_badge;
@@ -189,7 +189,7 @@ export default function PatientQueue() {
           {/* refresh */}
           <div className="flex justify-center pt-1">
             <Button variant="ghost" size="sm" onClick={() => { setLoading(true); fetchQueue(); }}>
-              <RefreshCw className="h-4 w-4 ml-1" /> تحديث
+              <RefreshCw className="h-4 w-4 me-1" /> تحديث
             </Button>
           </div>
         </CardContent>

@@ -131,13 +131,13 @@ const Console = () => {
           </div>
           <div className="flex items-center gap-1 shrink-0">
             <Button variant="ghost" size="icon" className="h-10 w-10 md:h-auto md:w-auto md:px-3" onClick={() => navigate("/clinic-profile")}>
-              <Settings className="h-4 w-4 md:ml-2" /><span className="hidden md:inline">الملف الشخصي</span>
+              <Settings className="h-4 w-4 md:me-2" /><span className="hidden md:inline">الملف الشخصي</span>
             </Button>
             <Button variant="ghost" size="icon" className="h-10 w-10 md:h-auto md:w-auto md:px-3 hidden md:inline-flex" onClick={() => navigate("/queue-settings")}>
               إعدادات قائمة الانتظار
             </Button>
             <Button variant="ghost" size="icon" className="h-10 w-10 md:h-auto md:w-auto md:px-3" onClick={signOut}>
-              <LogOut className="h-4 w-4 md:ml-2" /><span className="hidden md:inline">تسجيل الخروج</span>
+              <LogOut className="h-4 w-4 md:me-2" /><span className="hidden md:inline">تسجيل الخروج</span>
             </Button>
           </div>
         </div>
@@ -151,7 +151,7 @@ const Console = () => {
             <h2 className="text-xl font-semibold text-foreground">لا توجد عيادة</h2>
             <p className="text-muted-foreground">أنشئ عيادة تجريبية للبدء.</p>
             <Button onClick={handleBootstrap} disabled={bootstrapping}>
-              <Plus className="ml-2 h-4 w-4" />
+              <Plus className="me-2 h-4 w-4" />
               {bootstrapping ? "جاري الإنشاء…" : "إنشاء عيادة تجريبية"}
             </Button>
           </div>
@@ -169,7 +169,7 @@ const Console = () => {
                   {clinicId && <CreateTicketDialog clinicId={clinicId} clinicName={clinicName} onCreated={refresh} />}
                   {isOwnerOrAdmin && (
                     <Button variant="outline" size="sm" className="min-h-[44px] md:min-h-0" onClick={handleSeed} disabled={seeding}>
-                      <Database className="ml-2 h-4 w-4" />
+                      <Database className="me-2 h-4 w-4" />
                       {seeding ? "جاري…" : "تجريبي"}
                     </Button>
                   )}
@@ -179,7 +179,7 @@ const Console = () => {
                         actions.closeOutDay();
                       }
                     }}>
-                      <Power className="ml-2 h-4 w-4" />إغلاق اليوم
+                      <Power className="me-2 h-4 w-4" />إغلاق اليوم
                     </Button>
                   )}
                 </div>

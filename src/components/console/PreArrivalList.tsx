@@ -54,10 +54,10 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
               actions={
                 <>
                   <Button size="sm" variant="outline" className="min-h-[44px] flex-1" onClick={() => onSendLink(t.id)}>
-                    <Send className="h-3.5 w-3.5 ml-1" />إرسال
+                    <Send className="h-3.5 w-3.5 me-1" />إرسال
                   </Button>
                   <Button size="sm" variant="outline" className="min-h-[44px] flex-1" onClick={() => onConfirmArrival(t.id)}>
-                    <UserCheck className="h-3.5 w-3.5 ml-1" />تأكيد
+                    <UserCheck className="h-3.5 w-3.5 me-1" />تأكيد
                   </Button>
                   <Button size="sm" variant="destructive" className="min-h-[44px]" onClick={() => onCancel(t.id)}>
                     <Ban className="h-3.5 w-3.5" />
@@ -76,7 +76,7 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
               <TableHead>المصدر</TableHead>
               <TableHead>نوع الزيارة</TableHead>
               <TableHead>الموعد</TableHead>
-              <TableHead className="text-left w-[220px]">الإجراءات</TableHead>
+              <TableHead className="text-start w-[220px]">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -102,15 +102,15 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
                       ? fmtTime(t.created_at, clinicTimezone)
                       : "—"}
                 </TableCell>
-                <TableCell className="text-left w-[220px] space-x-1 space-x-reverse">
+                <TableCell className="text-start w-[220px] space-x-1 space-x-reverse">
                   <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => onSendLink(t.id)} title="إعادة الإرسال">
                     <Send className="h-3 w-3" />
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => onConfirmArrival(t.id)}>
-                    <UserCheck className="h-3 w-3 ml-1" />تأكيد الحضور
+                    <UserCheck className="h-3 w-3 me-1" />تأكيد الحضور
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => onCancel(t.id)}>
-                    <Ban className="h-3 w-3 ml-1" />إلغاء
+                    <Ban className="h-3 w-3 me-1" />إلغاء
                   </Button>
                 </TableCell>
               </TableRow>
