@@ -1,15 +1,14 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRoles?: Array<"doctor">;
   skipOnboardingCheck?: boolean;
   skipProfileCheck?: boolean;
 }
 
 const ProtectedRoute = ({ children, skipOnboardingCheck, skipProfileCheck }: ProtectedRouteProps) => {
-  const { user, userRoles, clinicId, clinicStatus, profileComplete, loading } = useAuth();
+  const { user, clinicId, clinicStatus, profileComplete, loading } = useAuth();
 
   if (loading) {
     return (
@@ -23,17 +22,17 @@ const ProtectedRoute = ({ children, skipOnboardingCheck, skipProfileCheck }: Pro
     return <Navigate to="/login" replace />;
   }
 
-  // No clinic yet → go to onboarding to create one
-  if (!skipOnboardingCheck && !clinicId && userRoles.length === 0) {
+  // No clinic yet → onboarding
+  if (!skipOnboardingCheck && !clinicId) {
     return <Navigate to="/onboarding" replace />;
   }
 
-  // Clinic exists but not approved → go to onboarding (shows pending/rejected)
+  // Clinic exists but not approved → onboarding (shows pending/rejected)
   if (!skipOnboardingCheck && clinicId && clinicStatus !== "active") {
     return <Navigate to="/onboarding" replace />;
   }
 
-  // Clinic approved but profile not complete → go to clinic-profile
+  // Clinic approved but profile not complete → clinic-profile
   if (!skipProfileCheck && clinicId && clinicStatus === "active" && !profileComplete) {
     return <Navigate to="/clinic-profile" replace />;
   }
