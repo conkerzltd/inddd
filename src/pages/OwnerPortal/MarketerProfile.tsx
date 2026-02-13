@@ -55,6 +55,7 @@ import {
   TrendingUp,
   Target,
   Calculator,
+  Pencil,
 } from "lucide-react";
 
 /* ── helpers ── */
@@ -120,6 +121,14 @@ const MarketerProfile = () => {
   const [txAmount, setTxAmount] = useState("");
   const [txDesc, setTxDesc] = useState("");
   const [txDate, setTxDate] = useState<Date | undefined>(new Date());
+
+  // HR Settings dialog
+  const [hrDialogOpen, setHrDialogOpen] = useState(false);
+  const [hrBaseSalary, setHrBaseSalary] = useState("");
+  const [hrWorkingDays, setHrWorkingDays] = useState("");
+  const [hrPenaltyMultiplier, setHrPenaltyMultiplier] = useState("");
+  const [hrTargetClinics, setHrTargetClinics] = useState("");
+  const [hrCommission, setHrCommission] = useState("");
 
   /* ── queries ── */
   const { data: marketer, isLoading } = useQuery({
@@ -268,6 +277,36 @@ const MarketerProfile = () => {
       setTxDesc("");
       setTxType("payout");
       toast({ title: "تم تسجيل المعاملة" });
+    },
+    onError: (err: Error) => toast({ title: "خطأ", description: err.message, variant: "destructive" }),
+  });
+
+  const openHrDialog = () => {
+    if (!marketer) return;
+    setHrBaseSalary(String(marketer.base_salary ?? 2000));
+    setHrWorkingDays(String(marketer.working_days_per_month ?? 24));
+    setHrPenaltyMultiplier(String(marketer.absence_penalty_multiplier ?? 1.5));
+    setHrTargetClinics(String(marketer.monthly_target_clinics ?? 120));
+    setHrCommission(String(marketer.commission_per_clinic ?? 100));
+    setHrDialogOpen(true);
+  };
+
+  const updateHrSettings = useMutation({
+    mutationFn: async () => {
+      const updates: Record<string, number> = {};
+      const val = (v: string) => { const n = Number(v); if (isNaN(n) || n < 0) throw new Error("قيمة غير صالحة"); return n; };
+      updates.base_salary = val(hrBaseSalary);
+      updates.working_days_per_month = Math.max(1, Math.round(val(hrWorkingDays)));
+      updates.absence_penalty_multiplier = val(hrPenaltyMultiplier);
+      updates.monthly_target_clinics = Math.max(1, Math.round(val(hrTargetClinics)));
+      updates.commission_per_clinic = val(hrCommission);
+      const { error } = await supabase.from("marketers").update(updates).eq("id", id!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["marketer", id] });
+      setHrDialogOpen(false);
+      toast({ title: "تم تحديث إعدادات HR" });
     },
     onError: (err: Error) => toast({ title: "خطأ", description: err.message, variant: "destructive" }),
   });
@@ -447,11 +486,15 @@ const MarketerProfile = () => {
 
             {/* HR Constants */}
             <Card>
-              <CardHeader className="pb-2">
+              <CardHeader className="pb-2 flex flex-row items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Calculator className="h-4 w-4" />
                   إعدادات الراتب والعمولات
                 </CardTitle>
+                <Button variant="ghost" size="sm" onClick={openHrDialog} className="gap-1">
+                  <Pencil className="h-3.5 w-3.5" />
+                  تعديل
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
@@ -855,6 +898,40 @@ const MarketerProfile = () => {
             </div>
             <Button className="w-full" onClick={() => addLedgerEntry.mutate()} disabled={addLedgerEntry.isPending}>
               {addLedgerEntry.isPending ? "جاري الحفظ…" : "حفظ"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* HR Settings Dialog */}
+      <Dialog open={hrDialogOpen} onOpenChange={setHrDialogOpen}>
+        <DialogContent dir="rtl">
+          <DialogHeader>
+            <DialogTitle>تعديل إعدادات HR</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>الراتب الأساسي (ج.م)</Label>
+              <Input type="number" min="0" value={hrBaseSalary} onChange={(e) => setHrBaseSalary(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>أيام العمل / شهر</Label>
+              <Input type="number" min="1" max="31" value={hrWorkingDays} onChange={(e) => setHrWorkingDays(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>مضاعف خصم الغياب</Label>
+              <Input type="number" min="0" step="0.1" value={hrPenaltyMultiplier} onChange={(e) => setHrPenaltyMultiplier(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>الهدف الشهري (عدد العيادات)</Label>
+              <Input type="number" min="1" value={hrTargetClinics} onChange={(e) => setHrTargetClinics(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>العمولة لكل عيادة (ج.م)</Label>
+              <Input type="number" min="0" value={hrCommission} onChange={(e) => setHrCommission(e.target.value)} />
+            </div>
+            <Button className="w-full" onClick={() => updateHrSettings.mutate()} disabled={updateHrSettings.isPending}>
+              {updateHrSettings.isPending ? "جاري الحفظ…" : "حفظ التعديلات"}
             </Button>
           </div>
         </DialogContent>
