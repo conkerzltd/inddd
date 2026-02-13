@@ -10,6 +10,7 @@ import {
   BarChart3,
   CheckCircle,
   LogOut,
+  KeyRound,
 } from "lucide-react";
 
 const OwnerDashboard = () => {
@@ -35,6 +36,13 @@ const OwnerDashboard = () => {
       description: "مراجعة العيادات الجديدة والموافقة عليها",
       icon: CheckCircle,
       path: "/owner-portal/approvals",
+      available: true,
+    },
+    {
+      title: "إدارة المستخدمين",
+      description: "تغيير كلمات المرور وإدارة حسابات المستخدمين",
+      icon: KeyRound,
+      path: "/owner-portal/users",
       available: true,
     },
     {
