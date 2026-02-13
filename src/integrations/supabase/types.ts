@@ -89,12 +89,14 @@ export type Database = {
           locality_level2_type: string | null
           locality_level3_ar: string | null
           maps_url: string | null
+          marketer_id: string | null
           name: string
           name_ar: string | null
           open_time: string
           phone: string | null
           primary_specialty_id: string | null
           session_paused: boolean
+          status: Database["public"]["Enums"]["entity_status"]
           timezone: string
           wa_message_template: string
           whatsapp_e164_1: string | null
@@ -123,12 +125,14 @@ export type Database = {
           locality_level2_type?: string | null
           locality_level3_ar?: string | null
           maps_url?: string | null
+          marketer_id?: string | null
           name: string
           name_ar?: string | null
           open_time?: string
           phone?: string | null
           primary_specialty_id?: string | null
           session_paused?: boolean
+          status?: Database["public"]["Enums"]["entity_status"]
           timezone?: string
           wa_message_template?: string
           whatsapp_e164_1?: string | null
@@ -157,12 +161,14 @@ export type Database = {
           locality_level2_type?: string | null
           locality_level3_ar?: string | null
           maps_url?: string | null
+          marketer_id?: string | null
           name?: string
           name_ar?: string | null
           open_time?: string
           phone?: string | null
           primary_specialty_id?: string | null
           session_paused?: boolean
+          status?: Database["public"]["Enums"]["entity_status"]
           timezone?: string
           wa_message_template?: string
           whatsapp_e164_1?: string | null
@@ -172,6 +178,13 @@ export type Database = {
           working_hours_json?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "clinics_marketer_id_fkey"
+            columns: ["marketer_id"]
+            isOneToOne: false
+            referencedRelation: "marketers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "clinics_primary_specialty_id_fkey"
             columns: ["primary_specialty_id"]
@@ -229,6 +242,57 @@ export type Database = {
           level2_ar?: string
           level2_type?: string
           level3_ar?: string | null
+        }
+        Relationships: []
+      }
+      marketers: {
+        Row: {
+          city_ar: string | null
+          created_at: string
+          created_by: string | null
+          detailed_address: string | null
+          governorate_ar: string | null
+          id: string
+          name: string
+          primary_phone: string
+          referral_code: string
+          secondary_phone: string | null
+          status: Database["public"]["Enums"]["entity_status"]
+          target_areas: string[] | null
+          updated_at: string
+          whatsapp_link: string | null
+        }
+        Insert: {
+          city_ar?: string | null
+          created_at?: string
+          created_by?: string | null
+          detailed_address?: string | null
+          governorate_ar?: string | null
+          id?: string
+          name: string
+          primary_phone: string
+          referral_code: string
+          secondary_phone?: string | null
+          status?: Database["public"]["Enums"]["entity_status"]
+          target_areas?: string[] | null
+          updated_at?: string
+          whatsapp_link?: string | null
+        }
+        Update: {
+          city_ar?: string | null
+          created_at?: string
+          created_by?: string | null
+          detailed_address?: string | null
+          governorate_ar?: string | null
+          id?: string
+          name?: string
+          primary_phone?: string
+          referral_code?: string
+          secondary_phone?: string | null
+          status?: Database["public"]["Enums"]["entity_status"]
+          target_areas?: string[] | null
+          updated_at?: string
+          whatsapp_link?: string | null
         }
         Relationships: []
       }
@@ -464,6 +528,7 @@ export type Database = {
             }
             Returns: Json
           }
+      generate_referral_code: { Args: never; Returns: string }
       get_patient_queue_view: {
         Args: { p_token: string }
         Returns: Database["public"]["CompositeTypes"]["patient_queue_view"]
@@ -491,6 +556,7 @@ export type Database = {
         Args: { _clinic_id: string; _user_id: string }
         Returns: boolean
       }
+      is_superadmin: { Args: { _user_id: string }; Returns: boolean }
       mark_missed: { Args: { p_ticket_id: string }; Returns: Json }
       mark_returned: { Args: { p_ticket_id: string }; Returns: Json }
       reinsert_returned: {
@@ -523,9 +589,10 @@ export type Database = {
       }
       start_service: { Args: { p_ticket_id: string }; Returns: Json }
       urlencode: { Args: { "": string }; Returns: string }
+      validate_referral_code: { Args: { p_code: string }; Returns: Json }
     }
     Enums: {
-      app_role: "owner" | "admin" | "secretary" | "doctor"
+      app_role: "owner" | "admin" | "secretary" | "doctor" | "superadmin"
       audit_action:
         | "TICKET_CREATED"
         | "LINK_SENT"
@@ -542,6 +609,7 @@ export type Database = {
         | "INTAKE_CLOSED"
         | "INTAKE_OPENED"
         | "CANCELLED"
+      entity_status: "pending" | "active" | "blocked"
       insert_position: "AFTER_CURRENT" | "AFTER_N" | "END"
       ticket_source: "EXTERNAL" | "PHONE_CALL" | "WALK_IN"
       ticket_status:
@@ -699,7 +767,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["owner", "admin", "secretary", "doctor"],
+      app_role: ["owner", "admin", "secretary", "doctor", "superadmin"],
       audit_action: [
         "TICKET_CREATED",
         "LINK_SENT",
@@ -717,6 +785,7 @@ export const Constants = {
         "INTAKE_OPENED",
         "CANCELLED",
       ],
+      entity_status: ["pending", "active", "blocked"],
       insert_position: ["AFTER_CURRENT", "AFTER_N", "END"],
       ticket_source: ["EXTERNAL", "PHONE_CALL", "WALK_IN"],
       ticket_status: [
