@@ -222,23 +222,52 @@ function StatusChip({ badge }: { badge: string | null }) {
 }
 
 function BookedBody({ data, remaining, progress }: { data: PatientQueueView; remaining: string | null; progress: number }) {
+  const hasEta = data.eta_min_minutes != null && data.eta_max_minutes != null;
+  const etaTime = hasEta ? { min: addMin(new Date(), data.eta_min_minutes!), max: addMin(new Date(), data.eta_max_minutes!) } : null;
+
   return (
     <div className="space-y-3 text-center">
-      {data.appointment_time && (
+      {/* Position */}
+      {data.eligible_position != null && (
         <div className="rounded-lg bg-muted/50 p-4">
-          <p className="text-sm text-muted-foreground mb-1">الوقت المتوقع للكشف</p>
+          <p className="text-sm text-muted-foreground mb-1">ترتيبك في قائمة الانتظار</p>
           <div className="flex items-center justify-center gap-2">
-            <Clock className="h-5 w-5 text-primary" />
-            <span className="font-bold text-2xl">{fmtTimeAr(data.appointment_time)}</span>
+            <Users className="h-5 w-5 text-primary" />
+            <span className="text-4xl font-bold text-primary">{data.eligible_position}</span>
           </div>
         </div>
       )}
-      {data.expected_window_start && data.expected_window_end && (
-        <div className="rounded-lg border border-border p-3">
-          <p className="text-sm text-muted-foreground mb-1">الفترة المتوقعة</p>
-          <p className="font-medium">{fmtTimeAr(data.expected_window_start)} – {fmtTimeAr(data.expected_window_end)}</p>
+      {/* ETA range in minutes */}
+      {hasEta && (
+        <div className="rounded-lg border border-border p-3 space-y-2">
+          <p className="text-sm text-muted-foreground">الوقت المتوقع للكشف</p>
+          <p className="font-bold text-lg">{data.eta_min_minutes} – {data.eta_max_minutes} دقيقة</p>
+          {etaTime && (
+            <div className="border-t border-border pt-2">
+              <p className="text-sm text-muted-foreground">الفترة المتوقعة</p>
+              <div className="flex items-center justify-center gap-2 mt-1">
+                <Clock className="h-4 w-4 text-primary" />
+                <span className="font-medium">
+                  {etaTime.min.toLocaleTimeString("ar-EG", { hour: "numeric", minute: "2-digit", hour12: true })}
+                  {" – "}
+                  {etaTime.max.toLocaleTimeString("ar-EG", { hour: "numeric", minute: "2-digit", hour12: true })}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       )}
+      {/* Expected window from RPC (when no ETA minutes but window exists) */}
+      {!hasEta && data.expected_window_start && data.expected_window_end && (
+        <div className="rounded-lg border border-border p-3">
+          <p className="text-sm text-muted-foreground mb-1">الفترة المتوقعة</p>
+          <div className="flex items-center justify-center gap-2">
+            <Clock className="h-4 w-4 text-primary" />
+            <span className="font-medium">{fmtTimeAr(data.expected_window_start)} – {fmtTimeAr(data.expected_window_end)}</span>
+          </div>
+        </div>
+      )}
+      {/* Countdown */}
       {remaining && (
         <div className="rounded-lg border border-border p-3 space-y-2">
           <div className="flex items-center justify-center gap-2">
@@ -249,8 +278,9 @@ function BookedBody({ data, remaining, progress }: { data: PatientQueueView; rem
           <p className="text-xs text-muted-foreground">{Math.round(progress)}٪ من الوقت انقضى</p>
         </div>
       )}
-      {data.eligible_position != null && (
-        <p className="text-sm text-muted-foreground">رقم الحجز: <span className="font-bold text-foreground">{data.eligible_position}</span></p>
+      {/* Appointment time as secondary */}
+      {data.appointment_time && (
+        <p className="text-sm text-muted-foreground">ميعادك المسجل: <span className="font-semibold text-foreground">{fmtTimeAr(data.appointment_time)}</span></p>
       )}
     </div>
   );
