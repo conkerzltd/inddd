@@ -31,7 +31,7 @@ export function DoneList({ tickets, clinicTimezone, highlightId }: Props) {
   const isMobile = useIsMobile();
 
   return (
-    <TicketSection title="مكتمل" count={tickets.length} collapsible defaultOpen={false}>
+    <TicketSection title="مكتمل" count={tickets.length}>
       {isMobile ? (
         <div className="space-y-2">
           {tickets.map((t, i) => (
