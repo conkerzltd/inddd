@@ -8,12 +8,11 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Phone, Zap, Ban } from "lucide-react";
+import { Zap, Ban } from "lucide-react";
 
 interface Props {
   tickets: TicketRow[];
   clinicTimezone: string;
-  onCallNext: () => void;
   onSetUrgent: (id: string, pos: string, n: number | null, note: string | null) => Promise<any>;
   onCancel: (id: string) => void;
 }
@@ -29,7 +28,7 @@ const visitTypeLabel = (v: string) => {
   return v;
 };
 
-export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, onCancel }: Props) {
+export function WaitingList({ tickets, clinicTimezone, onSetUrgent, onCancel }: Props) {
   const [urgentTicketId, setUrgentTicketId] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
@@ -38,11 +37,6 @@ export function WaitingList({ tickets, clinicTimezone, onCallNext, onSetUrgent, 
       <TicketSection
         title="قائمة الانتظار"
         count={tickets.length}
-        action={
-          <Button size="sm" className="min-h-[44px] md:min-h-0" onClick={onCallNext} disabled={tickets.length === 0}>
-            <Phone className="h-3 w-3 me-1" />نداء التالي
-          </Button>
-        }
       >
         {isMobile ? (
           <div className="space-y-2">

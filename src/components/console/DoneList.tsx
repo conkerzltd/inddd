@@ -2,9 +2,11 @@ import { TicketRow } from "@/hooks/useClinicTickets";
 import { TicketSection } from "./TicketSection";
 import { MobileTicketCard } from "./MobileTicketCard";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { formatTicketSourceLabel } from "@/utils/ticketSource";
 
 interface Props {
   tickets: TicketRow[];
@@ -35,6 +37,7 @@ export function DoneList({ tickets, clinicTimezone }: Props) {
               index={i + 1}
               fields={[
                 { label: "الاسم", value: t.patient_name || "غير معروف" },
+                { label: "المصدر", value: formatTicketSourceLabel(t) },
                 { label: "نوع الزيارة", value: visitTypeLabel(t.visit_type) },
                 { label: "وقت الإنهاء", value: t.completed_at ? fmtTime(t.completed_at, clinicTimezone) : "—" },
               ]}
@@ -47,6 +50,7 @@ export function DoneList({ tickets, clinicTimezone }: Props) {
             <TableRow>
               <TableHead className="w-12">الرقم</TableHead>
               <TableHead>اسم المريض</TableHead>
+              <TableHead>المصدر</TableHead>
               <TableHead>نوع الزيارة</TableHead>
               <TableHead>وقت إنهاء الزيارة</TableHead>
             </TableRow>
@@ -57,6 +61,9 @@ export function DoneList({ tickets, clinicTimezone }: Props) {
                 <TableCell className="font-mono">{i + 1}</TableCell>
                 <TableCell>
                   <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "غير معروف"}</span>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="secondary">{formatTicketSourceLabel(t)}</Badge>
                 </TableCell>
                 <TableCell>{visitTypeLabel(t.visit_type)}</TableCell>
                 <TableCell>{t.completed_at ? fmtTime(t.completed_at, clinicTimezone) : "—"}</TableCell>

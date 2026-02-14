@@ -253,7 +253,6 @@ const Console = () => {
             <WaitingList
               tickets={waiting}
               clinicTimezone={clinicTimezone}
-              onCallNext={actions.callNext}
               onSetUrgent={actions.setUrgentAndInsert}
               onCancel={actions.cancelTicket}
             />
@@ -274,7 +273,10 @@ const Console = () => {
               missedTickets={missed}
               returnedTickets={returned}
               clinicTimezone={clinicTimezone}
-              onMarkReturned={actions.markReturned}
+              onReinsertMissed={async (id, pos, n, note) => {
+                await actions.markReturned(id);
+                await actions.reinsertReturned(id, pos, n, note);
+              }}
               onReinsert={actions.reinsertReturned}
             />
             <DoneList tickets={done} clinicTimezone={clinicTimezone} />

@@ -6,7 +6,9 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Send, UserCheck, Ban } from "lucide-react";
+import { formatTicketSourceLabel } from "@/utils/ticketSource";
 
 interface Props {
   tickets: TicketRow[];
@@ -20,13 +22,6 @@ const fmtTime = (iso: string, tz: string) =>
   new Intl.DateTimeFormat("en-US", {
     timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
   }).format(new Date(iso));
-
-const sourceLabel = (s: string) => {
-  if (s === "WALK_IN") return "حضور";
-  if (s === "PHONE_CALL") return "تليفون";
-  if (s === "EXTERNAL") return "خارجي";
-  return s;
-};
 
 const visitTypeLabel = (v: string) => {
   if (v === "NEW") return "كشف جديد";
@@ -47,7 +42,7 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
               index={i + 1}
               fields={[
                 { label: "الاسم", value: t.patient_name || "—" },
-                { label: "المصدر", value: sourceLabel(t.source) },
+                { label: "المصدر", value: formatTicketSourceLabel(t) },
                 { label: "نوع الزيارة", value: visitTypeLabel(t.visit_type) },
                 { label: "الموعد", value: t.appointment_time ? fmtTime(t.appointment_time, clinicTimezone) : t.created_at ? fmtTime(t.created_at, clinicTimezone) : "—" },
               ]}
@@ -85,15 +80,10 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
                 <TableCell className="font-mono">{i + 1}</TableCell>
                 <TableCell>
                   <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
-                  {t.source === "EXTERNAL" && t.external_booking_app_label && (
-                    <span className="block text-xs text-muted-foreground">
-                      خارجي · {t.external_booking_app_code === "OTHER" && t.external_booking_app_other
-                        ? `أخرى: ${t.external_booking_app_other}`
-                        : t.external_booking_app_label}
-                    </span>
-                  )}
                 </TableCell>
-                <TableCell>{sourceLabel(t.source)}</TableCell>
+                <TableCell>
+                  <Badge variant="secondary">{formatTicketSourceLabel(t)}</Badge>
+                </TableCell>
                 <TableCell>{visitTypeLabel(t.visit_type)}</TableCell>
                 <TableCell>
                   {t.appointment_time

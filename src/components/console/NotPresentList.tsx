@@ -14,7 +14,7 @@ interface Props {
   missedTickets: TicketRow[];
   returnedTickets: TicketRow[];
   clinicTimezone: string;
-  onMarkReturned: (id: string) => void;
+  onReinsertMissed: (id: string, pos: string, n: number | null, note: string | null) => Promise<any>;
   onReinsert: (id: string, pos: string, n: number | null, note: string | null) => Promise<any>;
 }
 
@@ -23,8 +23,9 @@ const fmtTime = (iso: string, tz: string) =>
     timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
   }).format(new Date(iso));
 
-export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone, onMarkReturned, onReinsert }: Props) {
+export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone, onReinsertMissed, onReinsert }: Props) {
   const [dialogTicketId, setDialogTicketId] = useState<string | null>(null);
+  const [dialogSubStatus, setDialogSubStatus] = useState<"MISSED" | "RETURNED">("MISSED");
   const isMobile = useIsMobile();
 
   const allTickets = [
@@ -33,6 +34,11 @@ export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone,
   ];
 
   const totalCount = allTickets.length;
+
+  const openDialog = (id: string, sub: "MISSED" | "RETURNED") => {
+    setDialogTicketId(id);
+    setDialogSubStatus(sub);
+  };
 
   return (
     <>
@@ -48,15 +54,9 @@ export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone,
                   { label: "التوقيت", value: t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—" },
                 ]}
                 actions={
-                  t._subStatus === "MISSED" ? (
-                    <Button size="sm" variant="outline" className="min-h-[44px] flex-1" onClick={() => onMarkReturned(t.id)}>
-                      <RotateCcw className="h-3.5 w-3.5 me-1" />تسجيل عودة
-                    </Button>
-                  ) : (
-                    <Button size="sm" variant="outline" className="min-h-[44px] flex-1" onClick={() => setDialogTicketId(t.id)}>
-                      <RotateCcw className="h-3.5 w-3.5 me-1" />إعادة إدراج
-                    </Button>
-                  )
+                  <Button size="sm" variant="outline" className="min-h-[44px] flex-1" onClick={() => openDialog(t.id, t._subStatus)}>
+                    <RotateCcw className="h-3.5 w-3.5 me-1" />إعادة إدراج
+                  </Button>
                 }
               />
             ))}
@@ -82,15 +82,9 @@ export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone,
                     {t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—"}
                   </TableCell>
                   <TableCell className="text-start w-[160px]">
-                    {t._subStatus === "MISSED" ? (
-                      <Button size="sm" variant="outline" onClick={() => onMarkReturned(t.id)}>
-                        <RotateCcw className="h-3 w-3 me-1" />تسجيل عودة
-                      </Button>
-                    ) : (
-                      <Button size="sm" variant="outline" onClick={() => setDialogTicketId(t.id)}>
-                        <RotateCcw className="h-3 w-3 me-1" />إعادة إدراج
-                      </Button>
-                    )}
+                    <Button size="sm" variant="outline" onClick={() => openDialog(t.id, t._subStatus)}>
+                      <RotateCcw className="h-3 w-3 me-1" />إعادة إدراج
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -105,7 +99,11 @@ export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone,
         title="إعادة إدراج المريض"
         onSubmit={async (pos, n, note) => {
           if (!dialogTicketId) return;
-          await onReinsert(dialogTicketId, pos, n, note);
+          if (dialogSubStatus === "MISSED") {
+            await onReinsertMissed(dialogTicketId, pos, n, note);
+          } else {
+            await onReinsert(dialogTicketId, pos, n, note);
+          }
         }}
       />
     </>
