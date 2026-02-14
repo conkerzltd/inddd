@@ -45,7 +45,7 @@ export function InServiceList({ tickets, clinicTimezone, highlightId, onComplete
       count={tickets.length}
       alwaysShow
       action={
-        <Button size="sm" className="min-h-[44px] md:min-h-0" onClick={handleCallNext}>
+        <Button size="sm" variant="default" className="min-h-[44px] md:min-h-0 animate-pulse" onClick={handleCallNext}>
           <Phone className="h-3 w-3 me-1" />نداء التالي
         </Button>
       }
@@ -66,7 +66,7 @@ export function InServiceList({ tickets, clinicTimezone, highlightId, onComplete
                 ]}
                 actions={
                   completedId === t.id ? (
-                    <Button size="sm" variant="outline" className="min-h-[44px] flex-1 animate-scale-in" onClick={handleCallNext}>
+                    <Button size="sm" variant="default" className="min-h-[44px] flex-1 animate-pulse" onClick={handleCallNext}>
                       <Phone className="h-3.5 w-3.5 me-1" />نداء التالي
                     </Button>
                   ) : (
@@ -106,7 +106,7 @@ export function InServiceList({ tickets, clinicTimezone, highlightId, onComplete
                   <TableCell>{t.service_started_at ? fmtTime(t.service_started_at, clinicTimezone) : "—"}</TableCell>
                   <TableCell className="text-start w-[140px]">
                     {completedId === t.id ? (
-                      <Button size="sm" variant="outline" onClick={handleCallNext} className="animate-scale-in">
+                      <Button size="sm" variant="default" onClick={handleCallNext} className="animate-pulse">
                         <Phone className="h-3 w-3 me-1" />نداء التالي
                       </Button>
                     ) : (
