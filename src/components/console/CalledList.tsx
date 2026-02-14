@@ -7,10 +7,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Play, XCircle, Ban } from "lucide-react";
+import { HIGHLIGHT_ROW_CLASS } from "@/hooks/useTicketHighlight";
 
 interface Props {
   tickets: TicketRow[];
   clinicTimezone: string;
+  highlightId?: string | null;
   onStartService: (id: string) => void;
   onMarkMissed: (id: string) => void;
   onCancel: (id: string) => void;
@@ -21,7 +23,7 @@ const fmtTime = (iso: string, tz: string) =>
     timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
   }).format(new Date(iso));
 
-export function CalledList({ tickets, clinicTimezone, onStartService, onMarkMissed, onCancel }: Props) {
+export function CalledList({ tickets, clinicTimezone, highlightId, onStartService, onMarkMissed, onCancel }: Props) {
   const isMobile = useIsMobile();
 
   return (
@@ -33,6 +35,7 @@ export function CalledList({ tickets, clinicTimezone, onStartService, onMarkMiss
               key={t.id}
               index={i + 1}
               highlight
+              highlightActive={t.id === highlightId}
               fields={[
                 { label: "الاسم", value: t.patient_name || "—" },
                 { label: "وقت النداء", value: t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—" },
@@ -65,7 +68,7 @@ export function CalledList({ tickets, clinicTimezone, onStartService, onMarkMiss
           </TableHeader>
           <TableBody>
             {tickets.map((t, i) => (
-              <TableRow key={t.id}>
+              <TableRow key={t.id} className={t.id === highlightId ? HIGHLIGHT_ROW_CLASS : "transition-all duration-500"}>
                 <TableCell className="font-mono">{i + 1}</TableCell>
                 <TableCell>
                   <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>

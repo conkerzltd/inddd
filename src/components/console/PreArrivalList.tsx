@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Send, UserCheck, Ban } from "lucide-react";
 import { formatTicketSourceLabel } from "@/utils/ticketSource";
+import { HIGHLIGHT_ROW_CLASS } from "@/hooks/useTicketHighlight";
 
 interface Props {
   tickets: TicketRow[];
   clinicTimezone: string;
+  highlightId?: string | null;
   onSendLink: (id: string) => void;
   onConfirmArrival: (id: string) => void;
   onCancel: (id: string) => void;
@@ -29,7 +31,7 @@ const visitTypeLabel = (v: string) => {
   return v;
 };
 
-export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmArrival, onCancel }: Props) {
+export function PreArrivalList({ tickets, clinicTimezone, highlightId, onSendLink, onConfirmArrival, onCancel }: Props) {
   const isMobile = useIsMobile();
 
   return (
@@ -40,6 +42,7 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
             <MobileTicketCard
               key={t.id}
               index={i + 1}
+              highlightActive={t.id === highlightId}
               fields={[
                 { label: "الاسم", value: t.patient_name || "—" },
                 { label: "المصدر", value: formatTicketSourceLabel(t) },
@@ -76,7 +79,7 @@ export function PreArrivalList({ tickets, clinicTimezone, onSendLink, onConfirmA
           </TableHeader>
           <TableBody>
             {tickets.map((t, i) => (
-              <TableRow key={t.id}>
+              <TableRow key={t.id} className={t.id === highlightId ? HIGHLIGHT_ROW_CLASS : "transition-all duration-500"}>
                 <TableCell className="font-mono">{i + 1}</TableCell>
                 <TableCell>
                   <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
