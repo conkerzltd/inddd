@@ -10,6 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SOURCE_LABELS } from "@/utils/ticketSource";
 import { toast } from "sonner";
 import { EgyptPhoneInput } from "@/components/inputs/EgyptPhoneInput";
 import { isValidEg10, toEgE164Digits } from "@/utils/phoneEG";
@@ -169,9 +170,9 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
               }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="WALK_IN">حضور مباشر</SelectItem>
-                  <SelectItem value="PHONE_CALL">تليفون</SelectItem>
-                  <SelectItem value="EXTERNAL">خارجي</SelectItem>
+                  {Object.entries(SOURCE_LABELS).map(([code, label]) => (
+                    <SelectItem key={code} value={code}>{label}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
