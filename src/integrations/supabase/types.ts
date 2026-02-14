@@ -143,6 +143,8 @@ export type Database = {
           phone: string | null
           primary_specialty_id: string | null
           profile_complete: boolean
+          remote_showup_last_calculated_at: string | null
+          remote_showup_rate: number
           serial_id: string | null
           session_paused: boolean
           status: Database["public"]["Enums"]["entity_status"]
@@ -187,6 +189,8 @@ export type Database = {
           phone?: string | null
           primary_specialty_id?: string | null
           profile_complete?: boolean
+          remote_showup_last_calculated_at?: string | null
+          remote_showup_rate?: number
           serial_id?: string | null
           session_paused?: boolean
           status?: Database["public"]["Enums"]["entity_status"]
@@ -231,6 +235,8 @@ export type Database = {
           phone?: string | null
           primary_specialty_id?: string | null
           profile_complete?: boolean
+          remote_showup_last_calculated_at?: string | null
+          remote_showup_rate?: number
           serial_id?: string | null
           session_paused?: boolean
           status?: Database["public"]["Enums"]["entity_status"]
@@ -847,6 +853,10 @@ export type Database = {
           p_primary_specialty_id?: string
         }
         Returns: string
+      }
+      recompute_clinic_showup_rate: {
+        Args: { p_clinic_id: string; p_days?: number; p_min_sample?: number }
+        Returns: Json
       }
       reinsert_returned: {
         Args: {

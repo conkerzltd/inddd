@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save, Check, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Save, Check, ShieldCheck, Calculator } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import logoSymbol from "@/assets/logo-symbol.png";
@@ -20,6 +20,9 @@ const QueueSettings = () => {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [serialId, setSerialId] = useState<string | null>(null);
+  const [remoteShowupRate, setRemoteShowupRate] = useState(0.6);
+  const [remoteShowupLastCalc, setRemoteShowupLastCalc] = useState<string | null>(null);
+  const [recalculating, setRecalculating] = useState(false);
 
   const [avgServiceMinutes, setAvgServiceMinutes] = useState(10);
   const [lateThreshold, setLateThreshold] = useState(10);
@@ -30,7 +33,7 @@ const QueueSettings = () => {
     if (!clinicId) return;
     supabase
       .from("clinics")
-      .select("avg_service_time_seed_minutes, late_threshold_minutes, allow_urgent_insert, allow_pause_intake, serial_id")
+      .select("avg_service_time_seed_minutes, late_threshold_minutes, allow_urgent_insert, allow_pause_intake, serial_id, remote_showup_rate, remote_showup_last_calculated_at")
       .eq("id", clinicId)
       .single()
       .then(({ data }) => {
@@ -40,6 +43,8 @@ const QueueSettings = () => {
         setAllowUrgent((data as any).allow_urgent_insert ?? true);
         setAllowPauseIntake((data as any).allow_pause_intake ?? true);
         setSerialId((data as any).serial_id ?? null);
+        setRemoteShowupRate((data as any).remote_showup_rate ?? 0.6);
+        setRemoteShowupLastCalc((data as any).remote_showup_last_calculated_at ?? null);
       });
   }, [clinicId]);
 
@@ -54,6 +59,7 @@ const QueueSettings = () => {
         late_threshold_minutes: lateThreshold,
         allow_urgent_insert: allowUrgent,
         allow_pause_intake: allowPauseIntake,
+        remote_showup_rate: remoteShowupRate,
       } as any)
       .eq("id", clinicId);
     setSaving(false);
@@ -125,6 +131,65 @@ const QueueSettings = () => {
                 onChange={(e) => setLateThreshold(Number(e.target.value))}
               />
               <p className="text-xs text-muted-foreground">المرضى الذين يصلون متأخرين أكثر من هذا الحد يتم تأخيرهم في قائمة الانتظار.</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle className="text-base">تقدير وقت الانتظار — الحجوزات قبل الوصول</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>نسبة الحضور المتوقعة للحجوزات قبل الوصول</Label>
+              <Input
+                type="number"
+                min={0}
+                max={1}
+                step={0.05}
+                value={remoteShowupRate}
+                onChange={(e) => setRemoteShowupRate(Math.max(0, Math.min(1, Number(e.target.value))))}
+              />
+              <p className="text-xs text-muted-foreground">
+                قيمة بين 0 و 1. مثال: 0.6 تعني توقع حضور 60% من الحجوزات قبل الوصول. ضع 0 لإيقاف التأثير عمليًا.
+              </p>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                {remoteShowupLastCalc && (
+                  <p className="text-xs text-muted-foreground">
+                    آخر حساب تلقائي: {new Date(remoteShowupLastCalc).toLocaleDateString("ar-EG")}
+                  </p>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={recalculating}
+                onClick={async () => {
+                  if (!clinicId) return;
+                  setRecalculating(true);
+                  const { data, error } = await supabase.rpc("recompute_clinic_showup_rate" as any, {
+                    p_clinic_id: clinicId,
+                    p_days: 30,
+                    p_min_sample: 20,
+                  });
+                  setRecalculating(false);
+                  if (error) {
+                    toast.error("فشل الحساب: " + error.message);
+                    return;
+                  }
+                  const result = data as any;
+                  setRemoteShowupRate(result.computed_rate);
+                  setRemoteShowupLastCalc(new Date().toISOString());
+                  if (result.used_default) {
+                    toast.info("لا توجد بيانات كافية، تم الإبقاء على 0.6");
+                  } else {
+                    toast.success(`تم تحديث النسبة إلى ${result.computed_rate} بناءً على ${result.total_remote} حجز (حضر ${result.arrived_remote})`);
+                  }
+                }}
+              >
+                <Calculator className="me-2 h-4 w-4" />
+                {recalculating ? "جاري الحساب..." : "حساب تلقائي (آخر 30 يوم)"}
+              </Button>
             </div>
           </CardContent>
         </Card>
