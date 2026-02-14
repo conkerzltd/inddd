@@ -167,10 +167,15 @@ export default function PatientQueue() {
           {(badge === "CANCELLED" || badge === "CLOSED") && <Msg icon="❌" text="تم إلغاء هذه الزيارة." sub="للاستفسار يرجى التواصل مع العيادة." />}
           {!badge && data.message && <Msg icon="ℹ️" text={data.message} />}
 
-          {/* warning for active statuses */}
-          {(badge === "BOOKED" || badge === "WAITING") && (
+          {/* state-driven note */}
+          {badge === "BOOKED" && (
             <p className="text-sm text-muted-foreground text-center leading-relaxed">
-              يرجى القدوم في الموعد المحدد لتجنب فقدان دورك في قائمة الانتظار.
+              سيتم تأكيد حضورك عند الوصول بواسطة الاستقبال.
+            </p>
+          )}
+          {badge === "WAITING" && (
+            <p className="text-sm text-muted-foreground text-center leading-relaxed">
+              أنت الآن داخل العيادة. يرجى البقاء في منطقة الانتظار حتى يتم نداءك.
             </p>
           )}
 
