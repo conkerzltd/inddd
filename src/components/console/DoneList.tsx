@@ -8,9 +8,12 @@ import {
 } from "@/components/ui/table";
 import { formatTicketSourceLabel } from "@/utils/ticketSource";
 
+import { HIGHLIGHT_ROW_CLASS } from "@/hooks/useTicketHighlight";
+
 interface Props {
   tickets: TicketRow[];
   clinicTimezone: string;
+  highlightId?: string | null;
 }
 
 const visitTypeLabel = (v: string) => {
@@ -24,7 +27,7 @@ const fmtTime = (iso: string, tz: string) =>
     timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
   }).format(new Date(iso));
 
-export function DoneList({ tickets, clinicTimezone }: Props) {
+export function DoneList({ tickets, clinicTimezone, highlightId }: Props) {
   const isMobile = useIsMobile();
 
   return (
@@ -35,6 +38,7 @@ export function DoneList({ tickets, clinicTimezone }: Props) {
             <MobileTicketCard
               key={t.id}
               index={i + 1}
+              highlightActive={t.id === highlightId}
               fields={[
                 { label: "الاسم", value: t.patient_name || "غير معروف" },
                 { label: "المصدر", value: formatTicketSourceLabel(t) },
@@ -57,7 +61,7 @@ export function DoneList({ tickets, clinicTimezone }: Props) {
           </TableHeader>
           <TableBody>
             {tickets.map((t, i) => (
-              <TableRow key={t.id}>
+              <TableRow key={t.id} className={t.id === highlightId ? HIGHLIGHT_ROW_CLASS : "transition-all duration-500"}>
                 <TableCell className="font-mono">{i + 1}</TableCell>
                 <TableCell>
                   <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "غير معروف"}</span>

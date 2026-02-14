@@ -9,10 +9,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Zap, Ban } from "lucide-react";
+import { HIGHLIGHT_ROW_CLASS } from "@/hooks/useTicketHighlight";
 
 interface Props {
   tickets: TicketRow[];
   clinicTimezone: string;
+  highlightId?: string | null;
   onSetUrgent: (id: string, pos: string, n: number | null, note: string | null) => Promise<any>;
   onCancel: (id: string) => void;
 }
@@ -28,7 +30,7 @@ const visitTypeLabel = (v: string) => {
   return v;
 };
 
-export function WaitingList({ tickets, clinicTimezone, onSetUrgent, onCancel }: Props) {
+export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent, onCancel }: Props) {
   const [urgentTicketId, setUrgentTicketId] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
@@ -44,6 +46,7 @@ export function WaitingList({ tickets, clinicTimezone, onSetUrgent, onCancel }: 
               <MobileTicketCard
                 key={t.id}
                 index={i + 1}
+                highlightActive={t.id === highlightId}
                 fields={[
                   { label: "الاسم", value: t.patient_name || "—" },
                   { label: "نوع الزيارة", value: visitTypeLabel(t.visit_type) },
@@ -75,7 +78,7 @@ export function WaitingList({ tickets, clinicTimezone, onSetUrgent, onCancel }: 
             </TableHeader>
             <TableBody>
               {tickets.map((t, i) => (
-                <TableRow key={t.id}>
+                <TableRow key={t.id} className={t.id === highlightId ? HIGHLIGHT_ROW_CLASS : "transition-all duration-500"}>
                   <TableCell className="font-mono">{i + 1}</TableCell>
                   <TableCell>
                     <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>

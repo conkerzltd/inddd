@@ -9,10 +9,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Phone } from "lucide-react";
 import { playQueueChime } from "@/utils/chimeSound";
+import { HIGHLIGHT_ROW_CLASS } from "@/hooks/useTicketHighlight";
 
 interface Props {
   tickets: TicketRow[];
   clinicTimezone: string;
+  highlightId?: string | null;
   onComplete: (id: string) => void;
   onCallNext: () => void;
 }
@@ -22,7 +24,7 @@ const fmtTime = (iso: string, tz: string) =>
     timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
   }).format(new Date(iso));
 
-export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext }: Props) {
+export function InServiceList({ tickets, clinicTimezone, highlightId, onComplete, onCallNext }: Props) {
   const [completedId, setCompletedId] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
@@ -57,6 +59,7 @@ export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext 
               <MobileTicketCard
                 key={t.id}
                 index={i + 1}
+                highlightActive={t.id === highlightId}
                 fields={[
                   { label: "الاسم", value: t.patient_name || "—" },
                   { label: "وقت البدء", value: t.service_started_at ? fmtTime(t.service_started_at, clinicTimezone) : "—" },
@@ -95,7 +98,7 @@ export function InServiceList({ tickets, clinicTimezone, onComplete, onCallNext 
               </TableRow>
             ) : (
               tickets.map((t, i) => (
-                <TableRow key={t.id} className="animate-fade-in">
+                <TableRow key={t.id} className={`animate-fade-in ${t.id === highlightId ? HIGHLIGHT_ROW_CLASS : "transition-all duration-500"}`}>
                   <TableCell className="font-mono">{i + 1}</TableCell>
                   <TableCell>
                     <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>

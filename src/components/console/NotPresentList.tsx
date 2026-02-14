@@ -9,11 +9,13 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
+import { HIGHLIGHT_ROW_CLASS } from "@/hooks/useTicketHighlight";
 
 interface Props {
   missedTickets: TicketRow[];
   returnedTickets: TicketRow[];
   clinicTimezone: string;
+  highlightId?: string | null;
   onReinsertMissed: (id: string, pos: string, n: number | null, note: string | null) => Promise<any>;
   onReinsert: (id: string, pos: string, n: number | null, note: string | null) => Promise<any>;
 }
@@ -23,7 +25,7 @@ const fmtTime = (iso: string, tz: string) =>
     timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
   }).format(new Date(iso));
 
-export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone, onReinsertMissed, onReinsert }: Props) {
+export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone, highlightId, onReinsertMissed, onReinsert }: Props) {
   const [dialogTicketId, setDialogTicketId] = useState<string | null>(null);
   const [dialogSubStatus, setDialogSubStatus] = useState<"MISSED" | "RETURNED">("MISSED");
   const isMobile = useIsMobile();
@@ -49,6 +51,7 @@ export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone,
               <MobileTicketCard
                 key={t.id}
                 index={i + 1}
+                highlightActive={t.id === highlightId}
                 fields={[
                   { label: "الاسم", value: t.patient_name || "—" },
                   { label: "التوقيت", value: t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—" },
@@ -73,7 +76,7 @@ export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone,
             </TableHeader>
             <TableBody>
               {allTickets.map((t, i) => (
-                <TableRow key={t.id} className="animate-fade-in">
+                <TableRow key={t.id} className={`animate-fade-in ${t.id === highlightId ? HIGHLIGHT_ROW_CLASS : "transition-all duration-500"}`}>
                   <TableCell className="font-mono">{i + 1}</TableCell>
                   <TableCell>
                     <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>

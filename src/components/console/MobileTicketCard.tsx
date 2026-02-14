@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { HIGHLIGHT_CARD_CLASS } from "@/hooks/useTicketHighlight";
 
 interface Field {
   label: string;
@@ -12,12 +13,13 @@ interface MobileTicketCardProps {
   fields: Field[];
   actions?: ReactNode;
   highlight?: boolean;
+  highlightActive?: boolean;
   className?: string;
 }
 
-export function MobileTicketCard({ index, fields, actions, highlight, className }: MobileTicketCardProps) {
+export function MobileTicketCard({ index, fields, actions, highlight, highlightActive, className }: MobileTicketCardProps) {
   return (
-    <Card className={`animate-fade-in ${highlight ? "border-primary/40 bg-primary/5" : ""} ${className || ""}`}>
+    <Card className={`animate-fade-in ${highlight ? "border-primary/40 bg-primary/5" : ""} ${highlightActive ? HIGHLIGHT_CARD_CLASS : "transition-all duration-500"} ${className || ""}`}>
       <CardContent className="p-3 space-y-2">
         <div className="flex items-start justify-between gap-2">
           <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-muted text-xs font-bold shrink-0">

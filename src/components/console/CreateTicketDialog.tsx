@@ -19,7 +19,7 @@ import { PUBLIC_BASE_URL } from "@/config/publicBaseUrl";
 interface Props {
   clinicId: string;
   clinicName: string;
-  onCreated: () => void;
+  onCreated: (ticketId?: string) => void;
 }
 
 interface BookingApp { id: string; code: string; label_en: string; }
@@ -138,7 +138,7 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
 
       reset();
       setOpen(false);
-      onCreated();
+      onCreated(ticketId);
     } catch (e: any) {
       if (popup) popup.close();
       toast.error(e.message || "فشل إنشاء التذكرة");

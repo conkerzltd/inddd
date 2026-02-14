@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useClinicTickets } from "@/hooks/useClinicTickets";
 import { useTicketActions } from "@/hooks/useTicketActions";
+import { useTicketHighlight } from "@/hooks/useTicketHighlight";
 import { PreArrivalList } from "@/components/console/PreArrivalList";
 import { WaitingList } from "@/components/console/WaitingList";
 import { CalledList } from "@/components/console/CalledList";
@@ -67,6 +68,27 @@ const Console = () => {
   } = useClinicTickets(clinicId, clinicTimezone);
 
   const actions = useTicketActions(clinicId, refresh);
+  const { highlightId, highlight } = useTicketHighlight();
+
+  /** Wrap an action to highlight the affected ticket after success */
+  const withHighlight = useCallback(
+    (fn: (...args: any[]) => Promise<any> | void) =>
+      async (ticketId: string, ...rest: any[]) => {
+        const result = await fn(ticketId, ...rest);
+        if (result !== null) highlight(ticketId);
+        return result;
+      },
+    [highlight]
+  );
+
+  /** For callNext — extract ticketId from the RPC response */
+  const handleCallNextHighlight = useCallback(async () => {
+    const result = await actions.callNext();
+    if (result && typeof result === "object" && (result as any).ticket_id) {
+      highlight((result as any).ticket_id);
+    }
+    return result;
+  }, [actions, highlight]);
 
   const handleSendLink = useCallback(async (ticketId: string) => {
     const popup = window.open("about:blank", "_blank");
@@ -194,7 +216,7 @@ const Console = () => {
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  {clinicId && <CreateTicketDialog clinicId={clinicId} clinicName={clinicName} onCreated={refresh} />}
+                  {clinicId && <CreateTicketDialog clinicId={clinicId} clinicName={clinicName} onCreated={(ticketId) => { refresh(); if (ticketId) highlight(ticketId); }} />}
                   {isOwnerOrAdmin && (
                     <Button variant="outline" size="sm" className="min-h-[44px] md:min-h-0" onClick={handleSeed} disabled={seeding}>
                       <Database className="me-2 h-4 w-4" />
@@ -246,40 +268,55 @@ const Console = () => {
             <PreArrivalList
               tickets={preArrival}
               clinicTimezone={clinicTimezone}
+              highlightId={highlightId}
               onSendLink={handleSendLink}
-              onConfirmArrival={actions.confirmArrival}
-              onCancel={actions.cancelTicket}
+              onConfirmArrival={withHighlight(actions.confirmArrival)}
+              onCancel={withHighlight(actions.cancelTicket)}
             />
             <WaitingList
               tickets={waiting}
               clinicTimezone={clinicTimezone}
-              onSetUrgent={actions.setUrgentAndInsert}
-              onCancel={actions.cancelTicket}
+              highlightId={highlightId}
+              onSetUrgent={async (id, pos, n, note) => {
+                const r = await actions.setUrgentAndInsert(id, pos, n, note);
+                if (r !== null) highlight(id);
+                return r;
+              }}
+              onCancel={withHighlight(actions.cancelTicket)}
             />
             <CalledList
               tickets={called}
               clinicTimezone={clinicTimezone}
-              onStartService={actions.startService}
-              onMarkMissed={actions.markMissed}
-              onCancel={actions.cancelTicket}
+              highlightId={highlightId}
+              onStartService={withHighlight(actions.startService)}
+              onMarkMissed={withHighlight(actions.markMissed)}
+              onCancel={withHighlight(actions.cancelTicket)}
             />
             <InServiceList
               tickets={inService}
               clinicTimezone={clinicTimezone}
-              onComplete={actions.completeTicket}
-              onCallNext={actions.callNext}
+              highlightId={highlightId}
+              onComplete={withHighlight(actions.completeTicket)}
+              onCallNext={handleCallNextHighlight}
             />
             <NotPresentList
               missedTickets={missed}
               returnedTickets={returned}
               clinicTimezone={clinicTimezone}
+              highlightId={highlightId}
               onReinsertMissed={async (id, pos, n, note) => {
                 await actions.markReturned(id);
-                await actions.reinsertReturned(id, pos, n, note);
+                const r = await actions.reinsertReturned(id, pos, n, note);
+                if (r !== null) highlight(id);
+                return r;
               }}
-              onReinsert={actions.reinsertReturned}
+              onReinsert={async (id, pos, n, note) => {
+                const r = await actions.reinsertReturned(id, pos, n, note);
+                if (r !== null) highlight(id);
+                return r;
+              }}
             />
-            <DoneList tickets={done} clinicTimezone={clinicTimezone} />
+            <DoneList tickets={done} clinicTimezone={clinicTimezone} highlightId={highlightId} />
           </>
         )}
       </main>
