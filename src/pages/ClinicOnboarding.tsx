@@ -49,6 +49,9 @@ const ClinicOnboarding = () => {
       const { data, error } = await supabase.rpc("onboard_clinic", {
         p_name_ar: "عيادة جديدة",
         p_marketer_id: marketerId || null,
+        p_governorate_ar: null,
+        p_locality_level2_ar: null,
+        p_locality_level3_ar: null,
       });
       if (error) {
         toast.error("فشل إنشاء العيادة: " + error.message);
