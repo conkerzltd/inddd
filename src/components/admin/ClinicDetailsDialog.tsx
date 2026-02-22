@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -22,6 +22,8 @@ import {
   Trash2,
   Calendar,
   Users,
+  Pencil,
+  ArrowRight,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -34,6 +36,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import ClinicProfileForm from "@/components/clinic/ClinicProfileForm";
 
 const DAYS_MAP: Record<string, string> = {
   sat: "السبت",
@@ -51,9 +54,7 @@ interface ClinicDetailsDialogProps {
   clinicId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Show approve/reject buttons for pending clinics */
   showApproval?: boolean;
-  /** Show delete button */
   showDelete?: boolean;
   onApprove?: (clinicId: string) => void;
   onSuspend?: (clinicId: string) => void;
@@ -77,6 +78,8 @@ const ClinicDetailsDialog = ({
   deleting,
 }: ClinicDetailsDialogProps) => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: clinic, isLoading } = useQuery({
     queryKey: ["admin-clinic-details", clinicId],
@@ -107,199 +110,250 @@ const ClinicDetailsDialog = ({
 
   const clinicName = clinic?.name_ar || clinic?.name || "";
 
+  const handleOpenChange = (o: boolean) => {
+    if (!o) setEditMode(false);
+    onOpenChange(o);
+  };
+
+  const handleEditSaved = () => {
+    setEditMode(false);
+    queryClient.invalidateQueries({ queryKey: ["admin-clinic-details", clinicId] });
+    queryClient.invalidateQueries({ queryKey: ["admin-clinics"] });
+  };
+
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className={editMode ? "max-w-2xl max-h-[90vh] overflow-y-auto" : "max-w-lg max-h-[85vh] overflow-y-auto"}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-primary" />
-              تفاصيل العيادة
+              {editMode ? (
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditMode(false)}>
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Building2 className="h-5 w-5 text-primary" />
+              )}
+              {editMode ? "تعديل بيانات العيادة" : "تفاصيل العيادة"}
             </DialogTitle>
             <DialogDescription>{clinicName}</DialogDescription>
           </DialogHeader>
 
-          {isLoading ? (
-            <div className="py-8 text-center text-muted-foreground">جاري التحميل…</div>
-          ) : !clinic ? (
-            <div className="py-8 text-center text-muted-foreground">لم يتم العثور على العيادة</div>
-          ) : (
-            <div className="space-y-4" dir="rtl">
-              {/* Basic Info */}
-              <section className="space-y-2">
-                <h3 className="text-sm font-semibold text-foreground">البيانات الأساسية</h3>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">الاسم (عربي):</span>
-                    <p className="font-medium">{clinic.name_ar || "—"}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">الاسم (إنجليزي):</span>
-                    <p className="font-medium">{clinic.name || "—"}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">الكود:</span>
-                    <p className="font-mono">{clinic.serial_id || "—"}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">الحالة:</span>
-                    <p><Badge variant={clinic.status === "active" ? "default" : clinic.status === "blocked" ? "destructive" : "secondary"}>{statusLabels[clinic.status] || clinic.status}</Badge></p>
-                  </div>
-                </div>
-              </section>
-
-              <Separator />
-
-              {/* Contact */}
-              <section className="space-y-2">
-                <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" />التواصل</h3>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">واتساب ١:</span>
-                    <p dir="ltr" className="text-start">{clinic.whatsapp_local_1 || "—"}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">واتساب ٢:</span>
-                    <p dir="ltr" className="text-start">{clinic.whatsapp_local_2 || "—"}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">هاتف:</span>
-                    <p dir="ltr" className="text-start">{clinic.phone || "—"}</p>
-                  </div>
-                </div>
-              </section>
-
-              <Separator />
-
-              {/* Specialty */}
-              <section className="space-y-2">
-                <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5"><Stethoscope className="h-3.5 w-3.5" />التخصص</h3>
-                <p className="text-sm">{clinic.specialty?.specialty_ar || "—"}</p>
-              </section>
-
-              <Separator />
-
-              {/* Location */}
-              <section className="space-y-2">
-                <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />الموقع</h3>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">المحافظة:</span>
-                    <p>{clinic.governorate_ar || "—"}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">المدينة/المركز:</span>
-                    <p>{clinic.locality_level2_ar || "—"}</p>
-                  </div>
-                  {clinic.locality_level3_ar && (
-                    <div>
-                      <span className="text-muted-foreground">القرية:</span>
-                      <p>{clinic.locality_level3_ar}</p>
-                    </div>
-                  )}
-                </div>
-                <div className="text-sm">
-                  <span className="text-muted-foreground">العنوان التفصيلي:</span>
-                  <p>{clinic.address_text || "—"}</p>
-                </div>
-                {clinic.maps_url && (
-                  <a href={clinic.maps_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">فتح في خرائط جوجل</a>
-                )}
-                {clinic.lat && clinic.lng && (
-                  <p className="text-xs text-muted-foreground">الإحداثيات: {Number(clinic.lat).toFixed(4)}, {Number(clinic.lng).toFixed(4)}</p>
-                )}
-              </section>
-
-              <Separator />
-
-              {/* Working Hours */}
-              <section className="space-y-2">
-                <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />ساعات العمل</h3>
-                {Object.keys(workingHours).length === 0 ? (
-                  <p className="text-sm text-muted-foreground">لم يتم تحديد ساعات العمل</p>
-                ) : (
-                  <div className="space-y-1">
-                    {Object.entries(DAYS_MAP).map(([key, label]) => {
-                      const h = workingHours[key];
-                      if (!h) return null;
-                      return (
-                        <div key={key} className="flex items-center gap-2 text-sm">
-                          <span className="w-16 text-muted-foreground">{label}</span>
-                          <span dir="ltr">{h.open} – {h.close}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </section>
-
-              <Separator />
-
-              {/* Marketer */}
-              <section className="space-y-2">
-                <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5"><Users className="h-3.5 w-3.5" />المسوق</h3>
-                {clinic.marketer ? (
-                  <div className="text-sm space-y-1">
-                    <p><span className="text-muted-foreground">الاسم:</span> {clinic.marketer.name}</p>
-                    <p><span className="text-muted-foreground">الكود:</span> {clinic.marketer.referral_code}</p>
-                    <p><span className="text-muted-foreground">الهاتف:</span> <span dir="ltr">{clinic.marketer.primary_phone}</span></p>
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">بدون مسوق</p>
-                )}
-              </section>
-
-              <Separator />
-
-              {/* Dates */}
-              <section className="space-y-2">
-                <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />التواريخ</h3>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">تاريخ التسجيل:</span>
-                    <p>{formatDate(clinic.created_at)}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">تاريخ التفعيل:</span>
-                    <p>{formatDate(clinic.approved_at)}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">الاستحقاق التالي:</span>
-                    <p>{formatDate(clinic.next_billing_date)}</p>
-                  </div>
-                </div>
-              </section>
+          {editMode && clinicId ? (
+            <div dir="rtl">
+              <ClinicProfileForm
+                clinicId={clinicId}
+                onSaved={handleEditSaved}
+                submitLabel="حفظ التعديلات"
+              />
             </div>
-          )}
+          ) : (
+            <>
+              {isLoading ? (
+                <div className="py-8 text-center text-muted-foreground">جاري التحميل…</div>
+              ) : !clinic ? (
+                <div className="py-8 text-center text-muted-foreground">لم يتم العثور على العيادة</div>
+              ) : (
+                <div className="space-y-4" dir="rtl">
+                  {/* Basic Info */}
+                  <section className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground">البيانات الأساسية</h3>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">الاسم (عربي):</span>
+                        <p className="font-medium">{clinic.name_ar || "—"}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">الاسم (إنجليزي):</span>
+                        <p className="font-medium">{clinic.name || "—"}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">الكود:</span>
+                        <p className="font-mono">{clinic.serial_id || "—"}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">الحالة:</span>
+                        <p><Badge variant={clinic.status === "active" ? "default" : clinic.status === "blocked" ? "destructive" : "secondary"}>{statusLabels[clinic.status] || clinic.status}</Badge></p>
+                      </div>
+                    </div>
+                  </section>
 
-          {clinic && (
-            <DialogFooter className="gap-2 flex-wrap">
-              {showDelete && onDelete && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="me-auto"
-                  onClick={() => setDeleteConfirmOpen(true)}
-                  disabled={deleting}
-                >
-                  <Trash2 className="h-4 w-4 me-1" />حذف العيادة نهائيًا
-                </Button>
+                  <Separator />
+
+                  {/* Contact */}
+                  <section className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" />التواصل</h3>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">واتساب ١:</span>
+                        <p dir="ltr" className="text-start">{clinic.whatsapp_local_1 || "—"}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">واتساب ٢:</span>
+                        <p dir="ltr" className="text-start">{clinic.whatsapp_local_2 || "—"}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">هاتف:</span>
+                        <p dir="ltr" className="text-start">{clinic.phone || "—"}</p>
+                      </div>
+                    </div>
+                  </section>
+
+                  <Separator />
+
+                  {/* Specialty */}
+                  <section className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5"><Stethoscope className="h-3.5 w-3.5" />التخصص</h3>
+                    <p className="text-sm">{clinic.specialty?.specialty_ar || "—"}</p>
+                  </section>
+
+                  <Separator />
+
+                  {/* Location */}
+                  <section className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />الموقع</h3>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">المحافظة:</span>
+                        <p>{clinic.governorate_ar || "—"}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">المدينة/المركز:</span>
+                        <p>{clinic.locality_level2_ar || "—"}</p>
+                      </div>
+                      {clinic.locality_level3_ar && (
+                        <div>
+                          <span className="text-muted-foreground">القرية:</span>
+                          <p>{clinic.locality_level3_ar}</p>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">العنوان التفصيلي:</span>
+                      <p>{clinic.address_text || "—"}</p>
+                    </div>
+                    {clinic.maps_url && (
+                      <a href={clinic.maps_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">فتح في خرائط جوجل</a>
+                    )}
+                    {clinic.lat && clinic.lng && (
+                      <>
+                        <p className="text-xs text-muted-foreground">الإحداثيات: {Number(clinic.lat).toFixed(4)}, {Number(clinic.lng).toFixed(4)}</p>
+                        <div className="rounded-lg overflow-hidden border border-border">
+                          <iframe
+                            title="موقع العيادة"
+                            width="100%"
+                            height="200"
+                            style={{ border: 0 }}
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            src={`https://www.google.com/maps?q=${clinic.lat},${clinic.lng}&z=16&output=embed`}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </section>
+
+                  <Separator />
+
+                  {/* Working Hours */}
+                  <section className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />ساعات العمل</h3>
+                    {Object.keys(workingHours).length === 0 ? (
+                      <p className="text-sm text-muted-foreground">لم يتم تحديد ساعات العمل</p>
+                    ) : (
+                      <div className="space-y-1">
+                        {Object.entries(DAYS_MAP).map(([key, label]) => {
+                          const h = workingHours[key];
+                          if (!h) return null;
+                          return (
+                            <div key={key} className="flex items-center gap-2 text-sm">
+                              <span className="w-16 text-muted-foreground">{label}</span>
+                              <span dir="ltr">{h.open} – {h.close}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </section>
+
+                  <Separator />
+
+                  {/* Marketer */}
+                  <section className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5"><Users className="h-3.5 w-3.5" />المسوق</h3>
+                    {clinic.marketer ? (
+                      <div className="text-sm space-y-1">
+                        <p><span className="text-muted-foreground">الاسم:</span> {clinic.marketer.name}</p>
+                        <p><span className="text-muted-foreground">الكود:</span> {clinic.marketer.referral_code}</p>
+                        <p><span className="text-muted-foreground">الهاتف:</span> <span dir="ltr">{clinic.marketer.primary_phone}</span></p>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">بدون مسوق</p>
+                    )}
+                  </section>
+
+                  <Separator />
+
+                  {/* Dates */}
+                  <section className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />التواريخ</h3>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">تاريخ التسجيل:</span>
+                        <p>{formatDate(clinic.created_at)}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">تاريخ التفعيل:</span>
+                        <p>{formatDate(clinic.approved_at)}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">الاستحقاق التالي:</span>
+                        <p>{formatDate(clinic.next_billing_date)}</p>
+                      </div>
+                    </div>
+                  </section>
+                </div>
               )}
-              {showApproval && clinic.status === "pending" && (
-                <>
-                  {onSuspend && (
-                    <Button variant="outline" size="sm" onClick={() => onSuspend(clinic.id)} disabled={suspending}>
-                      <XCircle className="h-4 w-4 me-1" />رفض
+
+              {clinic && (
+                <DialogFooter className="gap-2 flex-wrap">
+                  {/* Edit button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="me-auto"
+                    onClick={() => setEditMode(true)}
+                  >
+                    <Pencil className="h-4 w-4 me-1" />تعديل البيانات
+                  </Button>
+
+                  {showDelete && onDelete && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setDeleteConfirmOpen(true)}
+                      disabled={deleting}
+                    >
+                      <Trash2 className="h-4 w-4 me-1" />حذف نهائيًا
                     </Button>
                   )}
-                  {onApprove && (
-                    <Button size="sm" onClick={() => onApprove(clinic.id)} disabled={approving}>
-                      <CheckCircle className="h-4 w-4 me-1" />{approving ? "جاري التفعيل…" : "قبول وتفعيل"}
-                    </Button>
+                  {showApproval && clinic.status === "pending" && (
+                    <>
+                      {onSuspend && (
+                        <Button variant="outline" size="sm" onClick={() => onSuspend(clinic.id)} disabled={suspending}>
+                          <XCircle className="h-4 w-4 me-1" />رفض
+                        </Button>
+                      )}
+                      {onApprove && (
+                        <Button size="sm" onClick={() => onApprove(clinic.id)} disabled={approving}>
+                          <CheckCircle className="h-4 w-4 me-1" />{approving ? "جاري التفعيل…" : "قبول وتفعيل"}
+                        </Button>
+                      )}
+                    </>
                   )}
-                </>
+                </DialogFooter>
               )}
-            </DialogFooter>
+            </>
           )}
         </DialogContent>
       </Dialog>
