@@ -49,7 +49,9 @@ import {
   Banknote,
   FilterX,
   CreditCard,
+  Eye,
 } from "lucide-react";
+import ClinicDetailsDialog from "@/components/admin/ClinicDetailsDialog";
 
 /* ── types ── */
 type ClinicRow = {
@@ -114,6 +116,7 @@ const ClinicApprovals = () => {
   } | null>(null);
   const [paymentNote, setPaymentNote] = useState("");
   const [paymentAmount, setPaymentAmount] = useState("");
+  const [detailsClinicId, setDetailsClinicId] = useState<string | null>(null);
 
   /* ── queries ── */
   const { data: clinics = [], isLoading } = useQuery({
@@ -174,6 +177,20 @@ const ClinicApprovals = () => {
       setPaymentDialog(null);
       setPaymentNote("");
       setPaymentAmount("");
+    },
+    onError: (err: Error) => toast({ title: "خطأ", description: err.message, variant: "destructive" }),
+  });
+
+  const deleteClinic = useMutation({
+    mutationFn: async (clinicId: string) => {
+      const { data, error } = await supabase.rpc("delete_clinic", { p_clinic_id: clinicId } as any);
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-clinics"] });
+      toast({ title: "تم حذف العيادة نهائيًا" });
+      setDetailsClinicId(null);
     },
     onError: (err: Error) => toast({ title: "خطأ", description: err.message, variant: "destructive" }),
   });
@@ -369,6 +386,9 @@ const ClinicApprovals = () => {
                             <TableCell className="text-xs">{formatDate(c.next_billing_date)}</TableCell>
                             <TableCell>
                               <div className="flex items-center gap-1">
+                                <Button size="sm" variant="ghost" onClick={() => setDetailsClinicId(c.id)} title="عرض التفاصيل">
+                                  <Eye className="h-3.5 w-3.5" />
+                                </Button>
                                 {c.status === "pending" && (
                                   <Button size="sm" variant="default" onClick={() => setConfirmDialog({ open: true, clinicId: c.id, clinicName: c.name_ar || c.name, action: "approve" })}>
                                     <CheckCircle className="h-3.5 w-3.5" />
@@ -421,6 +441,9 @@ const ClinicApprovals = () => {
                           </div>
                         </div>
                         <div className="flex flex-col gap-1 shrink-0">
+                          <Button size="sm" variant="ghost" onClick={() => setDetailsClinicId(c.id)}>
+                            <Eye className="h-4 w-4 me-1" />تفاصيل
+                          </Button>
                           {c.status === "pending" && (
                             <Button size="sm" onClick={() => setConfirmDialog({ open: true, clinicId: c.id, clinicName: c.name_ar || c.name, action: "approve" })}>
                               <CheckCircle className="h-4 w-4 me-1" />قبول
@@ -543,6 +566,27 @@ const ClinicApprovals = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Clinic Details Dialog */}
+      <ClinicDetailsDialog
+        clinicId={detailsClinicId}
+        open={!!detailsClinicId}
+        onOpenChange={(open) => { if (!open) setDetailsClinicId(null); }}
+        showApproval
+        showDelete
+        onApprove={(id) => {
+          approveClinic.mutate(id);
+          setDetailsClinicId(null);
+        }}
+        onSuspend={(id) => {
+          suspendClinic.mutate(id);
+          setDetailsClinicId(null);
+        }}
+        onDelete={(id) => deleteClinic.mutate(id)}
+        approving={approveClinic.isPending}
+        suspending={suspendClinic.isPending}
+        deleting={deleteClinic.isPending}
+      />
     </div>
   );
 };
