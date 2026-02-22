@@ -31,7 +31,19 @@ const AddLeadDrawer = ({ open, onOpenChange, marketerId }: AddLeadDrawerProps) =
   const [geoLoading, setGeoLoading] = useState(false);
 
   const scrollToField = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setTimeout(() => e.currentTarget.scrollIntoView({ behavior: "auto", block: "center" }), 300);
+    const field = e.currentTarget;
+    setTimeout(() => {
+      if (document.activeElement !== field) return;
+      const container = field.closest('[data-scroll-container="lead-form"]');
+      if (!container) return;
+      const containerRect = container.getBoundingClientRect();
+      const fieldRect = field.getBoundingClientRect();
+      const target =
+        container.scrollTop +
+        (fieldRect.top - containerRect.top) -
+        (containerRect.height / 3);
+      container.scrollTo({ top: Math.max(0, target), behavior: 'auto' });
+    }, 300);
   };
 
   const reset = () => {
@@ -100,7 +112,7 @@ const AddLeadDrawer = ({ open, onOpenChange, marketerId }: AddLeadDrawerProps) =
           </DrawerClose>
         </DrawerHeader>
 
-        <div ref={formRef} className="overflow-y-auto px-4 pb-[40vh] space-y-4">
+        <div ref={formRef} data-scroll-container="lead-form" className="max-h-[80dvh] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch] px-4 pb-[50vh] space-y-4">
           <div className="space-y-1.5">
             <Label>اسم العيادة *</Label>
             <Input value={nameAr} onChange={(e) => setNameAr(e.target.value)} dir="rtl" placeholder="مثال: عيادة د. أحمد" onFocus={scrollToField} />
