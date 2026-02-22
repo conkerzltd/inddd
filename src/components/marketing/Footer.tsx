@@ -24,6 +24,12 @@ const Footer = () => {
           <Link to={localePath("/contact")} className="hover:text-foreground">
             {isAr ? "تواصل معنا" : "Contact"}
           </Link>
+          <Link to="/ad" className="hover:text-foreground">
+            لوحة الإدارة
+          </Link>
+          <Link to="/m" className="hover:text-foreground">
+            لوحة المسوق
+          </Link>
         </div>
       </div>
     </footer>
