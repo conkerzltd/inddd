@@ -7,6 +7,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Zap, Ban } from "lucide-react";
 import { HIGHLIGHT_ROW_CLASS } from "@/hooks/useTicketHighlight";
@@ -32,6 +36,7 @@ const visitTypeLabel = (v: string) => {
 
 export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent, onCancel }: Props) {
   const [urgentTicketId, setUrgentTicketId] = useState<string | null>(null);
+  const [cancelTicketId, setCancelTicketId] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   return (
@@ -57,7 +62,7 @@ export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent,
                     <Button size="sm" variant="outline" className="min-h-[44px] flex-1" onClick={() => setUrgentTicketId(t.id)}>
                       <Zap className="h-3.5 w-3.5 me-1" />عاجل
                     </Button>
-                    <Button size="sm" variant="destructive" className="min-h-[44px]" onClick={() => onCancel(t.id)}>
+                    <Button size="sm" variant="destructive" className="min-h-[44px]" onClick={() => setCancelTicketId(t.id)}>
                       <Ban className="h-3.5 w-3.5 me-1" />إلغاء
                     </Button>
                   </>
@@ -91,7 +96,7 @@ export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent,
                     <Button size="sm" variant="outline" onClick={() => setUrgentTicketId(t.id)}>
                       <Zap className="h-3 w-3 me-1" />عاجل
                     </Button>
-                    <Button size="sm" variant="destructive" onClick={() => onCancel(t.id)}>
+                    <Button size="sm" variant="destructive" onClick={() => setCancelTicketId(t.id)}>
                       <Ban className="h-3 w-3 me-1" />إلغاء
                     </Button>
                   </TableCell>
@@ -112,6 +117,23 @@ export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent,
           await onSetUrgent(urgentTicketId, pos, n, note);
         }}
       />
+
+      <AlertDialog open={!!cancelTicketId} onOpenChange={(o) => { if (!o) setCancelTicketId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>تأكيد إلغاء التذكرة</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل أنت متأكد من إلغاء هذه التذكرة؟ لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>تراجع</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { if (cancelTicketId) onCancel(cancelTicketId); setCancelTicketId(null); }}>
+              إلغاء التذكرة
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
