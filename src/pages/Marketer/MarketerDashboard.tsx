@@ -5,16 +5,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Users, Settings, LogOut, MapPin, Building2, ExternalLink } from "lucide-react";
-import { useEffect } from "react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Users, Settings, LogOut, MapPin, Building2, ExternalLink, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import ClinicDetailDrawer from "@/components/marketer/ClinicDetailDrawer";
+import AddLeadDrawer from "@/components/marketer/AddLeadDrawer";
+import LeadCard from "@/components/marketer/LeadCard";
 
 const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   active: { label: "مفعّلة", variant: "default" },
@@ -26,6 +22,8 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
 const MarketerDashboard = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const [selectedClinicId, setSelectedClinicId] = useState<string | null>(null);
+  const [showAddLead, setShowAddLead] = useState(false);
 
   const { data: crm, isLoading } = useQuery({
     queryKey: ["marketer-crm"],
@@ -36,18 +34,41 @@ const MarketerDashboard = () => {
     },
   });
 
-  // Force password change if needed
+  const { data: pipeline } = useQuery({
+    queryKey: ["marketer-pipeline"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_marketer_pipeline");
+      if (error) throw error;
+      return data as any;
+    },
+  });
+
   useEffect(() => {
-    if (crm?.must_set_password) {
-      navigate("/m/settings", { replace: true });
-    }
+    if (crm?.must_set_password) navigate("/m/settings", { replace: true });
   }, [crm?.must_set_password, navigate]);
 
   const clinics = crm?.clinics || [];
   const counts = crm?.counts || { total: 0, draft: 0, pending: 0, active: 0, blocked: 0 };
+  const activeLeads = pipeline?.active || [];
+  const archiveLeads = pipeline?.archive || [];
 
   const formatDate = (d: string | null) =>
     d ? new Date(d).toLocaleDateString("ar-EG", { year: "numeric", month: "short", day: "numeric" }) : "—";
+
+  // Get marketer_id from crm for lead insertion
+  const marketerId = crm ? (crm as any).marketer_id : null;
+
+  // We need the marketer_id. Let's fetch it from marketer_users if not in CRM.
+  const { data: marketerMapping } = useQuery({
+    queryKey: ["marketer-mapping"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("marketer_users").select("marketer_id").limit(1).single();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const resolvedMarketerId = marketerId || marketerMapping?.marketer_id || "";
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
@@ -108,97 +129,101 @@ const MarketerDashboard = () => {
               </CardContent></Card>
             </div>
 
-            {/* Clinics Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Building2 className="h-4 w-4" />العيادات المسجلة ({clinics.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                {clinics.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">لا توجد عيادات مسجلة بعد</div>
-                ) : (
-                  <>
-                    {/* Desktop Table */}
-                    <div className="hidden md:block">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>الاسم</TableHead>
-                            <TableHead>الحالة</TableHead>
-                            <TableHead>الموقع</TableHead>
-                            <TableHead>تاريخ التسجيل</TableHead>
-                            <TableHead>الخريطة</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {clinics.map((c: any) => {
-                            const st = statusLabels[c.status] || statusLabels.draft;
-                            const location = [c.governorate_ar, c.locality_level2_ar].filter(Boolean).join("، ");
-                            const mapLink = c.maps_url || (c.lat && c.lng ? `https://www.google.com/maps?q=${c.lat},${c.lng}` : null);
-                            return (
-                              <TableRow key={c.id}>
-                                <TableCell className="font-semibold">{c.name_ar || c.name || "—"}</TableCell>
-                                <TableCell><Badge variant={st.variant}>{st.label}</Badge></TableCell>
-                                <TableCell className="text-sm">
-                                  {location ? (
-                                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3 text-muted-foreground" />{location}</span>
-                                  ) : "—"}
-                                </TableCell>
-                                <TableCell className="text-xs">{formatDate(c.created_at)}</TableCell>
-                                <TableCell>
-                                  {mapLink ? (
-                                    <a href={mapLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs flex items-center gap-1">
-                                      <ExternalLink className="h-3 w-3" />خريطة
-                                    </a>
-                                  ) : "—"}
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                        </TableBody>
-                      </Table>
-                    </div>
+            {/* FAB: Add Lead */}
+            <Button className="w-full" onClick={() => setShowAddLead(true)}>
+              <Plus className="me-2 h-4 w-4" />إضافة عيادة محتملة
+            </Button>
 
-                    {/* Mobile Cards */}
-                    <div className="md:hidden space-y-3 p-3">
-                      {clinics.map((c: any) => {
-                        const st = statusLabels[c.status] || statusLabels.draft;
-                        const location = [c.governorate_ar, c.locality_level2_ar].filter(Boolean).join("، ");
-                        const mapLink = c.maps_url || (c.lat && c.lng ? `https://www.google.com/maps?q=${c.lat},${c.lng}` : null);
-                        return (
-                          <Card key={c.id}>
-                            <CardContent className="p-3 space-y-2">
-                              <div className="flex items-center justify-between">
-                                <p className="font-semibold text-sm">{c.name_ar || c.name || "—"}</p>
-                                <Badge variant={st.variant}>{st.label}</Badge>
-                              </div>
-                              {location && (
-                                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <MapPin className="h-3 w-3" />{location}
-                                </p>
-                              )}
-                              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                <span>{formatDate(c.created_at)}</span>
-                                {mapLink && (
-                                  <a href={mapLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
-                                    <ExternalLink className="h-3 w-3" />خريطة
-                                  </a>
-                                )}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  </>
+            {/* Tabs */}
+            <Tabs defaultValue="tasks" className="w-full">
+              <TabsList className="w-full grid grid-cols-3">
+                <TabsTrigger value="tasks" className="text-xs">
+                  المهام والزيارات ({activeLeads.length})
+                </TabsTrigger>
+                <TabsTrigger value="clinics" className="text-xs">
+                  العيادات المسجلة ({clinics.length})
+                </TabsTrigger>
+                <TabsTrigger value="archive" className="text-xs">
+                  الأرشيف ({archiveLeads.length})
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Tasks Tab */}
+              <TabsContent value="tasks">
+                {activeLeads.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    لا توجد مهام حالية. أضف عيادة محتملة للبدء.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {activeLeads.map((lead: any) => (
+                      <LeadCard key={lead.id} lead={lead} referralCode={crm?.referral_code || ""} />
+                    ))}
+                  </div>
                 )}
-              </CardContent>
-            </Card>
+              </TabsContent>
+
+              {/* Clinics Tab */}
+              <TabsContent value="clinics">
+                {clinics.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm">لا توجد عيادات مسجلة بعد</div>
+                ) : (
+                  <div className="space-y-3">
+                    {clinics.map((c: any) => {
+                      const st = statusLabels[c.status] || statusLabels.draft;
+                      const location = [c.governorate_ar, c.locality_level2_ar].filter(Boolean).join("، ");
+                      return (
+                        <Card key={c.id} className="cursor-pointer hover:bg-accent/50 transition-colors"
+                          onClick={() => setSelectedClinicId(c.id)}>
+                          <CardContent className="p-3 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <p className="font-semibold text-sm">{c.name_ar || c.name || "—"}</p>
+                              <Badge variant={st.variant}>{st.label}</Badge>
+                            </div>
+                            {location && (
+                              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />{location}
+                              </p>
+                            )}
+                            <p className="text-xs text-muted-foreground">{formatDate(c.created_at)}</p>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </TabsContent>
+
+              {/* Archive Tab */}
+              <TabsContent value="archive">
+                {archiveLeads.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm">الأرشيف فارغ</div>
+                ) : (
+                  <div className="space-y-3">
+                    {archiveLeads.map((lead: any) => (
+                      <LeadCard key={lead.id} lead={lead} referralCode={crm?.referral_code || ""} isArchive />
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
           </>
         )}
       </main>
+
+      {/* Drawers */}
+      <ClinicDetailDrawer
+        clinicId={selectedClinicId}
+        open={!!selectedClinicId}
+        onOpenChange={(open) => { if (!open) setSelectedClinicId(null); }}
+      />
+      {resolvedMarketerId && (
+        <AddLeadDrawer
+          open={showAddLead}
+          onOpenChange={setShowAddLead}
+          marketerId={resolvedMarketerId}
+        />
+      )}
     </div>
   );
 };
