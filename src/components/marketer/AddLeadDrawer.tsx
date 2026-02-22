@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -19,6 +19,7 @@ interface AddLeadDrawerProps {
 
 const AddLeadDrawer = ({ open, onOpenChange, marketerId }: AddLeadDrawerProps) => {
   const qc = useQueryClient();
+  const formRef = useRef<HTMLDivElement>(null);
   const [nameAr, setNameAr] = useState("");
   const [phone, setPhone] = useState("");
   const [locationNotes, setLocationNotes] = useState("");
@@ -29,9 +30,32 @@ const AddLeadDrawer = ({ open, onOpenChange, marketerId }: AddLeadDrawerProps) =
   const [mapsUrl, setMapsUrl] = useState("");
   const [geoLoading, setGeoLoading] = useState(false);
 
+  const scrollActive = useCallback(() => {
+    const el = document.activeElement;
+    if (!el || !(el instanceof HTMLElement)) return;
+    if (!formRef.current?.contains(el)) return;
+    if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)) return;
+    el.scrollIntoView({ behavior: "auto", block: "center" });
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    let tid: ReturnType<typeof setTimeout> | null = null;
+    const onResize = () => {
+      if (tid) return;
+      tid = setTimeout(() => { tid = null; scrollActive(); }, 150);
+    };
+    vv.addEventListener("resize", onResize);
+    return () => { vv.removeEventListener("resize", onResize); if (tid) clearTimeout(tid); };
+  }, [open, scrollActive]);
+
   const scrollToField = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setTimeout(() => {
-      e.target.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (document.activeElement === e.target) {
+        e.target.scrollIntoView({ behavior: "auto", block: "center" });
+      }
     }, 300);
   };
 
@@ -101,7 +125,7 @@ const AddLeadDrawer = ({ open, onOpenChange, marketerId }: AddLeadDrawerProps) =
           </DrawerClose>
         </DrawerHeader>
 
-        <div className="overflow-y-auto px-4 pb-[40vh] space-y-4">
+        <div ref={formRef} className="overflow-y-auto px-4 pb-[40vh] space-y-4">
           <div className="space-y-1.5">
             <Label>اسم العيادة *</Label>
             <Input value={nameAr} onChange={(e) => setNameAr(e.target.value)} dir="rtl" placeholder="مثال: عيادة د. أحمد" onFocus={scrollToField} />
