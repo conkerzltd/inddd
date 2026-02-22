@@ -13,10 +13,11 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
+  mode?: "urgent" | "reinsert";
   onSubmit: (position: string, n: number | null, note: string | null) => Promise<void>;
 }
 
-export function InsertPositionDialog({ open, onOpenChange, title, onSubmit }: Props) {
+export function InsertPositionDialog({ open, onOpenChange, title, mode = "reinsert", onSubmit }: Props) {
   const [position, setPosition] = useState("AFTER_CURRENT");
   const [n, setN] = useState("");
   const [note, setNote] = useState("");
@@ -53,7 +54,9 @@ export function InsertPositionDialog({ open, onOpenChange, title, onSubmit }: Pr
               <SelectContent>
                 <SelectItem value="AFTER_CURRENT">بعد الحالي مباشرة</SelectItem>
                 <SelectItem value="AFTER_N">بعد عدد محدد</SelectItem>
-                <SelectItem value="END">نهاية القائمة</SelectItem>
+                {mode !== "urgent" && (
+                  <SelectItem value="END">نهاية القائمة</SelectItem>
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -70,11 +73,11 @@ export function InsertPositionDialog({ open, onOpenChange, title, onSubmit }: Pr
             </div>
           )}
           <div className="space-y-1">
-            <Label>ملاحظة (اختياري)</Label>
+            <Label>{mode === "urgent" ? "سبب الإدراج العاجل (اختياري)" : "ملاحظة (اختياري)"}</Label>
             <Input
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="سبب إعادة الإدراج"
+              placeholder={mode === "urgent" ? "سبب الاستعجال" : "سبب إعادة الإدراج"}
             />
           </div>
         </div>
