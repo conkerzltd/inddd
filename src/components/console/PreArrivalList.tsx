@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { TicketRow } from "@/hooks/useClinicTickets";
 import { TicketSection } from "./TicketSection";
 import { MobileTicketCard } from "./MobileTicketCard";
@@ -5,6 +6,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Send, UserCheck, Ban } from "lucide-react";
@@ -33,8 +38,10 @@ const visitTypeLabel = (v: string) => {
 
 export function PreArrivalList({ tickets, clinicTimezone, highlightId, onSendLink, onConfirmArrival, onCancel }: Props) {
   const isMobile = useIsMobile();
+  const [cancelTicketId, setCancelTicketId] = useState<string | null>(null);
 
   return (
+    <>
     <TicketSection title="قبل الوصول" count={tickets.length}>
       {isMobile ? (
         <div className="space-y-2">
@@ -57,7 +64,7 @@ export function PreArrivalList({ tickets, clinicTimezone, highlightId, onSendLin
                   <Button size="sm" variant="outline" className="min-h-[44px] flex-1" onClick={() => onConfirmArrival(t.id)}>
                     <UserCheck className="h-3.5 w-3.5 me-1" />تأكيد
                   </Button>
-                  <Button size="sm" variant="destructive" className="min-h-[44px]" onClick={() => onCancel(t.id)}>
+                  <Button size="sm" variant="destructive" className="min-h-[44px]" onClick={() => setCancelTicketId(t.id)}>
                     <Ban className="h-3.5 w-3.5" />
                   </Button>
                 </>
@@ -102,7 +109,7 @@ export function PreArrivalList({ tickets, clinicTimezone, highlightId, onSendLin
                   <Button size="sm" variant="outline" onClick={() => onConfirmArrival(t.id)}>
                     <UserCheck className="h-3 w-3 me-1" />تأكيد الحضور
                   </Button>
-                  <Button size="sm" variant="destructive" onClick={() => onCancel(t.id)}>
+                  <Button size="sm" variant="destructive" onClick={() => setCancelTicketId(t.id)}>
                     <Ban className="h-3 w-3 me-1" />إلغاء
                   </Button>
                 </TableCell>
@@ -112,5 +119,23 @@ export function PreArrivalList({ tickets, clinicTimezone, highlightId, onSendLin
         </Table>
       )}
     </TicketSection>
+
+    <AlertDialog open={!!cancelTicketId} onOpenChange={(o) => { if (!o) setCancelTicketId(null); }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>تأكيد إلغاء التذكرة</AlertDialogTitle>
+          <AlertDialogDescription>
+            هل أنت متأكد من إلغاء هذه التذكرة؟ لا يمكن التراجع عن هذا الإجراء.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>تراجع</AlertDialogCancel>
+          <AlertDialogAction onClick={() => { if (cancelTicketId) onCancel(cancelTicketId); setCancelTicketId(null); }}>
+            إلغاء التذكرة
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
