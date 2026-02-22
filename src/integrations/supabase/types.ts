@@ -420,6 +420,59 @@ export type Database = {
           },
         ]
       }
+      marketer_leads: {
+        Row: {
+          created_at: string
+          followup_date: string | null
+          id: string
+          lat: number | null
+          lng: number | null
+          location_notes: string | null
+          maps_url: string | null
+          marketer_id: string
+          name_ar: string
+          phone: string | null
+          status: string
+          visit_date: string | null
+        }
+        Insert: {
+          created_at?: string
+          followup_date?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          location_notes?: string | null
+          maps_url?: string | null
+          marketer_id: string
+          name_ar: string
+          phone?: string | null
+          status?: string
+          visit_date?: string | null
+        }
+        Update: {
+          created_at?: string
+          followup_date?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          location_notes?: string | null
+          maps_url?: string | null
+          marketer_id?: string
+          name_ar?: string
+          phone?: string | null
+          status?: string
+          visit_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketer_leads_marketer_id_fkey"
+            columns: ["marketer_id"]
+            isOneToOne: false
+            referencedRelation: "marketers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketer_ledger: {
         Row: {
           amount: number
@@ -871,11 +924,17 @@ export type Database = {
           }
       delete_clinic: { Args: { p_clinic_id: string }; Returns: Json }
       generate_referral_code: { Args: never; Returns: string }
+      get_clinic_details_marketer: {
+        Args: { p_clinic_id: string }
+        Returns: Json
+      }
       get_marketer_login_state: {
         Args: { p_referral_code: string }
         Returns: Json
       }
+      get_marketer_pipeline: { Args: never; Returns: Json }
       get_my_marketer_crm: { Args: never; Returns: Json }
+      get_my_marketer_id: { Args: never; Returns: string }
       get_patient_queue_view: {
         Args: { p_token: string }
         Returns: Database["public"]["CompositeTypes"]["patient_queue_view"]
