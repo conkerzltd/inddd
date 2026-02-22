@@ -805,6 +805,7 @@ export type Database = {
             }
             Returns: Json
           }
+      delete_clinic: { Args: { p_clinic_id: string }; Returns: Json }
       generate_referral_code: { Args: never; Returns: string }
       get_patient_queue_view: {
         Args: { p_token: string }
