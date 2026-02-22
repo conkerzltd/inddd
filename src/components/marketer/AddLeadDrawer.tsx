@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -30,33 +30,8 @@ const AddLeadDrawer = ({ open, onOpenChange, marketerId }: AddLeadDrawerProps) =
   const [mapsUrl, setMapsUrl] = useState("");
   const [geoLoading, setGeoLoading] = useState(false);
 
-  const scrollActive = useCallback(() => {
-    const el = document.activeElement;
-    if (!el || !(el instanceof HTMLElement)) return;
-    if (!formRef.current?.contains(el)) return;
-    if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)) return;
-    el.scrollIntoView({ behavior: "auto", block: "center" });
-  }, []);
-
-  useEffect(() => {
-    if (!open) return;
-    const vv = window.visualViewport;
-    if (!vv) return;
-    let tid: ReturnType<typeof setTimeout> | null = null;
-    const onResize = () => {
-      if (tid) return;
-      tid = setTimeout(() => { tid = null; scrollActive(); }, 150);
-    };
-    vv.addEventListener("resize", onResize);
-    return () => { vv.removeEventListener("resize", onResize); if (tid) clearTimeout(tid); };
-  }, [open, scrollActive]);
-
   const scrollToField = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setTimeout(() => {
-      if (document.activeElement === e.target) {
-        e.target.scrollIntoView({ behavior: "auto", block: "center" });
-      }
-    }, 300);
+    setTimeout(() => e.currentTarget.scrollIntoView({ behavior: "auto", block: "center" }), 300);
   };
 
   const reset = () => {
