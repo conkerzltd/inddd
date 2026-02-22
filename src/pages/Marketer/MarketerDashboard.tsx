@@ -135,8 +135,8 @@ const MarketerDashboard = () => {
             </Button>
 
             {/* Tabs */}
-            <Tabs defaultValue="tasks" className="w-full">
-              <TabsList className="w-full grid grid-cols-3">
+            <Tabs defaultValue="tasks" className="w-full" dir="rtl">
+              <TabsList className="w-full grid grid-cols-3" dir="rtl">
                 <TabsTrigger value="tasks" className="text-xs">
                   المهام والزيارات ({activeLeads.length})
                 </TabsTrigger>
