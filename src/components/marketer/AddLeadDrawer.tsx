@@ -101,7 +101,7 @@ const AddLeadDrawer = ({ open, onOpenChange, marketerId }: AddLeadDrawerProps) =
           </DrawerClose>
         </DrawerHeader>
 
-        <div className="overflow-y-auto px-4 pb-40 space-y-4">
+        <div className="overflow-y-auto px-4 pb-[40vh] space-y-4">
           <div className="space-y-1.5">
             <Label>اسم العيادة *</Label>
             <Input value={nameAr} onChange={(e) => setNameAr(e.target.value)} dir="rtl" placeholder="مثال: عيادة د. أحمد" onFocus={scrollToField} />
