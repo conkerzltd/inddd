@@ -23,13 +23,20 @@ const AddLeadDrawer = ({ open, onOpenChange, marketerId }: AddLeadDrawerProps) =
   const [phone, setPhone] = useState("");
   const [locationNotes, setLocationNotes] = useState("");
   const [visitDate, setVisitDate] = useState("");
+  const [visitTime, setVisitTime] = useState("");
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
   const [mapsUrl, setMapsUrl] = useState("");
   const [geoLoading, setGeoLoading] = useState(false);
 
+  const scrollToField = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 300);
+  };
+
   const reset = () => {
-    setNameAr(""); setPhone(""); setLocationNotes(""); setVisitDate("");
+    setNameAr(""); setPhone(""); setLocationNotes(""); setVisitDate(""); setVisitTime("");
     setLat(null); setLng(null); setMapsUrl("");
   };
 
@@ -94,23 +101,27 @@ const AddLeadDrawer = ({ open, onOpenChange, marketerId }: AddLeadDrawerProps) =
           </DrawerClose>
         </DrawerHeader>
 
-        <div className="overflow-y-auto px-4 pb-2 space-y-4">
+        <div className="overflow-y-auto px-4 pb-40 space-y-4">
           <div className="space-y-1.5">
             <Label>اسم العيادة *</Label>
-            <Input value={nameAr} onChange={(e) => setNameAr(e.target.value)} dir="rtl" placeholder="مثال: عيادة د. أحمد" />
+            <Input value={nameAr} onChange={(e) => setNameAr(e.target.value)} dir="rtl" placeholder="مثال: عيادة د. أحمد" onFocus={scrollToField} />
           </div>
           <div className="space-y-1.5">
             <Label>رقم الهاتف</Label>
-            <Input value={phone} onChange={(e) => setPhone(e.target.value)} dir="ltr" placeholder="01xxxxxxxxx" type="tel" />
+            <Input value={phone} onChange={(e) => setPhone(e.target.value)} dir="ltr" placeholder="01xxxxxxxxx" type="tel" onFocus={scrollToField} />
           </div>
           <div className="space-y-1.5">
             <Label>ملاحظات الموقع</Label>
             <Textarea value={locationNotes} onChange={(e) => setLocationNotes(e.target.value)} dir="rtl"
-              rows={2} placeholder="الشارع، بجوار..." />
+              rows={2} placeholder="الشارع، بجوار..." onFocus={scrollToField} />
           </div>
           <div className="space-y-1.5">
             <Label>تاريخ الزيارة المخطط</Label>
-            <Input type="date" value={visitDate} onChange={(e) => setVisitDate(e.target.value)} />
+            <Input type="date" value={visitDate} onChange={(e) => setVisitDate(e.target.value)} onFocus={scrollToField} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>وقت الزيارة</Label>
+            <Input type="time" value={visitTime} onChange={(e) => setVisitTime(e.target.value)} onFocus={scrollToField} />
           </div>
 
           {/* Location */}
@@ -132,7 +143,7 @@ const AddLeadDrawer = ({ open, onOpenChange, marketerId }: AddLeadDrawerProps) =
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">أو الصق رابط الخريطة</Label>
               <Input value={mapsUrl} onChange={(e) => setMapsUrl(e.target.value)} dir="ltr"
-                placeholder="https://maps.google.com/..." className="text-xs" />
+                placeholder="https://maps.google.com/..." className="text-xs" onFocus={scrollToField} />
             </div>
           </div>
         </div>
