@@ -471,6 +471,41 @@ export type Database = {
           },
         ]
       }
+      marketer_password_reset_requests: {
+        Row: {
+          id: string
+          marketer_id: string
+          requested_at: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+        }
+        Insert: {
+          id?: string
+          marketer_id: string
+          requested_at?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Update: {
+          id?: string
+          marketer_id?: string
+          requested_at?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketer_password_reset_requests_marketer_id_fkey"
+            columns: ["marketer_id"]
+            isOneToOne: false
+            referencedRelation: "marketers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketer_target_areas: {
         Row: {
           created_at: string
@@ -506,6 +541,32 @@ export type Database = {
           },
         ]
       }
+      marketer_users: {
+        Row: {
+          created_at: string
+          marketer_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          marketer_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          marketer_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketer_users_marketer_id_fkey"
+            columns: ["marketer_id"]
+            isOneToOne: false
+            referencedRelation: "marketers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketers: {
         Row: {
           absence_penalty_multiplier: number
@@ -518,6 +579,7 @@ export type Database = {
           governorate_ar: string | null
           id: string
           monthly_target_clinics: number
+          must_set_password: boolean
           name: string
           primary_phone: string
           referral_code: string
@@ -539,6 +601,7 @@ export type Database = {
           governorate_ar?: string | null
           id?: string
           monthly_target_clinics?: number
+          must_set_password?: boolean
           name: string
           primary_phone: string
           referral_code: string
@@ -560,6 +623,7 @@ export type Database = {
           governorate_ar?: string | null
           id?: string
           monthly_target_clinics?: number
+          must_set_password?: boolean
           name?: string
           primary_phone?: string
           referral_code?: string
@@ -807,6 +871,11 @@ export type Database = {
           }
       delete_clinic: { Args: { p_clinic_id: string }; Returns: Json }
       generate_referral_code: { Args: never; Returns: string }
+      get_marketer_login_state: {
+        Args: { p_referral_code: string }
+        Returns: Json
+      }
+      get_my_marketer_crm: { Args: never; Returns: Json }
       get_patient_queue_view: {
         Args: { p_token: string }
         Returns: Database["public"]["CompositeTypes"]["patient_queue_view"]
@@ -842,6 +911,7 @@ export type Database = {
       mark_missed: { Args: { p_ticket_id: string }; Returns: Json }
       mark_overdue_clinics: { Args: never; Returns: Json }
       mark_returned: { Args: { p_ticket_id: string }; Returns: Json }
+      marketer_clear_must_set_password: { Args: never; Returns: Json }
       onboard_clinic: {
         Args: {
           p_governorate_ar?: string
@@ -866,6 +936,10 @@ export type Database = {
           p_note?: string
           p_ticket_id: string
         }
+        Returns: Json
+      }
+      request_marketer_password_reset: {
+        Args: { p_referral_code: string }
         Returns: Json
       }
       seed_demo_day: { Args: { p_clinic_id: string }; Returns: number }

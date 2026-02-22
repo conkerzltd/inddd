@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SuperAdminRoute from "@/components/SuperAdminRoute";
+import MarketerProtectedRoute from "@/components/MarketerProtectedRoute";
 import Index from "./pages/Index";
 import MarketingHome from "./pages/MarketingHome";
 import DoctorsIndex from "./pages/Directory/DoctorsIndex";
@@ -28,6 +29,9 @@ import MarketerProfile from "./pages/OwnerPortal/MarketerProfile";
 import ClinicApprovals from "./pages/OwnerPortal/ClinicApprovals";
 import OwnerAnalytics from "./pages/OwnerPortal/OwnerAnalytics";
 import UserManagement from "./pages/OwnerPortal/UserManagement";
+import MarketerLogin from "./pages/Marketer/MarketerLogin";
+import MarketerDashboard from "./pages/Marketer/MarketerDashboard";
+import MarketerSettings from "./pages/Marketer/MarketerSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,6 +87,27 @@ const App = () => (
               }
             />
             <Route path="q/:token" element={<PatientQueue />} />
+
+            {/* Marketer Portal */}
+            <Route path="m" element={<MarketerLogin />} />
+            <Route
+              path="m/dashboard"
+              element={
+                <MarketerProtectedRoute>
+                  <MarketerDashboard />
+                </MarketerProtectedRoute>
+              }
+            />
+            <Route
+              path="m/settings"
+              element={
+                <MarketerProtectedRoute>
+                  <MarketerSettings />
+                </MarketerProtectedRoute>
+              }
+            />
+
+            {/* Admin Portal */}
             <Route path="ad/login" element={<OwnerLogin />} />
             <Route
               path="ad"
