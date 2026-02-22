@@ -106,6 +106,7 @@ export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent,
         open={!!urgentTicketId}
         onOpenChange={(o) => { if (!o) setUrgentTicketId(null); }}
         title="إدراج عاجل"
+        mode="urgent"
         onSubmit={async (pos, n, note) => {
           if (!urgentTicketId) return;
           await onSetUrgent(urgentTicketId, pos, n, note);
