@@ -60,8 +60,8 @@ const Console = () => {
         if (data) {
           setSessionPaused(data.session_paused);
           setIntakeOpen(data.intake_open);
-          setClinicName((data as any).name_ar || data.name || "");
-          setClinicWhatsApp((data as any).whatsapp_e164_1 || data.clinic_whatsapp_phone || "");
+          setClinicName(data.name_ar || data.name || "");
+          setClinicWhatsApp(data.whatsapp_e164_1 || data.clinic_whatsapp_phone || "");
         }
       });
   }, [clinicId]);
@@ -89,8 +89,8 @@ const Console = () => {
 
   /** Wrap an action to highlight the affected ticket after success */
   const withHighlight = useCallback(
-    (fn: (...args: any[]) => Promise<any> | void) =>
-      async (ticketId: string, ...rest: any[]) => {
+    (fn: (...args: unknown[]) => Promise<unknown> | void) =>
+      async (ticketId: string, ...rest: unknown[]) => {
         const result = await fn(ticketId, ...rest);
         if (result !== null) highlight(ticketId);
         return result;
@@ -101,8 +101,8 @@ const Console = () => {
   /** For callNext — extract ticketId from the RPC response */
   const handleCallNextHighlight = useCallback(async () => {
     const result = await actions.callNext();
-    if (result && typeof result === "object" && (result as any).ticket_id) {
-      highlight((result as any).ticket_id);
+    if (result && typeof result === "object" && (result as Record<string, unknown>).ticket_id) {
+      highlight((result as Record<string, unknown>).ticket_id as string);
     }
     return result;
   }, [actions, highlight]);
@@ -111,9 +111,9 @@ const Console = () => {
     const popup = window.open("about:blank", "_blank");
     const data = await actions.sendLink(ticketId);
     if (!data) { if (popup) popup.close(); return; }
-    const ticket = allTickets.find((t) => t.id === ticketId);
+    const ticket = allTickets.find((t: TicketRow) => t.id === ticketId);
     const patientPhone = ticket?.patient_phone?.replace(/\D/g, "") || "";
-    const token = (data as any)?.token || ticket?.token;
+    const token = (data as Record<string, unknown> | null)?.token as string | undefined || ticket?.token;
     if (!token) { if (popup) popup.close(); return; }
     const patientLink = `${PUBLIC_BASE_URL}/q/${token}`;
     if (/lovableproject\.com|lovable\.dev/i.test(patientLink)) {
@@ -137,8 +137,8 @@ const Console = () => {
       if (error) throw error;
       toast.success("تم إنشاء عيادة تجريبية!");
       window.location.reload();
-    } catch (e: any) {
-      toast.error(e.message || "فشل إنشاء العيادة التجريبية");
+    } catch (e: unknown) {
+      toast.error((e instanceof Error ? e.message : null) || "فشل إنشاء العيادة التجريبية");
     } finally {
       setBootstrapping(false);
     }
@@ -152,8 +152,8 @@ const Console = () => {
       if (error) throw error;
       toast.success(`تم إضافة ${data} تذكرة تجريبية لليوم.`);
       await refresh();
-    } catch (e: any) {
-      toast.error(e.message || "فشل إضافة البيانات التجريبية");
+    } catch (e: unknown) {
+      toast.error((e instanceof Error ? e.message : null) || "فشل إضافة البيانات التجريبية");
     } finally {
       setSeeding(false);
     }
