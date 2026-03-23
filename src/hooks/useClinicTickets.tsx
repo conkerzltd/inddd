@@ -73,8 +73,8 @@ export function useClinicTickets(clinicId: string | null, clinicTimezone: string
       const tokenMap = new Map((links || []).map((l) => [l.ticket_id, l.token]));
 
       setTickets(
-        raw.map((t: any) => {
-          const app = t.external_booking_apps;
+        raw.map((t) => {
+          const app = (t as Record<string, unknown>).external_booking_apps as { label_en?: string; code?: string } | null;
           return {
             ...t,
             token: tokenMap.get(t.id) || null,
