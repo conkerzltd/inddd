@@ -12,7 +12,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Zap, Ban } from "lucide-react";
+import { Zap, Ban, Send, Link2 } from "lucide-react";
 import { HIGHLIGHT_ROW_CLASS } from "@/hooks/useTicketHighlight";
 
 interface Props {
@@ -20,6 +20,7 @@ interface Props {
   clinicTimezone: string;
   highlightId?: string | null;
   onSetUrgent: (id: string, pos: string, n: number | null, note: string | null) => Promise<any>;
+  onSendLink?: (id: string) => void;
   onCancel: (id: string) => void;
 }
 
@@ -34,7 +35,7 @@ const visitTypeLabel = (v: string) => {
   return v;
 };
 
-export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent, onCancel }: Props) {
+export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent, onSendLink, onCancel }: Props) {
   const [urgentTicketId, setUrgentTicketId] = useState<string | null>(null);
   const [cancelTicketId, setCancelTicketId] = useState<string | null>(null);
   const isMobile = useIsMobile();
@@ -53,12 +54,17 @@ export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent,
                 index={t._pos ?? i + 1}
                 highlightActive={t.id === highlightId}
                 fields={[
-                  { label: "الاسم", value: <>{t.patient_name || "—"}{!hasRealPhone(t.patient_phone) && <span className="text-xs text-muted-foreground mr-1">(بدون هاتف)</span>}</> },
+                  { label: "الاسم", value: <>{t.patient_name || "—"}{!hasRealPhone(t.patient_phone) && <span className="text-xs text-muted-foreground mr-1">(بدون هاتف)</span>}{t.token && <Link2 className="inline h-3 w-3 text-primary ms-1" />}</> },
                   { label: "نوع الزيارة", value: visitTypeLabel(t.visit_type) },
                   { label: "الوصول", value: t.arrival_confirmed_at ? fmtTime(t.arrival_confirmed_at, clinicTimezone) : "—" },
                 ]}
                 actions={
                   <>
+                    {onSendLink && hasRealPhone(t.patient_phone) && (
+                      <Button size="sm" variant="outline" className="min-h-[44px]" onClick={() => onSendLink(t.id)} title="إعادة إرسال الرابط">
+                        <Send className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
                     <Button size="sm" variant="outline" className="min-h-[44px] flex-1" onClick={() => setUrgentTicketId(t.id)}>
                       <Zap className="h-3.5 w-3.5 me-1" />عاجل
                     </Button>
@@ -93,7 +99,12 @@ export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent,
                   <TableCell>
                     {t.arrival_confirmed_at ? fmtTime(t.arrival_confirmed_at, clinicTimezone) : "—"}
                   </TableCell>
-                  <TableCell className="text-start w-[180px] space-x-1 space-x-reverse">
+                  <TableCell className="text-start w-[220px] space-x-1 space-x-reverse">
+                    {onSendLink && hasRealPhone(t.patient_phone) && (
+                      <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => onSendLink(t.id)} title="إعادة إرسال الرابط">
+                        <Send className="h-3 w-3" />
+                      </Button>
+                    )}
                     <Button size="sm" variant="outline" onClick={() => setUrgentTicketId(t.id)}>
                       <Zap className="h-3 w-3 me-1" />عاجل
                     </Button>

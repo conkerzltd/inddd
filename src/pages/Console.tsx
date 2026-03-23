@@ -67,6 +67,7 @@ const Console = () => {
   }, [clinicId]);
 
   const {
+    tickets: allTickets,
     preArrival, waiting, called, inService, missed, returned, done, refresh, loading: ticketsLoading,
   } = useClinicTickets(clinicId, clinicTimezone);
 
@@ -110,7 +111,7 @@ const Console = () => {
     const popup = window.open("about:blank", "_blank");
     const data = await actions.sendLink(ticketId);
     if (!data) { if (popup) popup.close(); return; }
-    const ticket = preArrival.find((t) => t.id === ticketId);
+    const ticket = allTickets.find((t) => t.id === ticketId);
     const patientPhone = ticket?.patient_phone?.replace(/\D/g, "") || "";
     const token = (data as any)?.token || ticket?.token;
     if (!token) { if (popup) popup.close(); return; }
@@ -127,7 +128,7 @@ const Console = () => {
       ? `https://wa.me/${patientPhone}?text=${encodedMessage}`
       : `https://web.whatsapp.com/send?phone=${patientPhone}&text=${encodedMessage}`;
     if (popup) { popup.location.href = waUrl; } else { window.location.href = waUrl; }
-  }, [actions, preArrival, clinicName]);
+  }, [actions, allTickets, clinicName]);
 
   const handleBootstrap = async () => {
     setBootstrapping(true);
@@ -304,6 +305,7 @@ const Console = () => {
               tickets={enrichAndFilter(waiting)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
+              onSendLink={handleSendLink}
               onSetUrgent={async (id, pos, n, note) => {
                 const r = await actions.setUrgentAndInsert(id, pos, n, note);
                 if (r !== null) highlight(id);
@@ -317,6 +319,7 @@ const Console = () => {
               highlightId={highlightId}
               onStartService={withHighlight(actions.startService)}
               onMarkMissed={withHighlight(actions.markMissed)}
+              onSendLink={handleSendLink}
               onCancel={withHighlight(actions.cancelTicket)}
             />
             <InServiceList

@@ -11,7 +11,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Play, XCircle, Ban } from "lucide-react";
+import { Play, XCircle, Ban, Send } from "lucide-react";
 import { HIGHLIGHT_ROW_CLASS } from "@/hooks/useTicketHighlight";
 
 interface Props {
@@ -20,6 +20,7 @@ interface Props {
   highlightId?: string | null;
   onStartService: (id: string) => void;
   onMarkMissed: (id: string) => void;
+  onSendLink?: (id: string) => void;
   onCancel: (id: string) => void;
 }
 
@@ -28,7 +29,7 @@ const fmtTime = (iso: string, tz: string) =>
     timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
   }).format(new Date(iso));
 
-export function CalledList({ tickets, clinicTimezone, highlightId, onStartService, onMarkMissed, onCancel }: Props) {
+export function CalledList({ tickets, clinicTimezone, highlightId, onStartService, onMarkMissed, onSendLink, onCancel }: Props) {
   const isMobile = useIsMobile();
   const [cancelTicketId, setCancelTicketId] = useState<string | null>(null);
 
@@ -55,6 +56,11 @@ export function CalledList({ tickets, clinicTimezone, highlightId, onStartServic
                   <Button size="sm" variant="destructive" className="min-h-[44px] flex-1" onClick={() => onMarkMissed(t.id)}>
                     <XCircle className="h-3.5 w-3.5 me-1" />لم يحضر
                   </Button>
+                  {onSendLink && hasRealPhone(t.patient_phone) && (
+                    <Button size="sm" variant="outline" className="min-h-[44px]" onClick={() => onSendLink(t.id)} title="إعادة إرسال الرابط">
+                      <Send className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
                   <Button size="sm" variant="destructive" className="min-h-[44px]" onClick={() => setCancelTicketId(t.id)}>
                     <Ban className="h-3.5 w-3.5" />
                   </Button>
@@ -82,13 +88,18 @@ export function CalledList({ tickets, clinicTimezone, highlightId, onStartServic
                     {!hasRealPhone(t.patient_phone) && <span className="text-xs text-muted-foreground mr-1">(بدون هاتف)</span>}
                 </TableCell>
                 <TableCell>{t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—"}</TableCell>
-                <TableCell className="text-start w-[240px] space-x-1 space-x-reverse">
+                <TableCell className="text-start w-[280px] space-x-1 space-x-reverse">
                   <Button size="sm" onClick={() => onStartService(t.id)}>
                     <Play className="h-3 w-3 me-1" />بدء الخدمة
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => onMarkMissed(t.id)}>
                     <XCircle className="h-3 w-3 me-1" />لم يحضر
                   </Button>
+                  {onSendLink && hasRealPhone(t.patient_phone) && (
+                    <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => onSendLink(t.id)} title="إعادة إرسال الرابط">
+                      <Send className="h-3 w-3" />
+                    </Button>
+                  )}
                   <Button size="sm" variant="destructive" onClick={() => setCancelTicketId(t.id)}>
                     <Ban className="h-3 w-3 me-1" />إلغاء
                   </Button>
