@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { TicketRow } from "@/hooks/useClinicTickets";
 import { PUBLIC_BASE_URL } from "@/config/publicBaseUrl";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
