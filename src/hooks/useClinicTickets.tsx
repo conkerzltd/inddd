@@ -5,6 +5,9 @@ import { toast } from "sonner";
 /** Placeholder phone used for non-smartphone patients */
 export const NO_PHONE_PLACEHOLDER = "0000000000";
 
+/** Check if ticket has a real phone number */
+export const hasRealPhone = (phone: string) => phone !== NO_PHONE_PLACEHOLDER;
+
 export interface TicketRow {
   id: string;
   status: string;
