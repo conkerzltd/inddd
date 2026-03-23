@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogOut, Plus, Database, Power, Menu, Search } from "lucide-react";
 import { ScrollFabs } from "@/components/console/ScrollFabs";
