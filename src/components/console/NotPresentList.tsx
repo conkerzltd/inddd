@@ -53,7 +53,7 @@ export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone,
                 index={t._pos ?? i + 1}
                 highlightActive={t.id === highlightId}
                 fields={[
-                  { label: "الاسم", value: t.patient_name || "—" },
+                  { label: "الاسم", value: <>{t.patient_name || "—"}{!hasRealPhone(t.patient_phone) && <span className="text-xs text-muted-foreground mr-1">(بدون هاتف)</span>}</> },
                   { label: "التوقيت", value: t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—" },
                 ]}
                 actions={
