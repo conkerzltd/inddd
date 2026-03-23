@@ -99,9 +99,9 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
     const patientPhone = hasValidPhone ? toEgE164Digits(phone10) : NO_PHONE_PLACEHOLDER;
     const { data, error } = await supabase.rpc("create_ticket", {
       p_clinic_id: clinicId,
-      p_source: source as any,
-      p_type: type as any,
-      p_visit_type: visitType as any,
+      p_source: source as Database["public"]["Enums"]["ticket_source"],
+      p_type: type as Database["public"]["Enums"]["ticket_type"],
+      p_visit_type: visitType as Database["public"]["Enums"]["visit_type"],
       p_patient_phone: patientPhone,
       p_patient_name: name.trim(),
       p_appt_hhmm: type === "SCHEDULED" ? apptTime : (source === "WALK_IN" ? nowHHMM : null),
@@ -109,7 +109,8 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
       p_external_booking_app_other: source === "EXTERNAL" && selectedAppCode === "OTHER" ? extAppOther : null,
     });
     if (error) throw error;
-    const ticketId = (data as any)?.ticket_id;
+    const result = data as Record<string, unknown> | null;
+    const ticketId = result?.ticket_id as string | undefined;
     if (!ticketId) throw new Error("لم يتم إرجاع معرف التذكرة");
     return ticketId;
   };
