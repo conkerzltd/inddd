@@ -12,7 +12,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Zap, Ban } from "lucide-react";
+import { Zap, Ban, Send, Link2 } from "lucide-react";
 import { HIGHLIGHT_ROW_CLASS } from "@/hooks/useTicketHighlight";
 
 interface Props {
@@ -20,6 +20,7 @@ interface Props {
   clinicTimezone: string;
   highlightId?: string | null;
   onSetUrgent: (id: string, pos: string, n: number | null, note: string | null) => Promise<any>;
+  onSendLink?: (id: string) => void;
   onCancel: (id: string) => void;
 }
 
