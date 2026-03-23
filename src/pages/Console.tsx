@@ -70,6 +70,16 @@ const Console = () => {
 
   const actions = useTicketActions(clinicId, refresh);
   const { highlightId, highlight } = useTicketHighlight();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filterTickets = useCallback((tickets: any[]) => {
+    if (!searchQuery.trim()) return tickets;
+    const q = searchQuery.trim().toLowerCase();
+    return tickets.filter((t: any) =>
+      (t.patient_name && t.patient_name.toLowerCase().includes(q)) ||
+      (t.patient_phone && t.patient_phone.includes(q))
+    );
+  }, [searchQuery]);
 
   /** Wrap an action to highlight the affected ticket after success */
   const withHighlight = useCallback(
