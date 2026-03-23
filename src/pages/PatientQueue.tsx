@@ -27,7 +27,7 @@ interface PatientQueueView {
   clinic_maps_url: string | null;
 }
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 
 /* ───── helpers ───── */
 function fmtTimeAr(iso: string): string {
@@ -60,7 +60,7 @@ export default function PatientQueue() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevBadgeRef = useRef<string | null>(null);
 
-  const isValidToken = token && UUID_RE.test(token);
+  const isValidToken = !!token && token.trim().length > 0;
 
   /* ── fetch ── */
   const fetchQueue = useCallback(async () => {
@@ -91,7 +91,7 @@ export default function PatientQueue() {
   /* ── adaptive polling ── */
   useEffect(() => {
     if (!isValidToken) return;
-    const ms = data?.status_badge === "WAITING" ? 10_000 : 25_000;
+    const ms = (data?.status_badge === "WAITING" || data?.status_badge === "INSIDE_WAITING") ? 10_000 : 25_000;
     const start = () => { if (intervalRef.current) clearInterval(intervalRef.current); intervalRef.current = setInterval(fetchQueue, ms); };
     const stop = () => { if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; } };
     const vis = () => { document.hidden ? stop() : start(); };
@@ -137,7 +137,8 @@ export default function PatientQueue() {
   if (error) return <Centered><AlertCircle className="h-10 w-10 text-destructive mx-auto" /><p className="text-muted-foreground mt-3">{error}</p><Button variant="outline" className="mt-3" onClick={() => { setLoading(true); setError(null); fetchQueue(); }}><RefreshCw className="h-4 w-4 me-1" /> إعادة المحاولة</Button></Centered>;
   if (!data) return null;
 
-  const badge = data.status_badge;
+  const rawBadge = data.status_badge;
+  const badge = rawBadge === "INSIDE_WAITING" ? "WAITING" : (rawBadge === "CLOSED_OUT" ? "CLOSED" : rawBadge);
   const clinicName = data.clinic_name_ar;
   const mapsUrl = data.clinic_maps_url || (data.clinic_lat && data.clinic_lng ? `https://www.google.com/maps?q=${data.clinic_lat},${data.clinic_lng}` : null);
 
