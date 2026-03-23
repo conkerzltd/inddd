@@ -67,6 +67,7 @@ const Console = () => {
   }, [clinicId]);
 
   const {
+    tickets: allTickets,
     preArrival, waiting, called, inService, missed, returned, done, refresh, loading: ticketsLoading,
   } = useClinicTickets(clinicId, clinicTimezone);
 
