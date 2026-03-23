@@ -151,7 +151,7 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
         toast.warning("تم إنشاء التذكرة لكن فشل إرسال الرابط: " + linkError.message);
         if (popup) popup.close();
       } else {
-        const token = (linkData as any)?.token;
+        const token = (linkData as Record<string, unknown> | null)?.token as string | undefined;
         if (token) {
           const patientLink = `${PUBLIC_BASE_URL}/q/${token}`;
           if (/lovableproject\.com|lovable\.dev/i.test(patientLink)) {
