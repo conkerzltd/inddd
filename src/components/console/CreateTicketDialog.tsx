@@ -113,20 +113,20 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
     return ticketId;
   };
 
-  /** Create ticket only (no WhatsApp) */
+  /** Create ticket only (no WhatsApp, no link generation) */
   const handleCreateOnly = async () => {
     if (!validate(false)) return;
     setSubmitting(true);
     try {
       const ticketId = await createTicket();
-      if (ticketId && hasValidPhone) {
-        // Generate link silently but don't open WhatsApp
-        try { await supabase.rpc("send_patient_link", { p_ticket_id: ticketId }); } catch {}
+      if (hasValidPhone) {
+        toast.success("تم إنشاء التذكرة!");
+      } else {
+        toast.success(`تم إنشاء التذكرة — ${name.trim()} (بدون هاتف)`);
       }
-      toast.success("تم إنشاء التذكرة!");
       reset();
       setOpen(false);
-      onCreated(ticketId);
+      onCreated(ticketId ?? undefined);
     } catch (e: any) {
       toast.error(e.message || "فشل إنشاء التذكرة");
     } finally {
