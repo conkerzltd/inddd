@@ -60,7 +60,7 @@ export default function PatientQueue() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevBadgeRef = useRef<string | null>(null);
 
-  const isValidToken = token && UUID_RE.test(token);
+  const isValidToken = !!token && token.trim().length > 0;
 
   /* ── fetch ── */
   const fetchQueue = useCallback(async () => {
