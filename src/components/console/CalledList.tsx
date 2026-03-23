@@ -40,7 +40,7 @@ export function CalledList({ tickets, clinicTimezone, highlightId, onStartServic
           {tickets.map((t, i) => (
             <MobileTicketCard
               key={t.id}
-              index={i + 1}
+              index={t._pos ?? i + 1}
               highlight
               highlightActive={t.id === highlightId}
               fields={[
