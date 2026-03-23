@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import type { Database } from "@/integrations/supabase/types";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
