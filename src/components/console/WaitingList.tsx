@@ -99,7 +99,12 @@ export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent,
                   <TableCell>
                     {t.arrival_confirmed_at ? fmtTime(t.arrival_confirmed_at, clinicTimezone) : "—"}
                   </TableCell>
-                  <TableCell className="text-start w-[180px] space-x-1 space-x-reverse">
+                  <TableCell className="text-start w-[220px] space-x-1 space-x-reverse">
+                    {onSendLink && hasRealPhone(t.patient_phone) && (
+                      <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => onSendLink(t.id)} title="إعادة إرسال الرابط">
+                        <Send className="h-3 w-3" />
+                      </Button>
+                    )}
                     <Button size="sm" variant="outline" onClick={() => setUrgentTicketId(t.id)}>
                       <Zap className="h-3 w-3 me-1" />عاجل
                     </Button>

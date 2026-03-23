@@ -88,13 +88,18 @@ export function CalledList({ tickets, clinicTimezone, highlightId, onStartServic
                     {!hasRealPhone(t.patient_phone) && <span className="text-xs text-muted-foreground mr-1">(بدون هاتف)</span>}
                 </TableCell>
                 <TableCell>{t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—"}</TableCell>
-                <TableCell className="text-start w-[240px] space-x-1 space-x-reverse">
+                <TableCell className="text-start w-[280px] space-x-1 space-x-reverse">
                   <Button size="sm" onClick={() => onStartService(t.id)}>
                     <Play className="h-3 w-3 me-1" />بدء الخدمة
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => onMarkMissed(t.id)}>
                     <XCircle className="h-3 w-3 me-1" />لم يحضر
                   </Button>
+                  {onSendLink && hasRealPhone(t.patient_phone) && (
+                    <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => onSendLink(t.id)} title="إعادة إرسال الرابط">
+                      <Send className="h-3 w-3" />
+                    </Button>
+                  )}
                   <Button size="sm" variant="destructive" onClick={() => setCancelTicketId(t.id)}>
                     <Ban className="h-3 w-3 me-1" />إلغاء
                   </Button>
