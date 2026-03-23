@@ -54,7 +54,7 @@ export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent,
                 index={t._pos ?? i + 1}
                 highlightActive={t.id === highlightId}
                 fields={[
-                  { label: "الاسم", value: <>{t.patient_name || "—"}{!hasRealPhone(t.patient_phone) && <span className="text-xs text-muted-foreground mr-1">(بدون هاتف)</span>}</> },
+                  { label: "الاسم", value: <>{t.patient_name || "—"}{!hasRealPhone(t.patient_phone) && <span className="text-xs text-muted-foreground mr-1">(بدون هاتف)</span>}{t.token && <Link2 className="inline h-3 w-3 text-primary ms-1" />}</> },
                   { label: "نوع الزيارة", value: visitTypeLabel(t.visit_type) },
                   { label: "الوصول", value: t.arrival_confirmed_at ? fmtTime(t.arrival_confirmed_at, clinicTimezone) : "—" },
                 ]}
