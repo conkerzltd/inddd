@@ -113,7 +113,7 @@ const Console = () => {
     if (!data) { if (popup) popup.close(); return; }
     const ticket = allTickets.find((t: TicketRow) => t.id === ticketId);
     const patientPhone = ticket?.patient_phone?.replace(/\D/g, "") || "";
-    const token = (data as any)?.token || ticket?.token;
+    const token = (data as Record<string, unknown> | null)?.token as string | undefined || ticket?.token;
     if (!token) { if (popup) popup.close(); return; }
     const patientLink = `${PUBLIC_BASE_URL}/q/${token}`;
     if (/lovableproject\.com|lovable\.dev/i.test(patientLink)) {

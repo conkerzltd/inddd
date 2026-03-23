@@ -179,7 +179,7 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
       onCreated(ticketId);
     } catch (e: unknown) {
       if (popup) popup.close();
-      toast.error(e.message || "فشل إنشاء التذكرة");
+      toast.error((e instanceof Error ? e.message : null) || "فشل إنشاء التذكرة");
     } finally {
       setSubmitting(false);
     }

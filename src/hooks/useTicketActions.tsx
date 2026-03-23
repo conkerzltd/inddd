@@ -6,13 +6,14 @@ export function useTicketActions(clinicId: string | null, onDone: () => void) {
   const rpc = useCallback(
     async (fn: string, params: Record<string, unknown>, successMsg: string) => {
       try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error } = await supabase.rpc(fn as any, params as any);
         if (error) throw error;
         toast.success(successMsg);
         onDone();
         return data;
-      } catch (e: any) {
-        toast.error(e.message || `Failed: ${fn}`);
+      } catch (e: unknown) {
+        toast.error((e instanceof Error ? e.message : null) || `Failed: ${fn}`);
         return null;
       }
     },

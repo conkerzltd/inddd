@@ -84,8 +84,8 @@ export function useClinicTickets(clinicId: string | null, clinicTimezone: string
           };
         })
       );
-    } catch (e: any) {
-      toast.error(e.message || "Failed to load tickets");
+    } catch (e: unknown) {
+      toast.error((e instanceof Error ? e.message : null) || "Failed to load tickets");
     } finally {
       setLoading(false);
     }

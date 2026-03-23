@@ -76,8 +76,8 @@ export default function PatientQueue() {
       prevBadgeRef.current = view.status_badge;
       setData(view);
       setError(null);
-    } catch (e: any) {
-      setError(e.message || "حدث خطأ. يرجى المحاولة مرة أخرى.");
+    } catch (e: unknown) {
+      setError((e instanceof Error ? e.message : null) || "حدث خطأ. يرجى المحاولة مرة أخرى.");
     } finally {
       setLoading(false);
     }
