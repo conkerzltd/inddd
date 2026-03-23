@@ -95,7 +95,7 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
 
   const createTicket = async (): Promise<string | null> => {
     const nowHHMM = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
-    const patientPhone = hasValidPhone ? toEgE164Digits(phone10) : "0000000000";
+    const patientPhone = hasValidPhone ? toEgE164Digits(phone10) : NO_PHONE_PLACEHOLDER;
     const { data, error } = await supabase.rpc("create_ticket", {
       p_clinic_id: clinicId,
       p_source: source as any,
