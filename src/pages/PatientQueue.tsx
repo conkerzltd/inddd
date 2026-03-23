@@ -137,7 +137,8 @@ export default function PatientQueue() {
   if (error) return <Centered><AlertCircle className="h-10 w-10 text-destructive mx-auto" /><p className="text-muted-foreground mt-3">{error}</p><Button variant="outline" className="mt-3" onClick={() => { setLoading(true); setError(null); fetchQueue(); }}><RefreshCw className="h-4 w-4 me-1" /> إعادة المحاولة</Button></Centered>;
   if (!data) return null;
 
-  const badge = data.status_badge;
+  const rawBadge = data.status_badge;
+  const badge = rawBadge === "INSIDE_WAITING" ? "WAITING" : (rawBadge === "CLOSED_OUT" ? "CLOSED" : rawBadge);
   const clinicName = data.clinic_name_ar;
   const mapsUrl = data.clinic_maps_url || (data.clinic_lat && data.clinic_lng ? `https://www.google.com/maps?q=${data.clinic_lat},${data.clinic_lng}` : null);
 
