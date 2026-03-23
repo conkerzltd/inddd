@@ -61,7 +61,7 @@ export function InServiceList({ tickets, clinicTimezone, highlightId, onComplete
                 index={t._pos ?? i + 1}
                 highlightActive={t.id === highlightId}
                 fields={[
-                  { label: "الاسم", value: t.patient_name || "—" },
+                  { label: "الاسم", value: <>{t.patient_name || "—"}{!hasRealPhone(t.patient_phone) && <span className="text-xs text-muted-foreground mr-1">(بدون هاتف)</span>}</> },
                   { label: "وقت البدء", value: t.service_started_at ? fmtTime(t.service_started_at, clinicTimezone) : "—" },
                 ]}
                 actions={
