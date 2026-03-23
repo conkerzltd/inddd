@@ -120,7 +120,7 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
       const ticketId = await createTicket();
       if (ticketId && hasValidPhone) {
         // Generate link silently but don't open WhatsApp
-        await supabase.rpc("send_patient_link", { p_ticket_id: ticketId }).catch(() => {});
+        try { await supabase.rpc("send_patient_link", { p_ticket_id: ticketId }); } catch {}
       }
       toast.success("تم إنشاء التذكرة!");
       reset();
