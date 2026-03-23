@@ -60,6 +60,11 @@ export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent,
                 ]}
                 actions={
                   <>
+                    {onSendLink && hasRealPhone(t.patient_phone) && (
+                      <Button size="sm" variant="outline" className="min-h-[44px]" onClick={() => onSendLink(t.id)} title="إعادة إرسال الرابط">
+                        <Send className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
                     <Button size="sm" variant="outline" className="min-h-[44px] flex-1" onClick={() => setUrgentTicketId(t.id)}>
                       <Zap className="h-3.5 w-3.5 me-1" />عاجل
                     </Button>
