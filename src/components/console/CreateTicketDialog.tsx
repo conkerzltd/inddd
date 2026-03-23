@@ -8,7 +8,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
+import { Plus, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SOURCE_LABELS } from "@/utils/ticketSource";
 import { toast } from "sonner";
@@ -49,6 +49,8 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
 
   const selectedAppCode = bookingApps.find((a) => a.id === extAppId)?.code;
 
+  const hasValidPhone = isValidEg10(phone10);
+
   const reset = () => {
     setSource("WALK_IN");
     setType("NORMAL");
@@ -61,53 +63,86 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
     setExtAppOther("");
   };
 
-  const handleSubmit = async () => {
-    if (!isValidEg10(phone10)) {
+  const validate = (requirePhone: boolean): boolean => {
+    if (requirePhone && !hasValidPhone) {
       setPhoneError("أدخل ١٠ أرقام.");
-      return;
+      return false;
+    }
+    if (!requirePhone && phone10.length > 0 && !hasValidPhone) {
+      setPhoneError("أدخل ١٠ أرقام أو اترك الحقل فارغاً.");
+      return false;
     }
     setPhoneError("");
     if (!name.trim()) {
       toast.error("اسم المريض مطلوب");
-      return;
+      return false;
     }
     if (type === "SCHEDULED" && !apptTime) {
       toast.error("وقت الموعد مطلوب للتذاكر بميعاد");
-      return;
+      return false;
     }
     if (source === "EXTERNAL" && !extAppId) {
       toast.error("تطبيق الحجز الخارجي مطلوب");
-      return;
+      return false;
     }
     if (source === "EXTERNAL" && selectedAppCode === "OTHER" && !extAppOther.trim()) {
       toast.error("اسم التطبيق الآخر مطلوب");
-      return;
+      return false;
     }
-    setSubmitting(true);
-    // For walk-in, capture current time as arrival
+    return true;
+  };
+
+  const createTicket = async (): Promise<string | null> => {
     const nowHHMM = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
-    // Open popup immediately to avoid popup blocker
+    const patientPhone = hasValidPhone ? toEgE164Digits(phone10) : "0000000000";
+    const { data, error } = await supabase.rpc("create_ticket", {
+      p_clinic_id: clinicId,
+      p_source: source as any,
+      p_type: type as any,
+      p_visit_type: visitType as any,
+      p_patient_phone: patientPhone,
+      p_patient_name: name.trim(),
+      p_appt_hhmm: type === "SCHEDULED" ? apptTime : (source === "WALK_IN" ? nowHHMM : null),
+      p_external_booking_app_id: source === "EXTERNAL" && extAppId ? extAppId : null,
+      p_external_booking_app_other: source === "EXTERNAL" && selectedAppCode === "OTHER" ? extAppOther : null,
+    });
+    if (error) throw error;
+    const ticketId = (data as any)?.ticket_id;
+    if (!ticketId) throw new Error("لم يتم إرجاع معرف التذكرة");
+    return ticketId;
+  };
+
+  /** Create ticket only (no WhatsApp) */
+  const handleCreateOnly = async () => {
+    if (!validate(false)) return;
+    setSubmitting(true);
+    try {
+      const ticketId = await createTicket();
+      if (ticketId && hasValidPhone) {
+        // Generate link silently but don't open WhatsApp
+        await supabase.rpc("send_patient_link", { p_ticket_id: ticketId }).catch(() => {});
+      }
+      toast.success("تم إنشاء التذكرة!");
+      reset();
+      setOpen(false);
+      onCreated(ticketId);
+    } catch (e: any) {
+      toast.error(e.message || "فشل إنشاء التذكرة");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  /** Create ticket + open WhatsApp */
+  const handleCreateAndSend = async () => {
+    if (!validate(true)) return;
+    setSubmitting(true);
     const popup = window.open("about:blank", "_blank");
     try {
-      const { data, error } = await supabase.rpc("create_ticket", {
-        p_clinic_id: clinicId,
-        p_source: source as any,
-        p_type: type as any,
-        p_visit_type: visitType as any,
-        p_patient_phone: toEgE164Digits(phone10),
-        p_patient_name: name.trim(),
-        p_appt_hhmm: type === "SCHEDULED" ? apptTime : (source === "WALK_IN" ? nowHHMM : null),
-        p_external_booking_app_id: source === "EXTERNAL" && extAppId ? extAppId : null,
-        p_external_booking_app_other: source === "EXTERNAL" && selectedAppCode === "OTHER" ? extAppOther : null,
-      });
-      if (error) throw error;
+      const ticketId = await createTicket();
 
-      const ticketId = (data as any)?.ticket_id;
-      if (!ticketId) throw new Error("لم يتم إرجاع معرف التذكرة");
-
-      // Send patient link
       const { data: linkData, error: linkError } = await supabase.rpc("send_patient_link", {
-        p_ticket_id: ticketId,
+        p_ticket_id: ticketId!,
       });
       if (linkError) {
         toast.warning("تم إنشاء التذكرة لكن فشل إرسال الرابط: " + linkError.message);
@@ -151,7 +186,7 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm">
-          <Plus className="h-4 w-4 me-1" />إنشاء تذكرة وإرسال رابط المتابعة
+          <Plus className="h-4 w-4 me-1" />إنشاء تذكرة
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
@@ -165,7 +200,6 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
               <Select value={source} onValueChange={(v) => {
                 setSource(v);
                 if (v !== "EXTERNAL") { setExtAppId(""); setExtAppOther(""); }
-                // Walk-in can't be SCHEDULED
                 if (v === "WALK_IN" && type === "SCHEDULED") { setType("NORMAL"); setApptTime(""); }
               }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -200,10 +234,9 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
           </div>
 
           <EgyptPhoneInput
-            label="الهاتف *"
+            label="الهاتف"
             value10={phone10}
             onChange10={setPhone10}
-            required
             error={phoneError}
           />
 
@@ -253,9 +286,16 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
             </>
           )}
 
-          <Button className="w-full" onClick={handleSubmit} disabled={submitting}>
-            {submitting ? "جاري الإنشاء والإرسال…" : "إنشاء تذكرة وإرسال الرابط"}
-          </Button>
+          <div className="flex gap-2">
+            <Button className="flex-1" variant="outline" onClick={handleCreateOnly} disabled={submitting}>
+              <Plus className="h-4 w-4 me-1" />
+              {submitting ? "جاري…" : "إنشاء فقط"}
+            </Button>
+            <Button className="flex-1" onClick={handleCreateAndSend} disabled={submitting || !hasValidPhone}>
+              <Send className="h-4 w-4 me-1" />
+              {submitting ? "جاري…" : "إنشاء وإرسال"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
