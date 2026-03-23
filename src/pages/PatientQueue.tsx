@@ -91,7 +91,7 @@ export default function PatientQueue() {
   /* ── adaptive polling ── */
   useEffect(() => {
     if (!isValidToken) return;
-    const ms = data?.status_badge === "WAITING" ? 10_000 : 25_000;
+    const ms = (data?.status_badge === "WAITING" || data?.status_badge === "INSIDE_WAITING") ? 10_000 : 25_000;
     const start = () => { if (intervalRef.current) clearInterval(intervalRef.current); intervalRef.current = setInterval(fetchQueue, ms); };
     const stop = () => { if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; } };
     const vis = () => { document.hidden ? stop() : start(); };
