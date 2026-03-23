@@ -72,12 +72,15 @@ const Console = () => {
   const { highlightId, highlight } = useTicketHighlight();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filterTickets = useCallback((tickets: any[]) => {
-    if (!searchQuery.trim()) return tickets;
+  /** Enrich tickets with original position then filter by search */
+  const enrichAndFilter = useCallback((tickets: TicketRow[]) => {
+    const enriched = tickets.map((t, i) => ({ ...t, _pos: i + 1 }));
+    if (!searchQuery.trim()) return enriched;
     const q = searchQuery.trim().toLowerCase();
-    return tickets.filter((t: any) =>
+    const qDigits = q.replace(/\D/g, "");
+    return enriched.filter((t) =>
       (t.patient_name && t.patient_name.toLowerCase().includes(q)) ||
-      (t.patient_phone && t.patient_phone.includes(q))
+      (qDigits.length >= 3 && t.patient_phone && t.patient_phone.replace(/\D/g, "").includes(qDigits))
     );
   }, [searchQuery]);
 
