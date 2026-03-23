@@ -152,8 +152,8 @@ const Console = () => {
       if (error) throw error;
       toast.success(`تم إضافة ${data} تذكرة تجريبية لليوم.`);
       await refresh();
-    } catch (e: any) {
-      toast.error(e.message || "فشل إضافة البيانات التجريبية");
+    } catch (e: unknown) {
+      toast.error((e instanceof Error ? e.message : null) || "فشل إضافة البيانات التجريبية");
     } finally {
       setSeeding(false);
     }
