@@ -56,6 +56,11 @@ export function CalledList({ tickets, clinicTimezone, highlightId, onStartServic
                   <Button size="sm" variant="destructive" className="min-h-[44px] flex-1" onClick={() => onMarkMissed(t.id)}>
                     <XCircle className="h-3.5 w-3.5 me-1" />لم يحضر
                   </Button>
+                  {onSendLink && hasRealPhone(t.patient_phone) && (
+                    <Button size="sm" variant="outline" className="min-h-[44px]" onClick={() => onSendLink(t.id)} title="إعادة إرسال الرابط">
+                      <Send className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
                   <Button size="sm" variant="destructive" className="min-h-[44px]" onClick={() => setCancelTicketId(t.id)}>
                     <Ban className="h-3.5 w-3.5" />
                   </Button>
