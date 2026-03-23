@@ -101,8 +101,8 @@ const Console = () => {
   /** For callNext — extract ticketId from the RPC response */
   const handleCallNextHighlight = useCallback(async () => {
     const result = await actions.callNext();
-    if (result && typeof result === "object" && (result as any).ticket_id) {
-      highlight((result as any).ticket_id);
+    if (result && typeof result === "object" && (result as Record<string, unknown>).ticket_id) {
+      highlight((result as Record<string, unknown>).ticket_id as string);
     }
     return result;
   }, [actions, highlight]);
