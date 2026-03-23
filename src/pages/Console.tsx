@@ -1,11 +1,12 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { PUBLIC_BASE_URL } from "@/config/publicBaseUrl";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogOut, Plus, Database, Power, Menu } from "lucide-react";
+import { LogOut, Plus, Database, Power, Menu, Search } from "lucide-react";
 import { ScrollFabs } from "@/components/console/ScrollFabs";
 import logoSymbol from "@/assets/logo-symbol.png";
 import { useNavigate } from "react-router-dom";
@@ -69,6 +70,16 @@ const Console = () => {
 
   const actions = useTicketActions(clinicId, refresh);
   const { highlightId, highlight } = useTicketHighlight();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filterTickets = useCallback((tickets: any[]) => {
+    if (!searchQuery.trim()) return tickets;
+    const q = searchQuery.trim().toLowerCase();
+    return tickets.filter((t: any) =>
+      (t.patient_name && t.patient_name.toLowerCase().includes(q)) ||
+      (t.patient_phone && t.patient_phone.includes(q))
+    );
+  }, [searchQuery]);
 
   /** Wrap an action to highlight the affected ticket after success */
   const withHighlight = useCallback(
@@ -265,8 +276,19 @@ const Console = () => {
               </div>
             </div>
 
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="بحث بالاسم أو رقم الهاتف…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="ps-9"
+              />
+            </div>
+
             <PreArrivalList
-              tickets={preArrival}
+              tickets={filterTickets(preArrival)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onSendLink={handleSendLink}
@@ -274,7 +296,7 @@ const Console = () => {
               onCancel={withHighlight(actions.cancelTicket)}
             />
             <WaitingList
-              tickets={waiting}
+              tickets={filterTickets(waiting)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onSetUrgent={async (id, pos, n, note) => {
@@ -285,7 +307,7 @@ const Console = () => {
               onCancel={withHighlight(actions.cancelTicket)}
             />
             <CalledList
-              tickets={called}
+              tickets={filterTickets(called)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onStartService={withHighlight(actions.startService)}
@@ -293,15 +315,15 @@ const Console = () => {
               onCancel={withHighlight(actions.cancelTicket)}
             />
             <InServiceList
-              tickets={inService}
+              tickets={filterTickets(inService)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onComplete={withHighlight(actions.completeTicket)}
               onCallNext={handleCallNextHighlight}
             />
             <NotPresentList
-              missedTickets={missed}
-              returnedTickets={returned}
+              missedTickets={filterTickets(missed)}
+              returnedTickets={filterTickets(returned)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onReinsertMissed={async (id, pos, n, note) => {
@@ -316,7 +338,7 @@ const Console = () => {
                 return r;
               }}
             />
-            <DoneList tickets={done} clinicTimezone={clinicTimezone} highlightId={highlightId} />
+            <DoneList tickets={filterTickets(done)} clinicTimezone={clinicTimezone} highlightId={highlightId} />
           </>
         )}
       </main>
