@@ -29,7 +29,7 @@ const fmtTime = (iso: string, tz: string) =>
     timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: true,
   }).format(new Date(iso));
 
-export function CalledList({ tickets, clinicTimezone, highlightId, onStartService, onMarkMissed, onCancel }: Props) {
+export function CalledList({ tickets, clinicTimezone, highlightId, onStartService, onMarkMissed, onSendLink, onCancel }: Props) {
   const isMobile = useIsMobile();
   const [cancelTicketId, setCancelTicketId] = useState<string | null>(null);
 
