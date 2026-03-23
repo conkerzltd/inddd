@@ -293,7 +293,7 @@ const Console = () => {
             </div>
 
             <PreArrivalList
-              tickets={filterTickets(preArrival)}
+              tickets={enrichAndFilter(preArrival)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onSendLink={handleSendLink}
@@ -301,7 +301,7 @@ const Console = () => {
               onCancel={withHighlight(actions.cancelTicket)}
             />
             <WaitingList
-              tickets={filterTickets(waiting)}
+              tickets={enrichAndFilter(waiting)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onSetUrgent={async (id, pos, n, note) => {
@@ -312,7 +312,7 @@ const Console = () => {
               onCancel={withHighlight(actions.cancelTicket)}
             />
             <CalledList
-              tickets={filterTickets(called)}
+              tickets={enrichAndFilter(called)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onStartService={withHighlight(actions.startService)}
@@ -320,15 +320,15 @@ const Console = () => {
               onCancel={withHighlight(actions.cancelTicket)}
             />
             <InServiceList
-              tickets={filterTickets(inService)}
+              tickets={enrichAndFilter(inService)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onComplete={withHighlight(actions.completeTicket)}
               onCallNext={handleCallNextHighlight}
             />
             <NotPresentList
-              missedTickets={filterTickets(missed)}
-              returnedTickets={filterTickets(returned)}
+              missedTickets={enrichAndFilter(missed)}
+              returnedTickets={enrichAndFilter(returned)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onReinsertMissed={async (id, pos, n, note) => {
