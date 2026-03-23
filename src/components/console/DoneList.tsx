@@ -37,7 +37,7 @@ export function DoneList({ tickets, clinicTimezone, highlightId }: Props) {
           {tickets.map((t, i) => (
             <MobileTicketCard
               key={t.id}
-              index={i + 1}
+              index={t._pos ?? i + 1}
               highlightActive={t.id === highlightId}
               fields={[
                 { label: "الاسم", value: t.patient_name || "غير معروف" },
