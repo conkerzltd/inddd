@@ -44,7 +44,7 @@ export function CalledList({ tickets, clinicTimezone, highlightId, onStartServic
               highlight
               highlightActive={t.id === highlightId}
               fields={[
-                { label: "الاسم", value: t.patient_name || "—" },
+                { label: "الاسم", value: <>{t.patient_name || "—"}{!hasRealPhone(t.patient_phone) && <span className="text-xs text-muted-foreground mr-1">(بدون هاتف)</span>}</> },
                 { label: "وقت النداء", value: t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—" },
               ]}
               actions={
