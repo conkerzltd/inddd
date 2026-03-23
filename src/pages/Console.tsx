@@ -111,7 +111,7 @@ const Console = () => {
     const popup = window.open("about:blank", "_blank");
     const data = await actions.sendLink(ticketId);
     if (!data) { if (popup) popup.close(); return; }
-    const ticket = allTickets.find((t) => t.id === ticketId);
+    const ticket = allTickets.find((t: TicketRow) => t.id === ticketId);
     const patientPhone = ticket?.patient_phone?.replace(/\D/g, "") || "";
     const token = (data as any)?.token || ticket?.token;
     if (!token) { if (popup) popup.close(); return; }
