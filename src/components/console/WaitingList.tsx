@@ -35,7 +35,7 @@ const visitTypeLabel = (v: string) => {
   return v;
 };
 
-export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent, onCancel }: Props) {
+export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent, onSendLink, onCancel }: Props) {
   const [urgentTicketId, setUrgentTicketId] = useState<string | null>(null);
   const [cancelTicketId, setCancelTicketId] = useState<string | null>(null);
   const isMobile = useIsMobile();
