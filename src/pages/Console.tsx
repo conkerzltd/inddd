@@ -341,7 +341,7 @@ const Console = () => {
                 return r;
               }}
             />
-            <DoneList tickets={filterTickets(done)} clinicTimezone={clinicTimezone} highlightId={highlightId} />
+            <DoneList tickets={enrichAndFilter(done)} clinicTimezone={clinicTimezone} highlightId={highlightId} />
           </>
         )}
       </main>
