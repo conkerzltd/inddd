@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SOURCE_LABELS } from "@/utils/ticketSource";
+import { NO_PHONE_PLACEHOLDER } from "@/hooks/useClinicTickets";
 import { toast } from "sonner";
 import { EgyptPhoneInput } from "@/components/inputs/EgyptPhoneInput";
 import { isValidEg10, toEgE164Digits } from "@/utils/phoneEG";
@@ -94,7 +95,7 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
 
   const createTicket = async (): Promise<string | null> => {
     const nowHHMM = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
-    const patientPhone = hasValidPhone ? toEgE164Digits(phone10) : "0000000000";
+    const patientPhone = hasValidPhone ? toEgE164Digits(phone10) : NO_PHONE_PLACEHOLDER;
     const { data, error } = await supabase.rpc("create_ticket", {
       p_clinic_id: clinicId,
       p_source: source as any,
@@ -112,20 +113,20 @@ export function CreateTicketDialog({ clinicId, clinicName, onCreated }: Props) {
     return ticketId;
   };
 
-  /** Create ticket only (no WhatsApp) */
+  /** Create ticket only (no WhatsApp, no link generation) */
   const handleCreateOnly = async () => {
     if (!validate(false)) return;
     setSubmitting(true);
     try {
       const ticketId = await createTicket();
-      if (ticketId && hasValidPhone) {
-        // Generate link silently but don't open WhatsApp
-        try { await supabase.rpc("send_patient_link", { p_ticket_id: ticketId }); } catch {}
+      if (hasValidPhone) {
+        toast.success("تم إنشاء التذكرة!");
+      } else {
+        toast.success(`تم إنشاء التذكرة — ${name.trim()} (بدون هاتف)`);
       }
-      toast.success("تم إنشاء التذكرة!");
       reset();
       setOpen(false);
-      onCreated(ticketId);
+      onCreated(ticketId ?? undefined);
     } catch (e: any) {
       toast.error(e.message || "فشل إنشاء التذكرة");
     } finally {

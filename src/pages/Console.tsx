@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { TicketRow } from "@/hooks/useClinicTickets";
 import { PUBLIC_BASE_URL } from "@/config/publicBaseUrl";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -72,12 +74,15 @@ const Console = () => {
   const { highlightId, highlight } = useTicketHighlight();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filterTickets = useCallback((tickets: any[]) => {
-    if (!searchQuery.trim()) return tickets;
+  /** Enrich tickets with original position then filter by search */
+  const enrichAndFilter = useCallback((tickets: TicketRow[]) => {
+    const enriched = tickets.map((t, i) => ({ ...t, _pos: i + 1 }));
+    if (!searchQuery.trim()) return enriched;
     const q = searchQuery.trim().toLowerCase();
-    return tickets.filter((t: any) =>
+    const qDigits = q.replace(/\D/g, "");
+    return enriched.filter((t) =>
       (t.patient_name && t.patient_name.toLowerCase().includes(q)) ||
-      (t.patient_phone && t.patient_phone.includes(q))
+      (qDigits.length >= 3 && t.patient_phone && t.patient_phone.replace(/\D/g, "").includes(qDigits))
     );
   }, [searchQuery]);
 
@@ -288,7 +293,7 @@ const Console = () => {
             </div>
 
             <PreArrivalList
-              tickets={filterTickets(preArrival)}
+              tickets={enrichAndFilter(preArrival)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onSendLink={handleSendLink}
@@ -296,7 +301,7 @@ const Console = () => {
               onCancel={withHighlight(actions.cancelTicket)}
             />
             <WaitingList
-              tickets={filterTickets(waiting)}
+              tickets={enrichAndFilter(waiting)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onSetUrgent={async (id, pos, n, note) => {
@@ -307,7 +312,7 @@ const Console = () => {
               onCancel={withHighlight(actions.cancelTicket)}
             />
             <CalledList
-              tickets={filterTickets(called)}
+              tickets={enrichAndFilter(called)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onStartService={withHighlight(actions.startService)}
@@ -315,15 +320,15 @@ const Console = () => {
               onCancel={withHighlight(actions.cancelTicket)}
             />
             <InServiceList
-              tickets={filterTickets(inService)}
+              tickets={enrichAndFilter(inService)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onComplete={withHighlight(actions.completeTicket)}
               onCallNext={handleCallNextHighlight}
             />
             <NotPresentList
-              missedTickets={filterTickets(missed)}
-              returnedTickets={filterTickets(returned)}
+              missedTickets={enrichAndFilter(missed)}
+              returnedTickets={enrichAndFilter(returned)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onReinsertMissed={async (id, pos, n, note) => {
@@ -338,7 +343,7 @@ const Console = () => {
                 return r;
               }}
             />
-            <DoneList tickets={filterTickets(done)} clinicTimezone={clinicTimezone} highlightId={highlightId} />
+            <DoneList tickets={enrichAndFilter(done)} clinicTimezone={clinicTimezone} highlightId={highlightId} />
           </>
         )}
       </main>

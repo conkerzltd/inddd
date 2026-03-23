@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TicketRow } from "@/hooks/useClinicTickets";
+import { TicketRow, hasRealPhone } from "@/hooks/useClinicTickets";
 import { TicketSection } from "./TicketSection";
 import { MobileTicketCard } from "./MobileTicketCard";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -40,11 +40,11 @@ export function CalledList({ tickets, clinicTimezone, highlightId, onStartServic
           {tickets.map((t, i) => (
             <MobileTicketCard
               key={t.id}
-              index={i + 1}
+              index={t._pos ?? i + 1}
               highlight
               highlightActive={t.id === highlightId}
               fields={[
-                { label: "الاسم", value: t.patient_name || "—" },
+                { label: "الاسم", value: <>{t.patient_name || "—"}{!hasRealPhone(t.patient_phone) && <span className="text-xs text-muted-foreground mr-1">(بدون هاتف)</span>}</> },
                 { label: "وقت النداء", value: t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—" },
               ]}
               actions={
@@ -76,9 +76,10 @@ export function CalledList({ tickets, clinicTimezone, highlightId, onStartServic
           <TableBody>
             {tickets.map((t, i) => (
               <TableRow key={t.id} className={t.id === highlightId ? HIGHLIGHT_ROW_CLASS : "transition-all duration-500"}>
-                <TableCell className="font-mono">{i + 1}</TableCell>
+                <TableCell className="font-mono">{t._pos ?? i + 1}</TableCell>
                 <TableCell>
-                  <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
+                    <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
+                    {!hasRealPhone(t.patient_phone) && <span className="text-xs text-muted-foreground mr-1">(بدون هاتف)</span>}
                 </TableCell>
                 <TableCell>{t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—"}</TableCell>
                 <TableCell className="text-start w-[240px] space-x-1 space-x-reverse">

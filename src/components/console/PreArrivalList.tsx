@@ -46,9 +46,9 @@ export function PreArrivalList({ tickets, clinicTimezone, highlightId, onSendLin
       {isMobile ? (
         <div className="space-y-2">
           {tickets.map((t, i) => (
-            <MobileTicketCard
+             <MobileTicketCard
               key={t.id}
-              index={i + 1}
+              index={t._pos ?? i + 1}
               highlightActive={t.id === highlightId}
               fields={[
                 { label: "الاسم", value: t.patient_name || "—" },
@@ -87,7 +87,7 @@ export function PreArrivalList({ tickets, clinicTimezone, highlightId, onSendLin
           <TableBody>
             {tickets.map((t, i) => (
               <TableRow key={t.id} className={t.id === highlightId ? HIGHLIGHT_ROW_CLASS : "transition-all duration-500"}>
-                <TableCell className="font-mono">{i + 1}</TableCell>
+                <TableCell className="font-mono">{t._pos ?? i + 1}</TableCell>
                 <TableCell>
                   <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
                 </TableCell>

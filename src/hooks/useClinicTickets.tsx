@@ -2,6 +2,12 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+/** Placeholder phone used for non-smartphone patients */
+export const NO_PHONE_PLACEHOLDER = "0000000000";
+
+/** Check if ticket has a real phone number */
+export const hasRealPhone = (phone: string) => phone !== NO_PHONE_PLACEHOLDER;
+
 export interface TicketRow {
   id: string;
   status: string;
@@ -23,6 +29,8 @@ export interface TicketRow {
   external_booking_app_other: string | null;
   external_booking_app_label: string | null;
   external_booking_app_code: string | null;
+  /** Original position in the unfiltered list (set before search filtering) */
+  _pos?: number;
 }
 
 export function useClinicTickets(clinicId: string | null, clinicTimezone: string) {
