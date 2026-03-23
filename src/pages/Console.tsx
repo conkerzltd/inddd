@@ -60,8 +60,8 @@ const Console = () => {
         if (data) {
           setSessionPaused(data.session_paused);
           setIntakeOpen(data.intake_open);
-          setClinicName((data as any).name_ar || data.name || "");
-          setClinicWhatsApp((data as any).whatsapp_e164_1 || data.clinic_whatsapp_phone || "");
+          setClinicName(data.name_ar || data.name || "");
+          setClinicWhatsApp(data.whatsapp_e164_1 || data.clinic_whatsapp_phone || "");
         }
       });
   }, [clinicId]);
