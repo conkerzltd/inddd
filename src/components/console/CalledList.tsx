@@ -11,7 +11,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Play, XCircle, Ban } from "lucide-react";
+import { Play, XCircle, Ban, Send } from "lucide-react";
 import { HIGHLIGHT_ROW_CLASS } from "@/hooks/useTicketHighlight";
 
 interface Props {
@@ -20,6 +20,7 @@ interface Props {
   highlightId?: string | null;
   onStartService: (id: string) => void;
   onMarkMissed: (id: string) => void;
+  onSendLink?: (id: string) => void;
   onCancel: (id: string) => void;
 }
 
