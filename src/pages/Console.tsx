@@ -137,8 +137,8 @@ const Console = () => {
       if (error) throw error;
       toast.success("تم إنشاء عيادة تجريبية!");
       window.location.reload();
-    } catch (e: any) {
-      toast.error(e.message || "فشل إنشاء العيادة التجريبية");
+    } catch (e: unknown) {
+      toast.error((e instanceof Error ? e.message : null) || "فشل إنشاء العيادة التجريبية");
     } finally {
       setBootstrapping(false);
     }
