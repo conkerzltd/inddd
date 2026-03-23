@@ -128,7 +128,7 @@ const Console = () => {
       ? `https://wa.me/${patientPhone}?text=${encodedMessage}`
       : `https://web.whatsapp.com/send?phone=${patientPhone}&text=${encodedMessage}`;
     if (popup) { popup.location.href = waUrl; } else { window.location.href = waUrl; }
-  }, [actions, preArrival, clinicName]);
+  }, [actions, allTickets, clinicName]);
 
   const handleBootstrap = async () => {
     setBootstrapping(true);
