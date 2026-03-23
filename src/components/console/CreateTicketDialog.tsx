@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SOURCE_LABELS } from "@/utils/ticketSource";
+import { NO_PHONE_PLACEHOLDER } from "@/hooks/useClinicTickets";
 import { toast } from "sonner";
 import { EgyptPhoneInput } from "@/components/inputs/EgyptPhoneInput";
 import { isValidEg10, toEgE164Digits } from "@/utils/phoneEG";
