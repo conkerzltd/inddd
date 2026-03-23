@@ -276,8 +276,19 @@ const Console = () => {
               </div>
             </div>
 
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="بحث بالاسم أو رقم الهاتف…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="ps-9"
+              />
+            </div>
+
             <PreArrivalList
-              tickets={preArrival}
+              tickets={filterTickets(preArrival)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onSendLink={handleSendLink}
@@ -285,7 +296,7 @@ const Console = () => {
               onCancel={withHighlight(actions.cancelTicket)}
             />
             <WaitingList
-              tickets={waiting}
+              tickets={filterTickets(waiting)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onSetUrgent={async (id, pos, n, note) => {
@@ -296,7 +307,7 @@ const Console = () => {
               onCancel={withHighlight(actions.cancelTicket)}
             />
             <CalledList
-              tickets={called}
+              tickets={filterTickets(called)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onStartService={withHighlight(actions.startService)}
@@ -304,15 +315,15 @@ const Console = () => {
               onCancel={withHighlight(actions.cancelTicket)}
             />
             <InServiceList
-              tickets={inService}
+              tickets={filterTickets(inService)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onComplete={withHighlight(actions.completeTicket)}
               onCallNext={handleCallNextHighlight}
             />
             <NotPresentList
-              missedTickets={missed}
-              returnedTickets={returned}
+              missedTickets={filterTickets(missed)}
+              returnedTickets={filterTickets(returned)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
               onReinsertMissed={async (id, pos, n, note) => {
@@ -327,7 +338,7 @@ const Console = () => {
                 return r;
               }}
             />
-            <DoneList tickets={done} clinicTimezone={clinicTimezone} highlightId={highlightId} />
+            <DoneList tickets={filterTickets(done)} clinicTimezone={clinicTimezone} highlightId={highlightId} />
           </>
         )}
       </main>
