@@ -80,6 +80,7 @@ export function NotPresentList({ missedTickets, returnedTickets, clinicTimezone,
                   <TableCell className="font-mono">{t._pos ?? i + 1}</TableCell>
                   <TableCell>
                     <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
+                    {!hasRealPhone(t.patient_phone) && <span className="text-xs text-muted-foreground mr-1">(بدون هاتف)</span>}
                   </TableCell>
                   <TableCell>
                     {t.called_at ? fmtTime(t.called_at, clinicTimezone) : "—"}

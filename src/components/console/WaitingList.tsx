@@ -87,6 +87,7 @@ export function WaitingList({ tickets, clinicTimezone, highlightId, onSetUrgent,
                   <TableCell className="font-mono">{t._pos ?? i + 1}</TableCell>
                   <TableCell>
                     <span className="font-medium truncate max-w-[200px] inline-block align-middle">{t.patient_name || "—"}</span>
+                    {!hasRealPhone(t.patient_phone) && <span className="text-xs text-muted-foreground mr-1">(بدون هاتف)</span>}
                   </TableCell>
                   <TableCell>{visitTypeLabel(t.visit_type)}</TableCell>
                   <TableCell>
