@@ -89,8 +89,8 @@ const Console = () => {
 
   /** Wrap an action to highlight the affected ticket after success */
   const withHighlight = useCallback(
-    (fn: (...args: any[]) => Promise<any> | void) =>
-      async (ticketId: string, ...rest: any[]) => {
+    (fn: (...args: unknown[]) => Promise<unknown> | void) =>
+      async (ticketId: string, ...rest: unknown[]) => {
         const result = await fn(ticketId, ...rest);
         if (result !== null) highlight(ticketId);
         return result;
