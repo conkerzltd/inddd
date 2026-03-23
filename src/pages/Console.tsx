@@ -304,6 +304,7 @@ const Console = () => {
               tickets={enrichAndFilter(waiting)}
               clinicTimezone={clinicTimezone}
               highlightId={highlightId}
+              onSendLink={handleSendLink}
               onSetUrgent={async (id, pos, n, note) => {
                 const r = await actions.setUrgentAndInsert(id, pos, n, note);
                 if (r !== null) highlight(id);
@@ -317,6 +318,7 @@ const Console = () => {
               highlightId={highlightId}
               onStartService={withHighlight(actions.startService)}
               onMarkMissed={withHighlight(actions.markMissed)}
+              onSendLink={handleSendLink}
               onCancel={withHighlight(actions.cancelTicket)}
             />
             <InServiceList
