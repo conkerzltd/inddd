@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TicketRow } from "@/hooks/useClinicTickets";
+import { TicketRow, hasRealPhone } from "@/hooks/useClinicTickets";
 import { TicketSection } from "./TicketSection";
 import { MobileTicketCard } from "./MobileTicketCard";
 import { useIsMobile } from "@/hooks/use-mobile";
