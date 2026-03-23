@@ -27,7 +27,7 @@ interface PatientQueueView {
   clinic_maps_url: string | null;
 }
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 
 /* ───── helpers ───── */
 function fmtTimeAr(iso: string): string {
