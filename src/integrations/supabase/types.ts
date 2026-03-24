@@ -1090,6 +1090,11 @@ export type Database = {
         clinic_lat: number | null
         clinic_lng: number | null
         clinic_maps_url: string | null
+        inside_ahead: number | null
+        prearrival_ahead: number | null
+        total_ahead: number | null
+        after_me: number | null
+        expected_wait_minutes: number | null
       }
     }
   }
