@@ -51,4 +51,4 @@ export const EgyptPhoneInput = forwardRef<HTMLDivElement, Props>(function EgyptP
       {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
-}
+});
