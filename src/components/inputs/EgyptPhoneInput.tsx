@@ -23,7 +23,7 @@ export const EgyptPhoneInput = forwardRef<HTMLDivElement, Props>(function EgyptP
   disabled = false,
 }, ref) {
   return (
-    <div className="space-y-1">
+    <div ref={ref} className="space-y-1">
       {label && <Label>{label}</Label>}
       <div className="flex items-center gap-2">
         <span className="inline-flex items-center rounded-md border border-input bg-muted px-3 h-10 text-sm text-muted-foreground select-none">
