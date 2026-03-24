@@ -101,21 +101,16 @@ export default function PatientQueue() {
   }, [fetchQueue, isValidToken, data?.status_badge]);
 
   /* ── remaining‑time live countdown every 1s ── */
-  const createdAtRef = useRef<number | null>(null);
   useEffect(() => {
     if (!data) return;
-    // For WAITING: use ETA max as dynamic target; for BOOKED: use appointment_time
-    let target = data.appointment_time || data.expected_window_start;
-    if (!target && data.eta_max_minutes != null) {
-      target = addMin(new Date(), data.eta_max_minutes).toISOString();
-    }
+    const start = data.expected_window_start;
+    const end = data.expected_window_end;
+    const target = end || data.appointment_time;
     if (!target) { setRemaining(null); setProgress(0); return; }
 
     const targetMs = new Date(target).getTime();
-    // Use created_at or first fetch time as the "start" anchor for progress
-    if (!createdAtRef.current) createdAtRef.current = Date.now();
-    const startMs = createdAtRef.current;
-    const totalDuration = targetMs - startMs;
+    const startMs = start ? new Date(start).getTime() : Date.now();
+    const totalDuration = Math.max(targetMs - startMs, 0);
 
     const tick = () => {
       setRemaining(calcRemaining(target));
