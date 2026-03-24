@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { normalizeEgTo10 } from "@/utils/phoneEG";
@@ -12,7 +13,7 @@ interface Props {
   disabled?: boolean;
 }
 
-export function EgyptPhoneInput({
+export const EgyptPhoneInput = forwardRef<HTMLDivElement, Props>(function EgyptPhoneInput({
   label,
   value10,
   onChange10,
@@ -20,7 +21,7 @@ export function EgyptPhoneInput({
   error,
   helperText,
   disabled = false,
-}: Props) {
+}, ref) {
   return (
     <div className="space-y-1">
       {label && <Label>{label}</Label>}
