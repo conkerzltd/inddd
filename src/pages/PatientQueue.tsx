@@ -39,9 +39,6 @@ function fmtTimeAr(iso: string): string {
   return new Date(iso).toLocaleTimeString("ar-EG", { hour: "numeric", minute: "2-digit", hour12: true });
 }
 
-function addMin(d: Date, m: number) {
-  return new Date(d.getTime() + m * 60_000);
-}
 
 function calcRemaining(targetIso: string): string | null {
   const diff = new Date(targetIso).getTime() - Date.now();
