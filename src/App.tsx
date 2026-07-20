@@ -33,6 +33,7 @@ import MarketerLogin from "./pages/Marketer/MarketerLogin";
 import MarketerDashboard from "./pages/Marketer/MarketerDashboard";
 import MarketerSettings from "./pages/Marketer/MarketerSettings";
 import NotFound from "./pages/NotFound";
+import OAuthConsent from "./pages/OAuthConsent";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
             <Route index element={<MarketingHome />} />
             <Route path="app" element={<Index />} />
             <Route path="login" element={<Login />} />
+            <Route path=".lovable/oauth/consent" element={<OAuthConsent />} />
             <Route
               path="onboarding"
               element={

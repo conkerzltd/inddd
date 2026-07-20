@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://ecjvrfascepvfvxykccw.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "inddd-clinic-mcp",
+      "version": "0.1.0",
+      "title": "INDDD Clinic MCP"
+    },
+    "tools": [
+      {
+        "name": "list_tickets",
+        "title": "List clinic tickets",
+        "description": "List active tickets for the signed-in user's clinic. Returns id, patient name, phone, status, source, and created_at.",
+        "annotations": {
+          "readOnlyHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "status": {
+              "description": "Optional status filter, e.g. INSIDE_WAITING, REMOTE_BOOKED, LINK_SENT, CALLED, IN_SERVICE, DONE, MISSED.",
+              "type": "string"
+            },
+            "limit": {
+              "description": "Max rows (default 50).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "call_next",
+        "title": "Call next patient",
+        "description": "Call the next patient in the signed-in user's clinic queue.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_clinic_info",
+        "title": "Get clinic info",
+        "description": "Get the signed-in user's clinic: name, status, timezone, and current session flags (paused, intake open).",
+        "annotations": {
+          "readOnlyHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
