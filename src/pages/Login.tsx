@@ -25,9 +25,15 @@ const Login = () => {
   const [referralMarketerId, setReferralMarketerId] = useState<string | null>(null);
   const [referralError, setReferralError] = useState("");
 
-  // Redirect already-logged-in users based on clinic state
+  // Redirect already-logged-in users based on clinic state (or `next` param if present)
   useEffect(() => {
     if (authLoading || !user) return;
+    const params = new URLSearchParams(window.location.search);
+    const nextRaw = params.get("next");
+    if (nextRaw && nextRaw.startsWith("/") && !nextRaw.startsWith("//")) {
+      navigate(nextRaw, { replace: true });
+      return;
+    }
     if (!clinicId) {
       navigate("/onboarding", { replace: true });
     } else if (clinicStatus === "active") {
@@ -90,7 +96,17 @@ const Login = () => {
       return;
     }
     setIsLoading(true);
-    const { error } = await signUp(email, password);
+    const params = new URLSearchParams(window.location.search);
+    const nextRaw = params.get("next");
+    const emailRedirect =
+      nextRaw && nextRaw.startsWith("/") && !nextRaw.startsWith("//")
+        ? `${window.location.origin}${nextRaw}`
+        : `${window.location.origin}/onboarding`;
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: emailRedirect },
+    });
     setIsLoading(false);
     if (error) {
       toast({ title: "فشل إنشاء الحساب", description: error.message, variant: "destructive" });
